@@ -327,9 +327,9 @@
 
     /* Cart FAB */
     .cart-fab{
-      position:fixed;left:0;bottom:16px;
+      position:fixed;right:0;bottom:16px;
       background:var(--brown);color:var(--gold-light);
-      border:none;border-radius:0 13px 13px 0;
+      border:none;border-radius:13px 0 0 13px;
       padding:13px 14px;cursor:pointer;
       display:flex;flex-direction:column;align-items:center;gap:4px;
       font-size:11px;font-weight:600;z-index:160;transition:all 0.2s;
@@ -392,7 +392,7 @@
 
       /* Cart */
       #cart-drawer{width:100%;top:var(--nav-h);}
-      .cart-fab{bottom:16px;right:auto;left:0;border-radius:0 13px 13px 0;} /* lifted above AI fab */
+      .cart-fab{bottom:86px;} /* lifted above AI fab */
 
       /* Footer */
       .ft-top{grid-template-columns:1fr;gap:28px;}
@@ -404,6 +404,52 @@
       .logo-sub{display:none;}
       .logo-main{font-size:16px;}
     }
+
+    /* ===== AUTH ===== */
+    .btn-auth{display:flex;align-items:center;gap:7px;background:transparent;color:var(--brown);border:1.5px solid var(--border);padding:8px 15px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+    .btn-auth:hover{border-color:var(--gold);color:var(--gold-dark);background:rgba(196,154,60,0.06);}
+    #auth-overlay{display:none;position:fixed;inset:0;background:rgba(44,30,16,0.45);backdrop-filter:blur(4px);z-index:550;}
+    #auth-overlay.on{display:block;}
+    #auth-drawer{position:fixed;right:0;top:0;bottom:0;width:400px;max-width:100vw;background:var(--warm-white);border-left:1px solid var(--border);transform:translateX(100%);transition:transform 0.32s cubic-bezier(.4,0,.2,1);z-index:560;display:flex;flex-direction:column;box-shadow:-12px 0 48px rgba(44,30,16,0.14);}
+    #auth-drawer.open{transform:translateX(0);}
+    .auth-hdr{padding:22px 24px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .auth-brand{display:flex;align-items:center;gap:10px;}
+    .auth-brand-icon{width:36px;height:36px;border-radius:50%;background:var(--brown);display:flex;align-items:center;justify-content:center;color:var(--gold-light);font-size:16px;}
+    .auth-brand-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--brown);}
+    .auth-brand-sub{font-size:11px;color:var(--text-light);}
+    .auth-x{background:none;border:none;cursor:pointer;color:var(--text-light);font-size:20px;padding:4px 8px;border-radius:6px;transition:0.15s;}
+    .auth-x:hover{background:var(--cream2);color:var(--brown);}
+    .auth-tabs{display:flex;padding:16px 24px 0;border-bottom:1px solid var(--border);}
+    .auth-tab{flex:1;padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--text-light);border-bottom:2px solid transparent;transition:all 0.2s;margin-bottom:-1px;}
+    .auth-tab.active{color:var(--brown);border-bottom-color:var(--brown);}
+    .auth-body{flex:1;overflow-y:auto;padding:24px;}
+    .auth-panel{display:none;}
+    .auth-panel.active{display:block;}
+    .auth-welcome{margin-bottom:22px;}
+    .auth-welcome h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--brown);margin-bottom:5px;}
+    .auth-welcome p{font-size:13px;color:var(--text-light);line-height:1.6;}
+    .auth-field{margin-bottom:15px;}
+    .auth-field label{display:block;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-mid);margin-bottom:6px;}
+    .auth-field input{width:100%;padding:11px 14px;background:var(--cream2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color 0.18s;}
+    .auth-field input:focus{border-color:var(--gold);}
+    .auth-field input::placeholder{color:var(--text-light);}
+    .auth-submit{width:100%;padding:13px;background:var(--brown);color:var(--cream);border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+    .auth-submit:hover{background:var(--brown-light);}
+    .auth-submit:disabled{opacity:0.5;cursor:not-allowed;}
+    .auth-msg{display:none;font-size:12.5px;padding:10px 13px;border-radius:9px;margin-bottom:14px;}
+    .auth-msg.error{display:block;background:#fff0f0;border:1px solid #fca5a5;color:#b91c1c;}
+    .auth-msg.success{display:block;background:#f0fdf4;border:1px solid #86efac;color:#166534;}
+    .auth-switch{text-align:center;font-size:13px;color:var(--text-light);margin-top:18px;}
+    .auth-switch a{color:var(--gold-dark);font-weight:600;cursor:pointer;}
+    .auth-switch a:hover{color:var(--brown);}
+    .auth-logged-in{display:none;text-align:center;padding:32px 20px;}
+    .auth-logged-in.on{display:block;}
+    .auth-user-ava{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--brown),var(--brown-light));display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--gold-light);margin:0 auto 14px;}
+    .auth-user-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--brown);margin-bottom:4px;}
+    .auth-user-email{font-size:13px;color:var(--text-light);margin-bottom:24px;}
+    .btn-signout{width:100%;padding:12px;background:transparent;color:var(--brown);border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+    .btn-signout:hover{border-color:#fca5a5;color:#b91c1c;background:#fff0f0;}
+    @media(max-width:768px){#auth-drawer{width:100%;}.btn-auth .auth-label{display:none;}}
   </style>
 </head>
 <body>
@@ -438,7 +484,10 @@
     <span class="nav-link" onclick="go('#packages')">Packages</span>
   </div>
 
-  <button class="btn-nav-cta" onclick="go('#catalog')">✦ Plan My Event</button>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button class="btn-auth" onclick="openAuth()">👤 <span class="auth-label">Login / Sign Up</span></button>
+    <button class="btn-nav-cta" onclick="go('#catalog')" style="display:var(--cta-display,flex);">✦ Plan My Event</button>
+  </div>
   <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
@@ -457,6 +506,7 @@
   <button class="mob-link" onclick="jumpCat('photography');closeMobileNav()">📸 Photography</button>
   <div class="mob-divider"></div>
   <button class="mob-cta" onclick="openMobAI();closeMobileNav()">✦ AI Event Planner</button>
+  <button class="mob-link" onclick="openAuth();closeMobileNav()" style="text-align:center;background:var(--cream2);border-radius:10px;margin-top:4px;">👤 Login / Sign Up</button>
 </div>
 
 <!-- HERO -->
@@ -605,6 +655,83 @@
       <span class="cart-tot-amt" id="cart-tot">₱0</span>
     </div>
     <button class="btn-inquire">📩 Inquire / Book This Package</button>
+  </div>
+</div>
+
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay" onclick="closeAuth()"></div>
+
+<!-- AUTH DRAWER -->
+<div id="auth-drawer">
+  <div class="auth-hdr">
+    <div class="auth-brand">
+      <div class="auth-brand-icon">H</div>
+      <div>
+        <div class="auth-brand-name">Halden's</div>
+        <div class="auth-brand-sub">Event Management &amp; Catering</div>
+      </div>
+    </div>
+    <button class="auth-x" onclick="closeAuth()">✕</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="auth-tabs">
+    <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
+    <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+  </div>
+
+  <div class="auth-body">
+
+    <!-- Logged in state -->
+    <div class="auth-logged-in" id="auth-logged-in">
+      <div class="auth-user-ava">👤</div>
+      <div class="auth-user-name" id="auth-display-name">Welcome back!</div>
+      <div class="auth-user-email" id="auth-display-email"></div>
+      <button class="btn-signout" onclick="signOut()">Sign Out</button>
+    </div>
+
+    <!-- LOGIN PANEL -->
+    <div class="auth-panel active" id="panel-login">
+      <div class="auth-welcome">
+        <h3>Welcome back ✦</h3>
+        <p>Log in to manage your reservations and saved packages.</p>
+      </div>
+      <div class="auth-msg" id="login-msg"></div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="your@email.com"/>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••"/>
+      </div>
+      <button class="auth-submit" id="login-btn" onclick="doLogin()">Login to My Account</button>
+      <div class="auth-switch">Don't have an account? <a onclick="switchAuthTab('signup')">Sign up here</a></div>
+    </div>
+
+    <!-- SIGNUP PANEL -->
+    <div class="auth-panel" id="panel-signup">
+      <div class="auth-welcome">
+        <h3>Create an account ✦</h3>
+        <p>Sign up to save your custom packages and track your reservations.</p>
+      </div>
+      <div class="auth-msg" id="signup-msg"></div>
+      <div class="auth-field">
+        <label>Full Name</label>
+        <input type="text" id="signup-name" placeholder="Your full name"/>
+      </div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="signup-email" placeholder="your@email.com"/>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="signup-password" placeholder="Create a password (min 6 chars)"/>
+      </div>
+      <button class="auth-submit" id="signup-btn" onclick="doSignup()">Create My Account</button>
+      <div class="auth-switch">Already have an account? <a onclick="switchAuthTab('login')">Login here</a></div>
+    </div>
+
   </div>
 </div>
 
@@ -949,6 +1076,85 @@ renderCat();
 initAI('desk');
 // Init mobile AI lazily when drawer opens
 document.getElementById('mob-ai-fab').addEventListener('click', ()=>{ setTimeout(()=>initAI('mob'),50); });
+
+// ===== AUTH =====
+function openAuth(){
+  document.getElementById('auth-drawer').classList.add('open');
+  document.getElementById('auth-overlay').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeAuth(){
+  document.getElementById('auth-drawer').classList.remove('open');
+  document.getElementById('auth-overlay').classList.remove('on');
+  document.body.style.overflow='';
+}
+
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.auth-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+function showAuthMsg(id, type, text){
+  const el = document.getElementById(id);
+  el.className = 'auth-msg ' + type;
+  el.textContent = text;
+}
+function clearAuthMsg(id){ const el=document.getElementById(id); el.className='auth-msg'; el.textContent=''; }
+
+function setLoggedIn(user){
+  document.getElementById('auth-logged-in').classList.add('on');
+  document.getElementById('panel-login').classList.remove('active');
+  document.getElementById('panel-signup').classList.remove('active');
+  document.getElementById('auth-display-name').textContent = user.displayName || 'Welcome back!';
+  document.getElementById('auth-display-email').textContent = user.email;
+  // Update nav button
+  document.querySelector('.btn-auth').innerHTML = '👤 <span class="auth-label">' + (user.displayName?.split(' ')[0] || 'Account') + '</span>';
+}
+
+function setLoggedOut(){
+  document.getElementById('auth-logged-in').classList.remove('on');
+  document.getElementById('panel-login').classList.add('active');
+  document.querySelector('.btn-auth').innerHTML = '👤 <span class="auth-label">Login / Sign Up</span>';
+}
+
+// Placeholder functions — replace with Firebase calls later
+async function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  if(!email || !pass){ showAuthMsg('login-msg','error','Please fill in all fields.'); return; }
+  const btn = document.getElementById('login-btn');
+  btn.disabled=true; btn.textContent='Logging in...';
+  clearAuthMsg('login-msg');
+  // TODO: Replace with Firebase signInWithEmailAndPassword
+  setTimeout(()=>{
+    showAuthMsg('login-msg','error','Firebase not connected yet. Come back after setup.');
+    btn.disabled=false; btn.textContent='Login to My Account';
+  }, 800);
+}
+
+async function doSignup(){
+  const name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pass = document.getElementById('signup-password').value;
+  if(!name||!email||!pass){ showAuthMsg('signup-msg','error','Please fill in all fields.'); return; }
+  if(pass.length < 6){ showAuthMsg('signup-msg','error','Password must be at least 6 characters.'); return; }
+  const btn = document.getElementById('signup-btn');
+  btn.disabled=true; btn.textContent='Creating account...';
+  clearAuthMsg('signup-msg');
+  // TODO: Replace with Firebase createUserWithEmailAndPassword
+  setTimeout(()=>{
+    showAuthMsg('signup-msg','error','Firebase not connected yet. Come back after setup.');
+    btn.disabled=false; btn.textContent='Create My Account';
+  }, 800);
+}
+
+async function signOut(){
+  // TODO: Replace with Firebase signOut
+  setLoggedOut();
+  closeAuth();
+}
 </script>
 </body>
 </html>
