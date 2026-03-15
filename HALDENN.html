@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Halden's Catering Service</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream:#faf7f2; --cream2:#f3ede3; --warm-white:#fffdf9;
+      --gold:#c49a3c; --gold-light:#e8bf6a; --gold-dark:#8a6820;
+      --brown:#3d2b1a; --brown-light:#6b4c2e;
+      --text:#2c1e10; --text-mid:#6b5340; --text-light:#a08060;
+      --card-bg:#fffef9; --border:rgba(196,154,60,0.18);
+      --shadow:0 8px 40px rgba(44,30,16,0.10);
+    }
+    html{scroll-behavior:smooth;}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+
+    /* NAV */
+    nav{position:sticky;top:0;z-index:200;background:rgba(250,247,242,0.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 6%;display:flex;align-items:center;justify-content:space-between;height:72px;}
+    .nav-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--brown);display:flex;align-items:center;gap:10px;cursor:pointer;}
+    .nav-logo-icon{width:36px;height:36px;background:var(--brown);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold-light);font-size:17px;}
+    .nav-center{display:flex;align-items:center;gap:4px;}
+    .nav-link{font-size:14px;font-weight:500;color:var(--text-mid);text-decoration:none;padding:8px 14px;border-radius:8px;transition:all 0.2s;cursor:pointer;}
+    .nav-link:hover{background:var(--cream2);color:var(--brown);}
+    .dropdown{position:relative;}
+    .dropdown-toggle{display:flex;align-items:center;gap:5px;}
+    .dropdown-toggle svg{transition:transform 0.2s;}
+    .dropdown:hover .dropdown-toggle svg{transform:rotate(180deg);}
+    .dropdown-menu{position:absolute;top:calc(100% + 8px);left:0;background:var(--warm-white);border:1px solid var(--border);border-radius:14px;padding:8px;min-width:195px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transform:translateY(-6px);transition:all 0.22s cubic-bezier(.4,0,.2,1);z-index:300;}
+    .dropdown:hover .dropdown-menu{opacity:1;pointer-events:all;transform:translateY(0);}
+    .dropdown-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--text-mid);cursor:pointer;transition:all 0.15s;}
+    .dropdown-item:hover{background:var(--cream2);color:var(--brown);}
+    .di-icon{font-size:17px;}
+    .btn-nav-cta{background:var(--brown);color:var(--gold-light);padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;}
+    .btn-nav-cta:hover{background:var(--brown-light);transform:translateY(-1px);box-shadow:0 4px 18px rgba(44,30,16,0.18);}
+
+    /* HERO */
+    #hero{min-height:92vh;display:flex;align-items:center;padding:0 8%;position:relative;overflow:hidden;background:linear-gradient(135deg,#faf7f2 0%,#f5eddf 60%,#ede0cc 100%);}
+    .hero-bg1{position:absolute;right:-80px;top:-80px;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(196,154,60,0.08) 0%,transparent 70%);pointer-events:none;}
+    .hero-bg2{position:absolute;left:-100px;bottom:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(61,43,26,0.05) 0%,transparent 70%);pointer-events:none;}
+    .hero-content{max-width:580px;z-index:1;}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(196,154,60,0.12);border:1px solid rgba(196,154,60,0.3);color:var(--gold-dark);padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:22px;}
+    .hero-title{font-family:'Playfair Display',serif;font-size:clamp(42px,6vw,70px);font-weight:700;line-height:1.1;color:var(--brown);margin-bottom:18px;}
+    .hero-title em{font-style:italic;color:var(--gold);}
+    .hero-sub{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:var(--text-mid);line-height:1.7;margin-bottom:36px;}
+    .hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+    .btn-primary{background:var(--brown);color:var(--cream);padding:13px 26px;border-radius:11px;font-size:14px;font-weight:600;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all 0.22s;}
+    .btn-primary:hover{background:var(--brown-light);transform:translateY(-2px);box-shadow:0 8px 28px rgba(44,30,16,0.2);}
+    .btn-outline{background:transparent;color:var(--brown);padding:13px 26px;border-radius:11px;font-size:14px;font-weight:600;border:2px solid var(--border);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all 0.22s;}
+    .btn-outline:hover{border-color:var(--gold);color:var(--gold-dark);transform:translateY(-2px);}
+    .hero-image{position:absolute;right:6%;top:50%;transform:translateY(-50%);width:42%;max-width:540px;aspect-ratio:4/3;border-radius:22px;overflow:hidden;box-shadow:0 30px 80px rgba(44,30,16,0.18);}
+    .hero-ph{width:100%;height:100%;background:linear-gradient(135deg,#e8d5b8,#c9a96e);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--brown);font-size:60px;}
+    .hero-ph p{font-size:13px;font-family:'DM Sans';color:var(--brown-light);}
+
+    /* SECTION COMMONS */
+    .section-label{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold-dark);margin-bottom:12px;}
+    .section-title{font-family:'Playfair Display',serif;font-size:clamp(30px,4vw,46px);font-weight:700;color:var(--brown);line-height:1.2;margin-bottom:14px;}
+    .section-sub{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text-light);line-height:1.7;max-width:540px;}
+
+    /* PACKAGES */
+    #packages{padding:90px 8%;background:var(--cream);}
+    .packages-header{text-align:center;margin-bottom:52px;}
+    .packages-header .section-sub{margin:0 auto;}
+    .packages-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:26px;}
+    .package-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all 0.28s cubic-bezier(.4,0,.2,1);}
+    .package-card:hover{transform:translateY(-6px);box-shadow:0 24px 60px rgba(44,30,16,0.12);border-color:rgba(196,154,60,0.35);}
+    .pkg-img{width:100%;height:210px;background:linear-gradient(135deg,#e8d5b8,#c9a96e);display:flex;align-items:center;justify-content:center;font-size:50px;position:relative;}
+    .pkg-img::after{content:'Photo placeholder';position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;font-family:'DM Sans';color:rgba(61,43,26,0.45);}
+    .pkg-badge{position:absolute;top:12px;right:12px;background:var(--brown);color:var(--gold-light);padding:4px 11px;border-radius:18px;font-size:10px;font-weight:600;}
+    .pkg-body{padding:22px 24px 26px;}
+    .pkg-name{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--brown);margin-bottom:4px;}
+    .pkg-tagline{font-size:13px;color:var(--text-light);margin-bottom:14px;}
+    .pkg-price{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:var(--gold-dark);margin-bottom:18px;}
+    .pkg-price span{font-size:13px;font-family:'DM Sans';color:var(--text-light);font-weight:400;}
+    .pkg-list{list-style:none;margin-bottom:20px;}
+    .pkg-list li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text-mid);padding:4px 0;border-bottom:1px solid rgba(196,154,60,0.08);}
+    .pkg-list li:last-child{border-bottom:none;}
+    .pkg-list li::before{content:'✦';color:var(--gold);font-size:9px;margin-top:5px;flex-shrink:0;}
+    .btn-pkg{width:100%;padding:11px;background:var(--brown);color:var(--cream);border:none;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+    .btn-pkg:hover{background:var(--brown-light);}
+
+    /* CATALOG + AI WORKSPACE */
+    #catalog{background:var(--cream2);}
+    .catalog-intro{padding:70px 8% 0;}
+    .catalog-intro .section-sub{margin-bottom:0;}
+
+    .catalog-workspace{
+      display:grid;
+      grid-template-columns:360px 1fr;
+      border-top:1px solid var(--border);
+      margin-top:36px;
+    }
+
+    /* LEFT: AI PANEL */
+    .ai-panel{
+      background:var(--warm-white);
+      border-right:1px solid var(--border);
+      display:flex;flex-direction:column;
+      position:sticky;top:72px;
+      height:calc(100vh - 72px);
+    }
+    .ai-panel-hdr{padding:18px 20px 14px;border-bottom:1px solid var(--border);}
+    .ai-hdr-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .ai-ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--brown),var(--brown-light));display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--gold-light);flex-shrink:0;}
+    .ai-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--brown);}
+    .ai-status{display:flex;align-items:center;gap:5px;font-size:11px;color:#2d8a4e;font-weight:500;}
+    .ai-dot{width:6px;height:6px;border-radius:50%;background:#2d8a4e;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+    .ai-hint{font-size:12px;color:var(--text-mid);line-height:1.55;padding:9px 13px;background:rgba(196,154,60,0.07);border-radius:9px;border:1px solid rgba(196,154,60,0.15);}
+    .ai-hint strong{color:var(--gold-dark);}
+
+    .ai-msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
+    .ai-msg{display:flex;gap:8px;align-items:flex-start;animation:msgIn 0.2s ease;}
+    @keyframes msgIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+    .ai-msg.user{flex-direction:row-reverse;}
+    .ai-msg-ico{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;}
+    .ai-msg.bot .ai-msg-ico{background:var(--brown);color:var(--gold-light);}
+    .ai-msg.user .ai-msg-ico{background:var(--cream2);color:var(--brown);}
+    .ai-bub{max-width:86%;padding:9px 13px;border-radius:13px;font-size:12.5px;line-height:1.65;}
+    .ai-msg.bot .ai-bub{background:var(--cream2);color:var(--text);border-bottom-left-radius:3px;}
+    .ai-msg.user .ai-bub{background:var(--brown);color:var(--cream);border-bottom-right-radius:3px;}
+    .typing-dots{display:flex;gap:4px;align-items:center;padding:11px 14px;}
+    .typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--text-light);animation:dots 1.2s infinite;}
+    .typing-dots span:nth-child(2){animation-delay:0.2s;}
+    .typing-dots span:nth-child(3){animation-delay:0.4s;}
+    @keyframes dots{0%,80%,100%{transform:scale(1);opacity:0.5}40%{transform:scale(1.3);opacity:1}}
+
+    .ai-chips{padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:6px;}
+    .ai-chip{padding:5px 11px;border-radius:14px;background:var(--cream2);border:1px solid var(--border);font-size:11px;color:var(--text-mid);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+    .ai-chip:hover{background:var(--brown);color:var(--cream);border-color:var(--brown);}
+
+    .ai-inp-row{padding:10px 16px 14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;}
+    .ai-inp{flex:1;padding:9px 13px;background:var(--cream2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;max-height:96px;min-height:38px;transition:border-color 0.18s;line-height:1.5;}
+    .ai-inp:focus{border-color:var(--gold);}
+    .ai-inp::placeholder{color:var(--text-light);}
+    .ai-send{background:var(--brown);color:var(--gold-light);border:none;border-radius:9px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;flex-shrink:0;font-size:15px;}
+    .ai-send:hover{background:var(--brown-light);}
+    .ai-send:disabled{opacity:0.45;cursor:not-allowed;}
+
+    /* RIGHT: CATALOG PANEL */
+    .catalog-panel{padding:24px 28px 60px;overflow-y:auto;max-height:calc(100vh - 72px);position:sticky;top:72px;}
+
+    .ai-banner{display:none;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(61,43,26,0.05),rgba(196,154,60,0.08));border:1px solid rgba(196,154,60,0.28);border-radius:11px;padding:11px 15px;margin-bottom:18px;animation:fadeDown 0.3s ease;}
+    @keyframes fadeDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+    .ai-banner.on{display:flex;}
+    .aib-icon{font-size:18px;}
+    .aib-text{flex:1;font-size:12.5px;color:var(--text-mid);}
+    .aib-text strong{color:var(--brown);display:block;margin-bottom:2px;font-size:13px;}
+    .aib-clear{background:none;border:1px solid var(--border);border-radius:7px;padding:4px 11px;font-size:11.5px;color:var(--text-mid);cursor:pointer;transition:0.15s;white-space:nowrap;}
+    .aib-clear:hover{background:var(--cream2);color:var(--brown);}
+
+    .cat-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+    .cat-count{font-size:13px;color:var(--text-light);}
+    .cat-count strong{color:var(--brown);}
+    .cat-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+    .fb{padding:6px 14px;border-radius:16px;font-size:12px;font-weight:500;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);cursor:pointer;transition:all 0.18s;}
+    .fb.active,.fb:hover{background:var(--brown);color:var(--cream);border-color:var(--brown);}
+
+    .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:16px;}
+    .cat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:13px;overflow:hidden;transition:all 0.25s cubic-bezier(.4,0,.2,1);}
+    .cat-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(44,30,16,0.10);border-color:rgba(196,154,60,0.3);}
+    .cat-card.ai-pick{border-color:var(--gold);box-shadow:0 0 0 2px rgba(196,154,60,0.15);}
+    .cat-card.dimmed{opacity:0.28;transform:scale(0.97);}
+    .cat-thumb{width:100%;height:138px;background:linear-gradient(135deg,#edd5a8,#c9a96e);display:flex;align-items:center;justify-content:center;font-size:34px;position:relative;}
+    .pick-badge{position:absolute;top:7px;left:7px;background:var(--brown);color:var(--gold-light);padding:2px 9px;border-radius:10px;font-size:9px;font-weight:700;letter-spacing:0.5px;display:none;}
+    .cat-card.ai-pick .pick-badge{display:block;}
+    .cat-info{padding:12px 14px 14px;}
+    .cat-cat-lbl{font-size:9.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold-dark);margin-bottom:3px;}
+    .cat-n{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:600;color:var(--brown);margin-bottom:3px;}
+    .cat-d{font-size:11px;color:var(--text-light);line-height:1.5;margin-bottom:9px;}
+    .cat-p{font-size:14px;font-weight:700;color:var(--gold-dark);margin-bottom:9px;}
+    .btn-add{width:100%;padding:7px;background:transparent;border:1.5px solid var(--border);border-radius:7px;color:var(--text-mid);font-size:11.5px;font-weight:600;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:5px;}
+    .btn-add:hover,.btn-add.added{background:var(--brown);color:var(--cream);border-color:var(--brown);}
+    .cat-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-light);}
+    .cat-empty div{font-size:44px;margin-bottom:12px;}
+
+    /* CART */
+    #cart-drawer{position:fixed;right:0;top:72px;bottom:0;width:340px;background:var(--warm-white);border-left:1px solid var(--border);transform:translateX(100%);transition:transform 0.32s cubic-bezier(.4,0,.2,1);z-index:150;display:flex;flex-direction:column;box-shadow:-10px 0 36px rgba(44,30,16,0.08);}
+    #cart-drawer.open{transform:translateX(0);}
+    .cart-hdr{padding:20px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .cart-ttl{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--brown);}
+    .cart-x{background:none;border:none;cursor:pointer;color:var(--text-light);font-size:20px;padding:4px 8px;border-radius:6px;transition:0.15s;}
+    .cart-x:hover{background:var(--cream2);color:var(--brown);}
+    .cart-items{flex:1;overflow-y:auto;padding:14px;}
+    .cart-empty{text-align:center;padding:44px 16px;color:var(--text-light);}
+    .cart-empty div{font-size:40px;margin-bottom:10px;}
+    .c-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:11px;background:var(--card-bg);border:1px solid var(--border);margin-bottom:9px;animation:sli 0.2s ease;}
+    @keyframes sli{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+    .c-ico{font-size:26px;flex-shrink:0;}
+    .c-inf{flex:1;}
+    .c-cat{font-size:10px;color:var(--text-light);}
+    .c-n{font-size:13px;font-weight:600;color:var(--brown);}
+    .c-p{font-size:13px;font-weight:700;color:var(--gold-dark);}
+    .c-rm{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:15px;padding:2px 6px;border-radius:5px;transition:0.15s;}
+    .c-rm:hover{background:#fee2e2;color:#dc2626;}
+    .cart-ftr{padding:14px 20px 20px;border-top:1px solid var(--border);}
+    .cart-tot-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+    .cart-tot-lbl{font-size:13px;color:var(--text-mid);font-weight:500;}
+    .cart-tot-amt{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--brown);}
+    .btn-inquire{width:100%;padding:12px;background:var(--brown);color:var(--cream);border:none;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+    .btn-inquire:hover{background:var(--brown-light);}
+    .cart-fab{position:fixed;right:0;bottom:90px;background:var(--brown);color:var(--gold-light);border:none;border-radius:13px 0 0 13px;padding:13px 14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;z-index:160;transition:all 0.2s;box-shadow:-3px 4px 18px rgba(44,30,16,0.14);}
+    .cart-fab:hover{background:var(--brown-light);transform:translateX(-3px);}
+    .c-badge{background:var(--gold);color:var(--brown);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+
+    /* FOOTER */
+    footer{background:var(--brown);color:rgba(250,247,242,0.7);padding:48px 8% 28px;}
+    .ft-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:36px;}
+    .ft-brand{font-family:'Playfair Display',serif;font-size:22px;color:var(--cream);font-weight:700;margin-bottom:10px;}
+    .ft-desc{font-size:13.5px;line-height:1.7;}
+    .ft-col h4{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);margin-bottom:14px;}
+    .ft-col a{display:block;color:rgba(250,247,242,0.6);text-decoration:none;font-size:13.5px;padding:3px 0;transition:color 0.15s;cursor:pointer;}
+    .ft-col a:hover{color:var(--gold-light);}
+    .ft-bottom{border-top:1px solid rgba(255,255,255,0.1);padding-top:22px;display:flex;justify-content:space-between;font-size:12.5px;flex-wrap:wrap;gap:8px;}
+
+    ::-webkit-scrollbar{width:5px;}
+    ::-webkit-scrollbar-track{background:var(--cream2);}
+    ::-webkit-scrollbar-thumb{background:rgba(196,154,60,0.28);border-radius:3px;}
+
+    @media(max-width:960px){
+      .hero-image{display:none;} .hero-content{max-width:100%;}
+      .catalog-workspace{grid-template-columns:1fr;}
+      .ai-panel{position:relative;top:0;height:60vh;}
+      .catalog-panel{position:relative;top:0;max-height:none;}
+      .ft-top{grid-template-columns:1fr;}
+      #cart-drawer{width:100%;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="go('#hero')">
+    <div class="nav-logo-icon">H</div>Halden's Event Management and Catering Service
+  </div>
+  <div class="nav-center">
+    <span class="nav-link" onclick="go('#hero')">Home</span>
+    <div class="dropdown">
+      <span class="nav-link dropdown-toggle" onclick="go('#catalog')">
+        Catalog
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </span>
+      <div class="dropdown-menu">
+        <span class="dropdown-item" onclick="jumpCat('food')"><span class="di-icon">🍽️</span>Food &amp; Dishes</span>
+        <span class="dropdown-item" onclick="jumpCat('dessert')"><span class="di-icon">🍰</span>Desserts &amp; Drinks</span>
+        <span class="dropdown-item" onclick="jumpCat('decoration')"><span class="di-icon">🎨</span>Decorations</span>
+        <span class="dropdown-item" onclick="jumpCat('equipment')"><span class="di-icon">🪑</span>Equipment &amp; Setup</span>
+        <span class="dropdown-item" onclick="jumpCat('entertainment')"><span class="di-icon">🎉</span>Entertainment</span>
+        <span class="dropdown-item" onclick="jumpCat('photography')"><span class="di-icon">📸</span>Photography</span>
+        <span class="dropdown-item" onclick="jumpCat('all')"><span class="di-icon">✦</span>View All</span>
+      </div>
+    </div>
+    <span class="nav-link" onclick="go('#packages')">Packages</span>
+  </div>
+  <button class="btn-nav-cta" onclick="go('#catalog')">✦ Plan My Event</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg1"></div><div class="hero-bg2"></div>
+  <div class="hero-content">
+    <div class="hero-badge">✦ Premium Catering Services</div>
+    <h1 class="hero-title">Every Event,<br><em>Perfectly Served</em></h1>
+    <p class="hero-sub">From intimate family gatherings to grand celebrations — Halden's brings warmth, flavor, and elegance to every table.</p>
+    <div class="hero-btns">
+      <a class="btn-primary" onclick="go('#packages')">View Packages <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a>
+      <a class="btn-outline" onclick="go('#catalog')">✦ AI Event Planner</a>
+    </div>
+  </div>
+  <div class="hero-image"><div class="hero-ph">🍽️<p>Hero image placeholder</p></div></div>
+</section>
+
+<!-- PACKAGES -->
+<section id="packages">
+  <div class="packages-header">
+    <p class="section-label">Our Packages</p>
+    <h2 class="section-title">Ready-Made Packages</h2>
+    <p class="section-sub">Curated bundles for every type of event — complete, hassle-free, and elegantly delivered.</p>
+  </div>
+  <div class="packages-grid" id="pkgs-grid"></div>
+</section>
+
+<!-- CATALOG + AI -->
+<section id="catalog">
+  <div class="catalog-intro">
+    <p class="section-label">Build Your Package</p>
+    <h2 class="section-title">AI-Assisted Catalog</h2>
+    <p class="section-sub">Describe your event to the AI planner — it will highlight the best catalog items for you in real time.</p>
+  </div>
+
+  <div class="catalog-workspace">
+    <!-- LEFT: AI PANEL -->
+    <div class="ai-panel">
+      <div class="ai-panel-hdr">
+        <div class="ai-hdr-row">
+          <div class="ai-ava">✦</div>
+          <div>
+            <div class="ai-name">Halden's AI Planner</div>
+            <div class="ai-status"><div class="ai-dot"></div>Ready to assist</div>
+          </div>
+        </div>
+        <div class="ai-hint"><strong>Tell me about your event</strong> and I'll instantly filter the catalog to highlight the best items for your occasion, guest count, and budget.</div>
+      </div>
+      <div class="ai-msgs" id="ai-msgs"></div>
+      <div class="ai-chips" id="ai-chips">
+        <span class="ai-chip" onclick="chipSend(this)">Birthday for 50 guests</span>
+        <span class="ai-chip" onclick="chipSend(this)">Wedding reception</span>
+        <span class="ai-chip" onclick="chipSend(this)">Kiddie party ₱50k budget</span>
+        <span class="ai-chip" onclick="chipSend(this)">Corporate event 100 pax</span>
+      </div>
+      <div class="ai-inp-row">
+        <textarea class="ai-inp" id="ai-inp" placeholder="Describe your event — type, guests, budget, theme..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"
+          oninput="ar(this)"></textarea>
+        <button class="ai-send" id="ai-send" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: CATALOG -->
+    <div class="catalog-panel" id="cat-panel">
+      <div class="ai-banner" id="ai-banner">
+        <div class="aib-icon">✦</div>
+        <div class="aib-text">
+          <strong id="aib-title">AI Recommendations Active</strong>
+          <span id="aib-desc">Highlighted items match your event. Dimmed items are less relevant.</span>
+        </div>
+        <button class="aib-clear" onclick="clearFilter()">Clear</button>
+      </div>
+      <div class="cat-top">
+        <div class="cat-count" id="cat-count"><strong>All items</strong></div>
+        <div class="cat-filters" id="fbtns">
+          <button class="fb active" onclick="setCat('all',this)">All</button>
+          <button class="fb" onclick="setCat('food',this)">🍽️ Food</button>
+          <button class="fb" onclick="setCat('dessert',this)">🍰 Desserts</button>
+          <button class="fb" onclick="setCat('decoration',this)">🎨 Decor</button>
+          <button class="fb" onclick="setCat('equipment',this)">🪑 Equipment</button>
+          <button class="fb" onclick="setCat('entertainment',this)">🎉 Fun</button>
+          <button class="fb" onclick="setCat('photography',this)">📸 Photo</button>
+        </div>
+      </div>
+      <div class="cat-grid" id="cat-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CART FAB -->
+<button class="cart-fab" onclick="toggleCart()">🛒<div class="c-badge" id="c-badge">0</div>Cart</button>
+
+<!-- CART DRAWER -->
+<div id="cart-drawer">
+  <div class="cart-hdr">
+    <span class="cart-ttl">Custom Package</span>
+    <button class="cart-x" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <div class="cart-empty"><div>🛒</div><p>Your package is empty.<br>Add items from the catalog.</p></div>
+  </div>
+  <div class="cart-ftr">
+    <div class="cart-tot-row">
+      <span class="cart-tot-lbl">Estimated Total</span>
+      <span class="cart-tot-amt" id="cart-tot">₱0</span>
+    </div>
+    <button class="btn-inquire">📩 Inquire / Book This Package</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-top">
+    <div>
+      <div class="ft-brand">Halden's Catering</div>
+      <p class="ft-desc">Premium catering services for all occasions. From intimate gatherings to grand celebrations, we bring warmth and excellence to every table.</p>
+    </div>
+    <div class="ft-col"><h4>Explore</h4><a onclick="go('#packages')">Packages</a><a onclick="go('#catalog')">Full Catalog</a><a onclick="go('#catalog')">AI Planner</a></div>
+    <div class="ft-col"><h4>Contact</h4><a>Facebook: Halden's Catering</a><a>Phone: (placeholder)</a><a>Email: (placeholder)</a></div>
+  </div>
+  <div class="ft-bottom"><span>© 2025 Halden's Catering Service. All rights reserved.</span><span>Made with ✦ for every occasion</span></div>
+</footer>
+
+<script>
+// ===== CATALOG DATA =====
+const CAT = [
+  {id:'f1',name:'Pork Dish',cat:'food',icon:'🥩',price:2500,desc:'Tender slow-cooked pork, serves ~20 pax'},
+  {id:'f2',name:'Beef Dish',cat:'food',icon:'🥩',price:3000,desc:'Premium beef dish, serves ~20 pax'},
+  {id:'f3',name:'Chicken Dish',cat:'food',icon:'🍗',price:2200,desc:'Classic Filipino chicken recipe, serves ~20 pax'},
+  {id:'f4',name:'Fish Dish',cat:'food',icon:'🐟',price:2000,desc:'Fresh fish fillet, serves ~20 pax'},
+  {id:'f5',name:'Vegetable Dish',cat:'food',icon:'🥦',price:1200,desc:'Seasonal vegetables, serves ~20 pax'},
+  {id:'f6',name:'Pasta',cat:'food',icon:'🍝',price:1800,desc:'Creamy or tomato-based pasta, serves ~20 pax'},
+  {id:'f7',name:'Special Pancit Canton',cat:'food',icon:'🍜',price:1500,desc:'Savory stir-fried noodles, serves ~20 pax'},
+  {id:'f8',name:'Soup',cat:'food',icon:'🍲',price:1000,desc:'Hearty Filipino soup, serves ~20 pax'},
+  {id:'f9',name:'Steamed Rice (Unlimited)',cat:'food',icon:'🍚',price:2000,desc:'Unlimited steamed rice for all guests'},
+  {id:'d1',name:'Dessert Selection',cat:'dessert',icon:'🍮',price:1500,desc:'Assorted Filipino desserts, serves ~20 pax'},
+  {id:'d2',name:'Spaghetti (Kids)',cat:'dessert',icon:'🍝',price:1200,desc:'Sweet Filipino spaghetti for kids'},
+  {id:'d3',name:'Fried Chicken (Kids)',cat:'dessert',icon:'🍗',price:1400,desc:'Crispy fried chicken for kids'},
+  {id:'d4',name:'Hotdog & Mallows (Kids)',cat:'dessert',icon:'🌭',price:900,desc:'Kid-favorite hotdog with marshmallows'},
+  {id:'d5',name:'Unlimited Drinks',cat:'dessert',icon:'🥤',price:1800,desc:'Assorted soft drinks & juice, unlimited'},
+  {id:'dc1',name:'Theme Stage Backdrop',cat:'decoration',icon:'🎭',price:5000,desc:'Custom printed theme backdrop for stage'},
+  {id:'dc2',name:'Ceiling Balloon Treatment',cat:'decoration',icon:'🎈',price:3500,desc:'Balloon ceiling arrangement in theme colors'},
+  {id:'dc3',name:'Table Centerpiece',cat:'decoration',icon:'💐',price:2500,desc:'Themed centerpiece per table (10 tables)'},
+  {id:'dc4',name:'Entrance Theme Setup',cat:'decoration',icon:'🚪',price:3000,desc:'Decorated entrance arch with theme elements'},
+  {id:'dc5',name:'Styro Name Cutouts',cat:'decoration',icon:'✂️',price:1500,desc:'Custom name/letters in styrofoam'},
+  {id:'eq1',name:'Complete Catering Setup',cat:'equipment',icon:'🍽️',price:5000,desc:'Full catering equipment & centerpiece'},
+  {id:'eq2',name:'Tables & Chairs w/ Cover',cat:'equipment',icon:'🪑',price:4500,desc:'Themed tables and chairs with ribbon covers'},
+  {id:'eq3',name:'VIP Long Table Setup',cat:'equipment',icon:'🎪',price:2000,desc:'Special long table for VIP guests'},
+  {id:'eq4',name:'Utensils & Glassware',cat:'equipment',icon:'🥄',price:1500,desc:'Complete utensil and glassware set'},
+  {id:'eq5',name:'Waiter in Uniform',cat:'equipment',icon:'🤵',price:2500,desc:'Professionally uniformed waiter service'},
+  {id:'eq6',name:'Full Lights & Sounds Setup',cat:'equipment',icon:'💡',price:8000,desc:'Complete audio-visual setup for events'},
+  {id:'en1',name:'2x Clowns / Magician',cat:'entertainment',icon:'🤡',price:6000,desc:'2 professional clowns or magicians'},
+  {id:'en2',name:'Game Prizes (20 pcs)',cat:'entertainment',icon:'🎁',price:2000,desc:'20 assorted game prizes for guests'},
+  {id:'en3',name:'Face Painting (3hrs)',cat:'entertainment',icon:'🎨',price:3500,desc:'Professional face painting, 3 hours'},
+  {id:'en4',name:'2x3 Photo Standee',cat:'entertainment',icon:'🖼️',price:2500,desc:'Custom printed 2x3 ft photo standee'},
+  {id:'ph1',name:'Photobooth (2hrs Unlimited)',cat:'photography',icon:'📷',price:7000,desc:'Unlimited photobooth sessions for 2 hours'},
+  {id:'ph2',name:'Photographer (Unlimited)',cat:'photography',icon:'📸',price:8000,desc:'Professional photographer, unlimited shots'},
+  {id:'ph3',name:'Videographer (MTV Style)',cat:'photography',icon:'🎬',price:10000,desc:'Professional videographer, MTV-style output'},
+];
+
+const PKGS = [
+  {name:'Kiddie Party Package B',tagline:'100 pax Plus • 30 Kids',price:'₱85,000',pax:'100 pax + 30 kids',icon:'🎉',badge:'Popular',inc:['Complete Catering Setup & Centerpiece','Tables & Chairs with Theme Cover','VIP Long Table Setup','Full Catering Equipment, Utensils & Glassware','Waiter in Uniform','5 Main Dishes (Pork/Beef, Chicken, Veggies, Fish, Pasta)','Special Pancit Canton, Soup & Dessert','Unlimited Drinks & Steamed Rice','Full Lights & Sounds Setup','Theme Backdrop, Balloon Ceiling, Centerpieces','Entrance Setup, Styro Name Cutouts','Photobooth (2hrs) + Photographer + MTV Videographer','2 Clowns/Magician + 2x3 Photo Standee','Face Painting (3hrs) + 20 Game Prizes','FREE Kiddie Meals: Spaghetti, Fried Chicken, Hotdog & Mallows']},
+  {name:'Simple Celebration Package',tagline:'Budget-Friendly • 50 pax',price:'Starting ₱25,000',pax:'50 pax',icon:'🌸',badge:'Starter',inc:['Basic Catering Setup','Tables & Chairs','3 Main Dishes (Choice of menu)','Steamed Rice (Unlimited)','Soup & Dessert','Unlimited Drinks','Waiter in Uniform']},
+  {name:'Custom Package',tagline:'Fully Personalized • Any size',price:'Quote on request',pax:'Any size',icon:'✦',badge:'Best Value',inc:['Choose any items from our full catalog','AI-powered recommendations based on your budget','Flexible guest count','Mix & match food, decor, entertainment & more','Personalized quotation from our team']},
+];
+
+// ===== STATE =====
+let cart = [];
+let curCat = 'all';
+let aiPicks = null; // null = no filter, array of ids = highlighted
+
+// ===== PACKAGES =====
+function renderPkgs() {
+  document.getElementById('pkgs-grid').innerHTML = PKGS.map(p=>`
+    <div class="package-card">
+      <div class="pkg-img">${p.icon}<span class="pkg-badge">${p.badge}</span></div>
+      <div class="pkg-body">
+        <div class="pkg-name">${p.name}</div>
+        <div class="pkg-tagline">${p.tagline}</div>
+        <div class="pkg-price">${p.price} <span>/ ${p.pax}</span></div>
+        <ul class="pkg-list">${p.inc.map(i=>`<li>${i}</li>`).join('')}</ul>
+        <button class="btn-pkg" onclick="go('#catalog')">Inquire / Book This Package</button>
+      </div>
+    </div>`).join('');
+}
+
+// ===== CATALOG =====
+function renderCat() {
+  const grid = document.getElementById('cat-grid');
+  let items = curCat==='all' ? CAT : CAT.filter(i=>i.cat===curCat);
+  if (!items.length) { grid.innerHTML=`<div class="cat-empty"><div>🔍</div><p>No items here.</p></div>`; return; }
+
+  // Sort AI picks to top
+  if (aiPicks) items = [...items].sort((a,b)=>aiPicks.includes(b.id)-aiPicks.includes(a.id));
+
+  const pickCount = aiPicks ? items.filter(i=>aiPicks.includes(i.id)).length : items.length;
+  document.getElementById('cat-count').innerHTML = aiPicks
+    ? `<strong>${pickCount} AI picks</strong> · ${items.length} shown`
+    : `<strong>${items.length}</strong> items`;
+
+  grid.innerHTML = items.map(item=>{
+    const inCart = cart.find(c=>c.id===item.id);
+    const isPick = aiPicks && aiPicks.includes(item.id);
+    const isDim  = aiPicks && !isPick;
+    return `
+      <div class="cat-card ${isPick?'ai-pick':''} ${isDim?'dimmed':''}">
+        <div class="cat-thumb">
+          ${item.icon}
+          <div class="pick-badge">✦ AI Pick</div>
+        </div>
+        <div class="cat-info">
+          <div class="cat-cat-lbl">${item.cat}</div>
+          <div class="cat-n">${item.name}</div>
+          <div class="cat-d">${item.desc}</div>
+          <div class="cat-p">₱${item.price.toLocaleString()}</div>
+          <button class="btn-add ${inCart?'added':''}" onclick="toggleItem('${item.id}')">
+            ${inCart?'✓ Added':'+ Add to Package'}
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function setCat(cat, btn) {
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  curCat = cat; renderCat();
+}
+
+function jumpCat(cat) {
+  const btns = document.querySelectorAll('.fb');
+  btns.forEach(b=>b.classList.remove('active'));
+  // Find the right button
+  btns.forEach(b=>{ if(b.onclick?.toString().includes(`'${cat}'`)||cat==='all'&&b.textContent.trim()==='All') b.classList.add('active'); });
+  curCat = cat; renderCat(); go('#catalog');
+}
+
+// ===== CART =====
+function toggleItem(id) {
+  const item = CAT.find(i=>i.id===id);
+  const idx = cart.findIndex(c=>c.id===id);
+  if (idx>-1) cart.splice(idx,1);
+  else { cart.push(item); document.getElementById('cart-drawer').classList.add('open'); }
+  renderCat(); renderCart();
+}
+
+function removeItem(id) {
+  cart = cart.filter(c=>c.id!==id);
+  renderCat(); renderCart();
+}
+
+function renderCart() {
+  const el = document.getElementById('cart-items');
+  const badge = document.getElementById('c-badge');
+  const tot = document.getElementById('cart-tot');
+  badge.textContent = cart.length;
+  if (!cart.length) {
+    el.innerHTML=`<div class="cart-empty"><div>🛒</div><p>Your package is empty.<br>Add items from the catalog.</p></div>`;
+    tot.textContent='₱0'; return;
+  }
+  tot.textContent = '₱' + cart.reduce((s,i)=>s+i.price,0).toLocaleString();
+  el.innerHTML = cart.map(item=>`
+    <div class="c-item">
+      <div class="c-ico">${item.icon}</div>
+      <div class="c-inf">
+        <div class="c-cat">${item.cat}</div>
+        <div class="c-n">${item.name}</div>
+        <div class="c-p">₱${item.price.toLocaleString()}</div>
+      </div>
+      <button class="c-rm" onclick="removeItem('${item.id}')">✕</button>
+    </div>`).join('');
+}
+
+function toggleCart() { document.getElementById('cart-drawer').classList.toggle('open'); }
+
+// ===== AI =====
+const API_KEY = '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';
+const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
+const SYS = `You are Halden's AI Event Planning Assistant for Halden's Catering Service, a premium catering business in the Philippines.
+
+Your job: (1) Have a warm, helpful conversation to understand the client's event, and (2) after EVERY reply where you understand the event, output a JSON block of recommended catalog IDs so the website can highlight those items in real time.
+
+CATALOG IDs:
+food: f1=Pork Dish(₱2500), f2=Beef Dish(₱3000), f3=Chicken Dish(₱2200), f4=Fish Dish(₱2000), f5=Vegetable Dish(₱1200), f6=Pasta(₱1800), f7=Pancit Canton(₱1500), f8=Soup(₱1000), f9=Steamed Rice(₱2000)
+dessert: d1=Dessert Selection(₱1500), d2=Spaghetti Kids(₱1200), d3=Fried Chicken Kids(₱1400), d4=Hotdog&Mallows Kids(₱900), d5=Unlimited Drinks(₱1800)
+decoration: dc1=Theme Backdrop(₱5000), dc2=Ceiling Balloons(₱3500), dc3=Table Centerpiece(₱2500), dc4=Entrance Setup(₱3000), dc5=Styro Name(₱1500)
+equipment: eq1=Catering Setup(₱5000), eq2=Tables&Chairs(₱4500), eq3=VIP Long Table(₱2000), eq4=Utensils(₱1500), eq5=Waiter(₱2500), eq6=Lights&Sounds(₱8000)
+entertainment: en1=Clowns/Magician(₱6000), en2=Game Prizes(₱2000), en3=Face Painting(₱3500), en4=Photo Standee(₱2500)
+photography: ph1=Photobooth(₱7000), ph2=Photographer(₱8000), ph3=Videographer(₱10000)
+
+RULES FOR JSON OUTPUT:
+- ALWAYS end every response with: {"recommended_ids":["id1","id2",...]}
+- Include 5 to 12 IDs most relevant to the event
+- Kiddie party → always include: f3,f9,d5,d2,d3,d4,en1,en3,eq2,dc2
+- Wedding → always include: f1,f2,f3,f9,d5,eq1,eq2,eq5,eq6,ph2,ph3,dc1
+- Corporate → include: f2,f3,f9,d5,eq1,eq2,eq5,eq6
+- Budget events (under ₱20k) → focus on food only, skip photography/entertainment
+- Large events (100+ pax) → always include eq1,eq2,eq5,eq6
+
+Keep your text reply concise, warm, and professional. Use ₱ for prices. Use line breaks for lists. If you need more info, ask ONE question. Always place the JSON at the very end, on its own line.`;
+
+let hist = [{role:'system',content:SYS}];
+
+function initAI() {
+  addBot("Hi there! 👋 I'm Halden's AI Event Planner.\n\nDescribe your event below — the occasion, number of guests, budget, and any theme ideas — and I'll instantly highlight the most suitable items from our catalog for you. ✦");
+}
+
+function addBot(txt) {
+  const c = document.getElementById('ai-msgs');
+  const d = document.createElement('div');
+  d.className='ai-msg bot';
+  d.innerHTML=`<div class="ai-msg-ico">✦</div><div class="ai-bub">${txt.replace(/\n/g,'<br>')}</div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+
+function addUser(txt) {
+  const c = document.getElementById('ai-msgs');
+  const d = document.createElement('div');
+  d.className='ai-msg user';
+  d.innerHTML=`<div class="ai-msg-ico">👤</div><div class="ai-bub">${txt.replace(/\n/g,'<br>')}</div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+
+function showTyping() {
+  const c = document.getElementById('ai-msgs');
+  const d = document.createElement('div');
+  d.className='ai-msg bot'; d.id='typin';
+  d.innerHTML=`<div class="ai-msg-ico">✦</div><div class="ai-bub typing-dots"><span></span><span></span><span></span></div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+function hideTyping() { document.getElementById('typin')?.remove(); }
+
+async function sendMsg() {
+  const inp = document.getElementById('ai-inp');
+  const btn = document.getElementById('ai-send');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value=''; inp.style.height='auto';
+  document.getElementById('ai-chips').style.display='none';
+  addUser(txt); btn.disabled=true; showTyping();
+  hist.push({role:'user',content:txt});
+  try {
+    const res = await fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY,'HTTP-Referer':location.href,'X-Title':"Halden's AI Planner"},
+      body:JSON.stringify({model:'arcee-ai/trinity-large-preview:free',messages:hist,max_tokens:900})
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't connect. Please try again.";
+    hist.push({role:'assistant',content:reply});
+    hideTyping();
+    // Extract JSON picks
+    const m = reply.match(/\{"recommended_ids"\s*:\s*\[.*?\]\}/s);
+    let clean = reply;
+    if (m) {
+      try {
+        const p = JSON.parse(m[0]);
+        if (p.recommended_ids?.length) applyPicks(p.recommended_ids, txt);
+        clean = reply.replace(m[0],'').trim();
+      } catch(e){}
+    }
+    addBot(clean);
+  } catch(e) {
+    hideTyping();
+    addBot("I'm having trouble connecting right now. Please try again in a moment.");
+  }
+  btn.disabled=false;
+}
+
+function applyPicks(ids, query) {
+  aiPicks = ids;
+  const banner = document.getElementById('ai-banner');
+  banner.classList.add('on');
+  document.getElementById('aib-title').textContent = `✦ ${ids.length} items recommended for you`;
+  document.getElementById('aib-desc').textContent = `Based on: "${query.substring(0,55)}${query.length>55?'...':''}"`;
+  // Show all so picks are visible
+  curCat = 'all';
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.fb').classList.add('active');
+  renderCat();
+  document.getElementById('cat-panel').scrollTop=0;
+}
+
+function clearFilter() {
+  aiPicks=null;
+  document.getElementById('ai-banner').classList.remove('on');
+  renderCat();
+}
+
+function chipSend(el) { document.getElementById('ai-inp').value=el.textContent; sendMsg(); }
+function ar(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,96)+'px'; }
+function go(id) { document.querySelector(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
+
+// ===== INIT =====
+renderPkgs();
+renderCat();
+initAI();
+</script>
+</body>
+</html>
