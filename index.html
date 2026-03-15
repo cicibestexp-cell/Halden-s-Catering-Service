@@ -327,9 +327,9 @@
 
     /* Cart FAB */
     .cart-fab{
-      position:fixed;right:0;bottom:16px;
+      position:fixed;Left:0;bottom:16px;
       background:var(--brown);color:var(--gold-light);
-      border:none;border-radius:13px 0 0 13px;
+      border:none;border-radius:0 13px 13px 0;
       padding:13px 14px;cursor:pointer;
       display:flex;flex-direction:column;align-items:center;gap:4px;
       font-size:11px;font-weight:600;z-index:160;transition:all 0.2s;
@@ -392,7 +392,7 @@
 
       /* Cart */
       #cart-drawer{width:100%;top:var(--nav-h);}
-      .cart-fab{bottom:86px;} /* lifted above AI fab */
+      .cart-fab{bottom:16px;right:auto;left:0;border-radius:0 13px 13px 0;}
 
       /* Footer */
       .ft-top{grid-template-columns:1fr;gap:28px;}
