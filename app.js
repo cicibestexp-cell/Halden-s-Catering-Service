@@ -366,7 +366,6 @@ function setLoggedOut(){
   document.querySelector('.btn-auth').innerHTML = '👤 <span class="auth-label">Login / Sign Up</span>';
 }
 
-// Placeholder functions — replace with Firebase calls later
 async function doLogin(){
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-password').value;
@@ -374,9 +373,18 @@ async function doLogin(){
   const btn = document.getElementById('login-btn');
   btn.disabled=true; btn.textContent='Logging in...';
   clearAuthMsg('login-msg');
-  // TODO: Replace with Firebase signInWithEmailAndPassword
+
+  // Admin shortcut — replace with Firebase later
+  if(email === 'admin@gmail.com' && pass === '12345'){
+    sessionStorage.setItem('halden_admin', JSON.stringify({name:'Administrator', email}));
+    showAuthMsg('login-msg','success','Welcome, Admin! Redirecting...');
+    setTimeout(()=>{ window.location.href = 'admin.html'; }, 800);
+    return;
+  }
+
+  // TODO: Replace with Firebase signInWithEmailAndPassword for regular users
   setTimeout(()=>{
-    showAuthMsg('login-msg','error','Firebase not connected yet. Come back after setup.');
+    showAuthMsg('login-msg','error','Invalid email or password. Please try again.');
     btn.disabled=false; btn.textContent='Login to My Account';
   }, 800);
 }
