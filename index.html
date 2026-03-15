@@ -790,8 +790,7 @@ function closeMobAI(){
 }
 
 // ===== AI =====
-const API_KEY = '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';
-const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const API_URL = 'https://halden-s-catering-service.vercel.app/api/chat';
 
 const SYS = `You are Halden's AI Event Planning Assistant for Halden's Event Management and Catering Service, a premium catering business in the Philippines.
 
@@ -874,7 +873,7 @@ async function sendMsg(panel) {
   try {
     const res = await fetch(API_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY,'HTTP-Referer':location.href,'X-Title':"Halden's AI Planner"},
+      headers:{'Content-Type':'application/json','HTTP-Referer':location.href,'X-Title':"Halden's AI Planner"},
       body:JSON.stringify({model:'arcee-ai/trinity-large-preview:free',messages:hist,max_tokens:900})
     });
     const data = await res.json();
