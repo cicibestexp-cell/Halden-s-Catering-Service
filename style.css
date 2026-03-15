@@ -227,7 +227,7 @@
     /* Floating AI button — mobile only */
     .mob-ai-fab{
       display:none;
-      position:fixed;bottom:86px;right:16px;
+      position:fixed;bottom:95px;right:16px;
       background:var(--brown);color:var(--gold-light);
       border:none;border-radius:50px;
       padding:13px 18px;
