@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Halden's Catering Service</title>
+  <title>Halden's Event Management and Catering Service</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -13,39 +13,93 @@
       --text:#2c1e10; --text-mid:#6b5340; --text-light:#a08060;
       --card-bg:#fffef9; --border:rgba(196,154,60,0.18);
       --shadow:0 8px 40px rgba(44,30,16,0.10);
+      --nav-h:72px;
     }
     html{scroll-behavior:smooth;}
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
     body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
 
-    /* NAV */
-    nav{position:sticky;top:0;z-index:200;background:rgba(250,247,242,0.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 6%;display:flex;align-items:center;justify-content:space-between;height:72px;}
-    .nav-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--brown);display:flex;align-items:center;gap:10px;cursor:pointer;}
-    .nav-logo-icon{width:36px;height:36px;background:var(--brown);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold-light);font-size:17px;}
+    /* ===== NAV ===== */
+    nav{
+      position:sticky;top:0;z-index:500;
+      background:rgba(250,247,242,0.97);backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border);
+      padding:0 6%;display:flex;align-items:center;justify-content:space-between;
+      height:var(--nav-h);
+    }
+
+    /* Logo */
+    .nav-logo{
+      font-family:'Playfair Display',serif;font-weight:700;color:var(--brown);
+      display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0;
+    }
+    .nav-logo-icon{
+      width:38px;height:38px;background:var(--brown);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--gold-light);font-size:17px;flex-shrink:0;
+    }
+    .logo-text{display:flex;flex-direction:column;line-height:1.15;}
+    .logo-main{font-size:18px;letter-spacing:0.3px;}
+    .logo-sub{font-size:10px;font-weight:400;color:var(--text-light);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Sans',sans-serif;}
+
+    /* Desktop nav links */
     .nav-center{display:flex;align-items:center;gap:4px;}
-    .nav-link{font-size:14px;font-weight:500;color:var(--text-mid);text-decoration:none;padding:8px 14px;border-radius:8px;transition:all 0.2s;cursor:pointer;}
+    .nav-link{font-size:14px;font-weight:500;color:var(--text-mid);text-decoration:none;padding:8px 14px;border-radius:8px;transition:all 0.2s;cursor:pointer;white-space:nowrap;}
     .nav-link:hover{background:var(--cream2);color:var(--brown);}
+
     .dropdown{position:relative;}
     .dropdown-toggle{display:flex;align-items:center;gap:5px;}
     .dropdown-toggle svg{transition:transform 0.2s;}
     .dropdown:hover .dropdown-toggle svg{transform:rotate(180deg);}
-    .dropdown-menu{position:absolute;top:calc(100% + 8px);left:0;background:var(--warm-white);border:1px solid var(--border);border-radius:14px;padding:8px;min-width:195px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transform:translateY(-6px);transition:all 0.22s cubic-bezier(.4,0,.2,1);z-index:300;}
+    .dropdown-menu{
+      position:absolute;top:calc(100% + 8px);left:0;
+      background:var(--warm-white);border:1px solid var(--border);
+      border-radius:14px;padding:8px;min-width:195px;
+      box-shadow:var(--shadow);opacity:0;pointer-events:none;
+      transform:translateY(-6px);transition:all 0.22s cubic-bezier(.4,0,.2,1);z-index:600;
+    }
     .dropdown:hover .dropdown-menu{opacity:1;pointer-events:all;transform:translateY(0);}
     .dropdown-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--text-mid);cursor:pointer;transition:all 0.15s;}
     .dropdown-item:hover{background:var(--cream2);color:var(--brown);}
     .di-icon{font-size:17px;}
-    .btn-nav-cta{background:var(--brown);color:var(--gold-light);padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;}
+
+    .btn-nav-cta{background:var(--brown);color:var(--gold-light);padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
     .btn-nav-cta:hover{background:var(--brown-light);transform:translateY(-1px);box-shadow:0 4px 18px rgba(44,30,16,0.18);}
 
-    /* HERO */
+    /* Hamburger — hidden on desktop */
+    .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--brown);border-radius:2px;transition:all 0.25s;}
+    .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+    .hamburger.open span:nth-child(2){opacity:0;}
+    .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+    /* Mobile nav drawer */
+    .mobile-nav{
+      display:none;
+      position:fixed;top:var(--nav-h);left:0;right:0;
+      background:var(--warm-white);border-bottom:1px solid var(--border);
+      padding:16px 6% 20px;
+      flex-direction:column;gap:4px;
+      z-index:490;
+      box-shadow:0 12px 40px rgba(44,30,16,0.1);
+      animation:slideDown 0.22s ease;
+    }
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+    .mobile-nav.open{display:flex;}
+    .mob-link{font-size:15px;font-weight:500;color:var(--text-mid);padding:12px 14px;border-radius:10px;cursor:pointer;transition:all 0.15s;border:none;background:none;text-align:left;width:100%;}
+    .mob-link:hover{background:var(--cream2);color:var(--brown);}
+    .mob-divider{height:1px;background:var(--border);margin:8px 0;}
+    .mob-cta{width:100%;padding:13px;background:var(--brown);color:var(--cream);border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;}
+
+    /* ===== HERO ===== */
     #hero{min-height:92vh;display:flex;align-items:center;padding:0 8%;position:relative;overflow:hidden;background:linear-gradient(135deg,#faf7f2 0%,#f5eddf 60%,#ede0cc 100%);}
     .hero-bg1{position:absolute;right:-80px;top:-80px;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(196,154,60,0.08) 0%,transparent 70%);pointer-events:none;}
     .hero-bg2{position:absolute;left:-100px;bottom:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(61,43,26,0.05) 0%,transparent 70%);pointer-events:none;}
     .hero-content{max-width:580px;z-index:1;}
     .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(196,154,60,0.12);border:1px solid rgba(196,154,60,0.3);color:var(--gold-dark);padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:22px;}
-    .hero-title{font-family:'Playfair Display',serif;font-size:clamp(42px,6vw,70px);font-weight:700;line-height:1.1;color:var(--brown);margin-bottom:18px;}
+    .hero-title{font-family:'Playfair Display',serif;font-size:clamp(36px,6vw,70px);font-weight:700;line-height:1.1;color:var(--brown);margin-bottom:18px;}
     .hero-title em{font-style:italic;color:var(--gold);}
-    .hero-sub{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:var(--text-mid);line-height:1.7;margin-bottom:36px;}
+    .hero-sub{font-family:'Cormorant Garamond',serif;font-size:clamp(17px,2.2vw,20px);font-weight:300;color:var(--text-mid);line-height:1.7;margin-bottom:36px;}
     .hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
     .btn-primary{background:var(--brown);color:var(--cream);padding:13px 26px;border-radius:11px;font-size:14px;font-weight:600;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all 0.22s;}
     .btn-primary:hover{background:var(--brown-light);transform:translateY(-2px);box-shadow:0 8px 28px rgba(44,30,16,0.2);}
@@ -55,52 +109,51 @@
     .hero-ph{width:100%;height:100%;background:linear-gradient(135deg,#e8d5b8,#c9a96e);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--brown);font-size:60px;}
     .hero-ph p{font-size:13px;font-family:'DM Sans';color:var(--brown-light);}
 
-    /* SECTION COMMONS */
+    /* ===== SECTION COMMONS ===== */
     .section-label{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold-dark);margin-bottom:12px;}
-    .section-title{font-family:'Playfair Display',serif;font-size:clamp(30px,4vw,46px);font-weight:700;color:var(--brown);line-height:1.2;margin-bottom:14px;}
-    .section-sub{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text-light);line-height:1.7;max-width:540px;}
+    .section-title{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,46px);font-weight:700;color:var(--brown);line-height:1.2;margin-bottom:14px;}
+    .section-sub{font-family:'Cormorant Garamond',serif;font-size:clamp(16px,2vw,18px);color:var(--text-light);line-height:1.7;max-width:540px;}
 
-    /* PACKAGES */
-    #packages{padding:90px 8%;background:var(--cream);}
-    .packages-header{text-align:center;margin-bottom:52px;}
+    /* ===== PACKAGES ===== */
+    #packages{padding:80px 6%;background:var(--cream);}
+    .packages-header{text-align:center;margin-bottom:48px;}
     .packages-header .section-sub{margin:0 auto;}
-    .packages-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:26px;}
+    .packages-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:24px;}
     .package-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all 0.28s cubic-bezier(.4,0,.2,1);}
     .package-card:hover{transform:translateY(-6px);box-shadow:0 24px 60px rgba(44,30,16,0.12);border-color:rgba(196,154,60,0.35);}
-    .pkg-img{width:100%;height:210px;background:linear-gradient(135deg,#e8d5b8,#c9a96e);display:flex;align-items:center;justify-content:center;font-size:50px;position:relative;}
+    .pkg-img{width:100%;height:200px;background:linear-gradient(135deg,#e8d5b8,#c9a96e);display:flex;align-items:center;justify-content:center;font-size:50px;position:relative;}
     .pkg-img::after{content:'Photo placeholder';position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;font-family:'DM Sans';color:rgba(61,43,26,0.45);}
     .pkg-badge{position:absolute;top:12px;right:12px;background:var(--brown);color:var(--gold-light);padding:4px 11px;border-radius:18px;font-size:10px;font-weight:600;}
-    .pkg-body{padding:22px 24px 26px;}
-    .pkg-name{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--brown);margin-bottom:4px;}
-    .pkg-tagline{font-size:13px;color:var(--text-light);margin-bottom:14px;}
-    .pkg-price{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:var(--gold-dark);margin-bottom:18px;}
+    .pkg-body{padding:20px 22px 24px;}
+    .pkg-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--brown);margin-bottom:4px;}
+    .pkg-tagline{font-size:13px;color:var(--text-light);margin-bottom:12px;}
+    .pkg-price{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--gold-dark);margin-bottom:16px;}
     .pkg-price span{font-size:13px;font-family:'DM Sans';color:var(--text-light);font-weight:400;}
-    .pkg-list{list-style:none;margin-bottom:20px;}
+    .pkg-list{list-style:none;margin-bottom:18px;}
     .pkg-list li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text-mid);padding:4px 0;border-bottom:1px solid rgba(196,154,60,0.08);}
     .pkg-list li:last-child{border-bottom:none;}
     .pkg-list li::before{content:'✦';color:var(--gold);font-size:9px;margin-top:5px;flex-shrink:0;}
     .btn-pkg{width:100%;padding:11px;background:var(--brown);color:var(--cream);border:none;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.2s;}
     .btn-pkg:hover{background:var(--brown-light);}
 
-    /* CATALOG + AI WORKSPACE */
+    /* ===== CATALOG + AI WORKSPACE ===== */
     #catalog{background:var(--cream2);}
-    .catalog-intro{padding:70px 8% 0;}
-    .catalog-intro .section-sub{margin-bottom:0;}
+    .catalog-intro{padding:64px 6% 0;}
 
     .catalog-workspace{
       display:grid;
       grid-template-columns:360px 1fr;
       border-top:1px solid var(--border);
-      margin-top:36px;
+      margin-top:32px;
     }
 
-    /* LEFT: AI PANEL */
+    /* LEFT: AI PANEL (desktop) */
     .ai-panel{
       background:var(--warm-white);
       border-right:1px solid var(--border);
       display:flex;flex-direction:column;
-      position:sticky;top:72px;
-      height:calc(100vh - 72px);
+      position:sticky;top:var(--nav-h);
+      height:calc(100vh - var(--nav-h));
     }
     .ai-panel-hdr{padding:18px 20px 14px;border-bottom:1px solid var(--border);}
     .ai-hdr-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
@@ -141,7 +194,7 @@
     .ai-send:disabled{opacity:0.45;cursor:not-allowed;}
 
     /* RIGHT: CATALOG PANEL */
-    .catalog-panel{padding:24px 28px 60px;overflow-y:auto;max-height:calc(100vh - 72px);position:sticky;top:72px;}
+    .catalog-panel{padding:24px 24px 60px;overflow-y:auto;max-height:calc(100vh - var(--nav-h));position:sticky;top:var(--nav-h);}
 
     .ai-banner{display:none;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(61,43,26,0.05),rgba(196,154,60,0.08));border:1px solid rgba(196,154,60,0.28);border-radius:11px;padding:11px 15px;margin-bottom:18px;animation:fadeDown 0.3s ease;}
     @keyframes fadeDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
@@ -152,14 +205,14 @@
     .aib-clear{background:none;border:1px solid var(--border);border-radius:7px;padding:4px 11px;font-size:11.5px;color:var(--text-mid);cursor:pointer;transition:0.15s;white-space:nowrap;}
     .aib-clear:hover{background:var(--cream2);color:var(--brown);}
 
-    .cat-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+    .cat-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
     .cat-count{font-size:13px;color:var(--text-light);}
     .cat-count strong{color:var(--brown);}
     .cat-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
     .fb{padding:6px 14px;border-radius:16px;font-size:12px;font-weight:500;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);cursor:pointer;transition:all 0.18s;}
     .fb.active,.fb:hover{background:var(--brown);color:var(--cream);border-color:var(--brown);}
 
-    .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:16px;}
+    .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:16px;}
     .cat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:13px;overflow:hidden;transition:all 0.25s cubic-bezier(.4,0,.2,1);}
     .cat-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(44,30,16,0.10);border-color:rgba(196,154,60,0.3);}
     .cat-card.ai-pick{border-color:var(--gold);box-shadow:0 0 0 2px rgba(196,154,60,0.15);}
@@ -177,8 +230,77 @@
     .cat-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-light);}
     .cat-empty div{font-size:44px;margin-bottom:12px;}
 
-    /* CART */
-    #cart-drawer{position:fixed;right:0;top:72px;bottom:0;width:340px;background:var(--warm-white);border-left:1px solid var(--border);transform:translateX(100%);transition:transform 0.32s cubic-bezier(.4,0,.2,1);z-index:150;display:flex;flex-direction:column;box-shadow:-10px 0 36px rgba(44,30,16,0.08);}
+    /* ===== MOBILE AI DRAWER ===== */
+    /* Floating AI button — mobile only */
+    .mob-ai-fab{
+      display:none;
+      position:fixed;bottom:86px;right:16px;
+      background:var(--brown);color:var(--gold-light);
+      border:none;border-radius:50px;
+      padding:13px 18px;
+      font-size:13px;font-weight:600;
+      cursor:pointer;z-index:400;
+      box-shadow:0 6px 24px rgba(44,30,16,0.25);
+      align-items:center;gap:8px;
+      transition:all 0.2s;
+    }
+    .mob-ai-fab:hover{background:var(--brown-light);transform:translateY(-2px);}
+    .mob-ai-fab .ai-notif{
+      background:var(--gold);color:var(--brown);
+      border-radius:50%;width:18px;height:18px;
+      display:none;align-items:center;justify-content:center;
+      font-size:10px;font-weight:700;
+    }
+    .mob-ai-fab .ai-notif.on{display:flex;}
+
+    /* Mobile AI drawer */
+    .mob-ai-drawer{
+      display:none;
+      position:fixed;bottom:0;left:0;right:0;
+      background:var(--warm-white);
+      border-radius:22px 22px 0 0;
+      border-top:1px solid var(--border);
+      z-index:450;
+      flex-direction:column;
+      box-shadow:0 -12px 48px rgba(44,30,16,0.18);
+      max-height:80vh;
+      transform:translateY(100%);
+      transition:transform 0.32s cubic-bezier(.4,0,.2,1);
+    }
+    .mob-ai-drawer.open{transform:translateY(0);}
+    .mob-drawer-handle{
+      width:40px;height:4px;background:rgba(44,30,16,0.15);
+      border-radius:2px;margin:12px auto 0;
+    }
+    .mob-drawer-hdr{
+      padding:14px 20px 12px;
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .mob-drawer-title{
+      display:flex;align-items:center;gap:10px;
+    }
+    .mob-drawer-close{background:none;border:none;color:var(--text-light);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;}
+    .mob-drawer-close:hover{background:var(--cream2);}
+    /* AI msgs and input reused inside drawer — same classes */
+
+    /* Overlay for mobile drawer */
+    .mob-overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(44,30,16,0.4);
+      z-index:440;
+      backdrop-filter:blur(2px);
+    }
+    .mob-overlay.on{display:block;}
+
+    /* ===== CART ===== */
+    #cart-drawer{
+      position:fixed;right:0;top:var(--nav-h);bottom:0;width:340px;
+      background:var(--warm-white);border-left:1px solid var(--border);
+      transform:translateX(100%);transition:transform 0.32s cubic-bezier(.4,0,.2,1);
+      z-index:150;display:flex;flex-direction:column;
+      box-shadow:-10px 0 36px rgba(44,30,16,0.08);
+    }
     #cart-drawer.open{transform:translateX(0);}
     .cart-hdr{padding:20px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
     .cart-ttl{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--brown);}
@@ -202,14 +324,24 @@
     .cart-tot-amt{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--brown);}
     .btn-inquire{width:100%;padding:12px;background:var(--brown);color:var(--cream);border:none;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.2s;}
     .btn-inquire:hover{background:var(--brown-light);}
-    .cart-fab{position:fixed;right:0;bottom:90px;background:var(--brown);color:var(--gold-light);border:none;border-radius:13px 0 0 13px;padding:13px 14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;z-index:160;transition:all 0.2s;box-shadow:-3px 4px 18px rgba(44,30,16,0.14);}
+
+    /* Cart FAB */
+    .cart-fab{
+      position:fixed;right:0;bottom:16px;
+      background:var(--brown);color:var(--gold-light);
+      border:none;border-radius:13px 0 0 13px;
+      padding:13px 14px;cursor:pointer;
+      display:flex;flex-direction:column;align-items:center;gap:4px;
+      font-size:11px;font-weight:600;z-index:160;transition:all 0.2s;
+      box-shadow:-3px 4px 18px rgba(44,30,16,0.14);
+    }
     .cart-fab:hover{background:var(--brown-light);transform:translateX(-3px);}
     .c-badge{background:var(--gold);color:var(--brown);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
 
-    /* FOOTER */
-    footer{background:var(--brown);color:rgba(250,247,242,0.7);padding:48px 8% 28px;}
+    /* ===== FOOTER ===== */
+    footer{background:var(--brown);color:rgba(250,247,242,0.7);padding:48px 6% 28px;}
     .ft-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:36px;}
-    .ft-brand{font-family:'Playfair Display',serif;font-size:22px;color:var(--cream);font-weight:700;margin-bottom:10px;}
+    .ft-brand{font-family:'Playfair Display',serif;font-size:20px;color:var(--cream);font-weight:700;margin-bottom:10px;}
     .ft-desc{font-size:13.5px;line-height:1.7;}
     .ft-col h4{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);margin-bottom:14px;}
     .ft-col a{display:block;color:rgba(250,247,242,0.6);text-decoration:none;font-size:13.5px;padding:3px 0;transition:color 0.15s;cursor:pointer;}
@@ -220,13 +352,57 @@
     ::-webkit-scrollbar-track{background:var(--cream2);}
     ::-webkit-scrollbar-thumb{background:rgba(196,154,60,0.28);border-radius:3px;}
 
-    @media(max-width:960px){
-      .hero-image{display:none;} .hero-content{max-width:100%;}
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:768px){
+      /* Nav */
+      .nav-center,.btn-nav-cta{display:none;}
+      .hamburger{display:flex;}
+      .logo-main{font-size:15px;}
+      .logo-sub{font-size:9px;}
+
+      /* Hero */
+      #hero{min-height:80vh;padding:60px 6% 80px;align-items:flex-start;}
+      .hero-image{display:none;}
+      .hero-content{max-width:100%;}
+      .hero-title{font-size:clamp(34px,8vw,48px);}
+      .hero-btns .btn-primary,.hero-btns .btn-outline{width:100%;justify-content:center;}
+      .hero-btns{flex-direction:column;}
+
+      /* Packages */
+      #packages{padding:60px 5%;}
+      .packages-grid{grid-template-columns:1fr;}
+
+      /* Catalog workspace — single column, AI removed from sidebar */
       .catalog-workspace{grid-template-columns:1fr;}
-      .ai-panel{position:relative;top:0;height:60vh;}
-      .catalog-panel{position:relative;top:0;max-height:none;}
-      .ft-top{grid-template-columns:1fr;}
-      #cart-drawer{width:100%;}
+      .ai-panel{display:none;} /* Hidden — replaced by mobile drawer */
+      .catalog-panel{
+        position:static;max-height:none;
+        padding:20px 16px 80px;
+      }
+      .cat-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+      .cat-thumb{height:120px;font-size:30px;}
+      .cat-filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;}
+      .cat-filters::-webkit-scrollbar{height:0;}
+      .fb{white-space:nowrap;flex-shrink:0;}
+      .catalog-intro{padding:44px 5% 0;}
+
+      /* Show mobile AI fab */
+      .mob-ai-fab{display:flex;}
+      .mob-ai-drawer{display:flex;}
+
+      /* Cart */
+      #cart-drawer{width:100%;top:var(--nav-h);}
+      .cart-fab{bottom:86px;} /* lifted above AI fab */
+
+      /* Footer */
+      .ft-top{grid-template-columns:1fr;gap:28px;}
+      .ft-bottom{flex-direction:column;gap:6px;text-align:center;}
+    }
+
+    @media(min-width:769px) and (max-width:1024px){
+      .catalog-workspace{grid-template-columns:300px 1fr;}
+      .logo-sub{display:none;}
+      .logo-main{font-size:16px;}
     }
   </style>
 </head>
@@ -235,8 +411,13 @@
 <!-- NAV -->
 <nav>
   <div class="nav-logo" onclick="go('#hero')">
-    <div class="nav-logo-icon">H</div>Halden's Event Management and Catering Service
+    <div class="nav-logo-icon">H</div>
+    <div class="logo-text">
+      <span class="logo-main">Halden's</span>
+      <span class="logo-sub">Event Management &amp; Catering</span>
+    </div>
   </div>
+
   <div class="nav-center">
     <span class="nav-link" onclick="go('#hero')">Home</span>
     <div class="dropdown">
@@ -256,8 +437,27 @@
     </div>
     <span class="nav-link" onclick="go('#packages')">Packages</span>
   </div>
+
   <button class="btn-nav-cta" onclick="go('#catalog')">✦ Plan My Event</button>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE NAV DRAWER -->
+<div class="mobile-nav" id="mobile-nav">
+  <button class="mob-link" onclick="go('#hero');closeMobileNav()">🏠 Home</button>
+  <button class="mob-link" onclick="go('#packages');closeMobileNav()">📦 Packages</button>
+  <div class="mob-divider"></div>
+  <button class="mob-link" onclick="jumpCat('food');closeMobileNav()">🍽️ Food &amp; Dishes</button>
+  <button class="mob-link" onclick="jumpCat('dessert');closeMobileNav()">🍰 Desserts &amp; Drinks</button>
+  <button class="mob-link" onclick="jumpCat('decoration');closeMobileNav()">🎨 Decorations</button>
+  <button class="mob-link" onclick="jumpCat('equipment');closeMobileNav()">🪑 Equipment &amp; Setup</button>
+  <button class="mob-link" onclick="jumpCat('entertainment');closeMobileNav()">🎉 Entertainment</button>
+  <button class="mob-link" onclick="jumpCat('photography');closeMobileNav()">📸 Photography</button>
+  <div class="mob-divider"></div>
+  <button class="mob-cta" onclick="openMobAI();closeMobileNav()">✦ AI Event Planner</button>
+</div>
 
 <!-- HERO -->
 <section id="hero">
@@ -267,7 +467,10 @@
     <h1 class="hero-title">Every Event,<br><em>Perfectly Served</em></h1>
     <p class="hero-sub">From intimate family gatherings to grand celebrations — Halden's brings warmth, flavor, and elegance to every table.</p>
     <div class="hero-btns">
-      <a class="btn-primary" onclick="go('#packages')">View Packages <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a>
+      <a class="btn-primary" onclick="go('#packages')">
+        View Packages
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </a>
       <a class="btn-outline" onclick="go('#catalog')">✦ AI Event Planner</a>
     </div>
   </div>
@@ -284,16 +487,16 @@
   <div class="packages-grid" id="pkgs-grid"></div>
 </section>
 
-<!-- CATALOG + AI -->
+<!-- CATALOG + AI WORKSPACE -->
 <section id="catalog">
   <div class="catalog-intro">
     <p class="section-label">Build Your Package</p>
     <h2 class="section-title">AI-Assisted Catalog</h2>
-    <p class="section-sub">Describe your event to the AI planner — it will highlight the best catalog items for you in real time.</p>
+    <p class="section-sub">Describe your event to the AI planner — it highlights the best catalog items for you in real time.</p>
   </div>
 
   <div class="catalog-workspace">
-    <!-- LEFT: AI PANEL -->
+    <!-- LEFT: AI PANEL (desktop only) -->
     <div class="ai-panel">
       <div class="ai-panel-hdr">
         <div class="ai-hdr-row">
@@ -303,49 +506,86 @@
             <div class="ai-status"><div class="ai-dot"></div>Ready to assist</div>
           </div>
         </div>
-        <div class="ai-hint"><strong>Tell me about your event</strong> and I'll instantly filter the catalog to highlight the best items for your occasion, guest count, and budget.</div>
+        <div class="ai-hint"><strong>Tell me about your event</strong> and I'll highlight the best items from the catalog for you in real time.</div>
       </div>
-      <div class="ai-msgs" id="ai-msgs"></div>
-      <div class="ai-chips" id="ai-chips">
-        <span class="ai-chip" onclick="chipSend(this)">Birthday for 50 guests</span>
-        <span class="ai-chip" onclick="chipSend(this)">Wedding reception</span>
-        <span class="ai-chip" onclick="chipSend(this)">Kiddie party ₱50k budget</span>
-        <span class="ai-chip" onclick="chipSend(this)">Corporate event 100 pax</span>
+      <div class="ai-msgs" id="ai-msgs-desk"></div>
+      <div class="ai-chips" id="ai-chips-desk">
+        <span class="ai-chip" onclick="chipSend(this,'desk')">Birthday for 50 guests</span>
+        <span class="ai-chip" onclick="chipSend(this,'desk')">Wedding reception</span>
+        <span class="ai-chip" onclick="chipSend(this,'desk')">Kiddie party ₱50k budget</span>
+        <span class="ai-chip" onclick="chipSend(this,'desk')">Corporate event 100 pax</span>
       </div>
       <div class="ai-inp-row">
-        <textarea class="ai-inp" id="ai-inp" placeholder="Describe your event — type, guests, budget, theme..." rows="1"
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"
+        <textarea class="ai-inp" id="ai-inp-desk" placeholder="Describe your event — type, guests, budget, theme..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg('desk');}"
           oninput="ar(this)"></textarea>
-        <button class="ai-send" id="ai-send" onclick="sendMsg()">➤</button>
+        <button class="ai-send" id="ai-send-desk" onclick="sendMsg('desk')">➤</button>
       </div>
     </div>
 
-    <!-- RIGHT: CATALOG -->
+    <!-- RIGHT: CATALOG PANEL -->
     <div class="catalog-panel" id="cat-panel">
       <div class="ai-banner" id="ai-banner">
         <div class="aib-icon">✦</div>
         <div class="aib-text">
           <strong id="aib-title">AI Recommendations Active</strong>
-          <span id="aib-desc">Highlighted items match your event. Dimmed items are less relevant.</span>
+          <span id="aib-desc">Highlighted items match your event.</span>
         </div>
         <button class="aib-clear" onclick="clearFilter()">Clear</button>
       </div>
       <div class="cat-top">
         <div class="cat-count" id="cat-count"><strong>All items</strong></div>
-        <div class="cat-filters" id="fbtns">
-          <button class="fb active" onclick="setCat('all',this)">All</button>
-          <button class="fb" onclick="setCat('food',this)">🍽️ Food</button>
-          <button class="fb" onclick="setCat('dessert',this)">🍰 Desserts</button>
-          <button class="fb" onclick="setCat('decoration',this)">🎨 Decor</button>
-          <button class="fb" onclick="setCat('equipment',this)">🪑 Equipment</button>
-          <button class="fb" onclick="setCat('entertainment',this)">🎉 Fun</button>
-          <button class="fb" onclick="setCat('photography',this)">📸 Photo</button>
-        </div>
+      </div>
+      <div class="cat-filters" id="fbtns">
+        <button class="fb active" onclick="setCat('all',this)">All</button>
+        <button class="fb" onclick="setCat('food',this)">🍽️ Food</button>
+        <button class="fb" onclick="setCat('dessert',this)">🍰 Desserts</button>
+        <button class="fb" onclick="setCat('decoration',this)">🎨 Decor</button>
+        <button class="fb" onclick="setCat('equipment',this)">🪑 Equipment</button>
+        <button class="fb" onclick="setCat('entertainment',this)">🎉 Fun</button>
+        <button class="fb" onclick="setCat('photography',this)">📸 Photo</button>
       </div>
       <div class="cat-grid" id="cat-grid"></div>
     </div>
   </div>
 </section>
+
+<!-- MOBILE: Floating AI Button -->
+<button class="mob-ai-fab" id="mob-ai-fab" onclick="openMobAI()">
+  ✦ AI Planner
+  <div class="ai-notif" id="ai-notif"></div>
+</button>
+
+<!-- MOBILE: AI Drawer Overlay -->
+<div class="mob-overlay" id="mob-overlay" onclick="closeMobAI()"></div>
+
+<!-- MOBILE: AI Drawer -->
+<div class="mob-ai-drawer" id="mob-ai-drawer">
+  <div class="mob-drawer-handle"></div>
+  <div class="mob-drawer-hdr">
+    <div class="mob-drawer-title">
+      <div class="ai-ava">✦</div>
+      <div>
+        <div class="ai-name">Halden's AI Planner</div>
+        <div class="ai-status"><div class="ai-dot"></div>Ready to assist</div>
+      </div>
+    </div>
+    <button class="mob-drawer-close" onclick="closeMobAI()">✕</button>
+  </div>
+  <div class="ai-msgs" id="ai-msgs-mob" style="flex:1;overflow-y:auto;"></div>
+  <div class="ai-chips" id="ai-chips-mob">
+    <span class="ai-chip" onclick="chipSend(this,'mob')">Birthday for 50 guests</span>
+    <span class="ai-chip" onclick="chipSend(this,'mob')">Wedding reception</span>
+    <span class="ai-chip" onclick="chipSend(this,'mob')">Kiddie party ₱50k budget</span>
+    <span class="ai-chip" onclick="chipSend(this,'mob')">Corporate event 100 pax</span>
+  </div>
+  <div class="ai-inp-row">
+    <textarea class="ai-inp" id="ai-inp-mob" placeholder="Describe your event..." rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg('mob');}"
+      oninput="ar(this)"></textarea>
+    <button class="ai-send" id="ai-send-mob" onclick="sendMsg('mob')">➤</button>
+  </div>
+</div>
 
 <!-- CART FAB -->
 <button class="cart-fab" onclick="toggleCart()">🛒<div class="c-badge" id="c-badge">0</div>Cart</button>
@@ -372,17 +612,20 @@
 <footer>
   <div class="ft-top">
     <div>
-      <div class="ft-brand">Halden's Catering</div>
+      <div class="ft-brand">Halden's Event Management &amp; Catering</div>
       <p class="ft-desc">Premium catering services for all occasions. From intimate gatherings to grand celebrations, we bring warmth and excellence to every table.</p>
     </div>
-    <div class="ft-col"><h4>Explore</h4><a onclick="go('#packages')">Packages</a><a onclick="go('#catalog')">Full Catalog</a><a onclick="go('#catalog')">AI Planner</a></div>
+    <div class="ft-col"><h4>Explore</h4><a onclick="go('#packages')">Packages</a><a onclick="go('#catalog')">Full Catalog</a><a onclick="openMobAI()">AI Planner</a></div>
     <div class="ft-col"><h4>Contact</h4><a>Facebook: Halden's Catering</a><a>Phone: (placeholder)</a><a>Email: (placeholder)</a></div>
   </div>
-  <div class="ft-bottom"><span>© 2025 Halden's Catering Service. All rights reserved.</span><span>Made with ✦ for every occasion</span></div>
+  <div class="ft-bottom">
+    <span>© 2025 Halden's Event Management &amp; Catering Service. All rights reserved.</span>
+    <span>Made with ✦ for every occasion</span>
+  </div>
 </footer>
 
 <script>
-// ===== CATALOG DATA =====
+// ===== DATA =====
 const CAT = [
   {id:'f1',name:'Pork Dish',cat:'food',icon:'🥩',price:2500,desc:'Tender slow-cooked pork, serves ~20 pax'},
   {id:'f2',name:'Beef Dish',cat:'food',icon:'🥩',price:3000,desc:'Premium beef dish, serves ~20 pax'},
@@ -427,7 +670,7 @@ const PKGS = [
 // ===== STATE =====
 let cart = [];
 let curCat = 'all';
-let aiPicks = null; // null = no filter, array of ids = highlighted
+let aiPicks = null;
 
 // ===== PACKAGES =====
 function renderPkgs() {
@@ -449,25 +692,18 @@ function renderCat() {
   const grid = document.getElementById('cat-grid');
   let items = curCat==='all' ? CAT : CAT.filter(i=>i.cat===curCat);
   if (!items.length) { grid.innerHTML=`<div class="cat-empty"><div>🔍</div><p>No items here.</p></div>`; return; }
-
-  // Sort AI picks to top
   if (aiPicks) items = [...items].sort((a,b)=>aiPicks.includes(b.id)-aiPicks.includes(a.id));
-
   const pickCount = aiPicks ? items.filter(i=>aiPicks.includes(i.id)).length : items.length;
   document.getElementById('cat-count').innerHTML = aiPicks
     ? `<strong>${pickCount} AI picks</strong> · ${items.length} shown`
     : `<strong>${items.length}</strong> items`;
-
   grid.innerHTML = items.map(item=>{
     const inCart = cart.find(c=>c.id===item.id);
     const isPick = aiPicks && aiPicks.includes(item.id);
     const isDim  = aiPicks && !isPick;
     return `
       <div class="cat-card ${isPick?'ai-pick':''} ${isDim?'dimmed':''}">
-        <div class="cat-thumb">
-          ${item.icon}
-          <div class="pick-badge">✦ AI Pick</div>
-        </div>
+        <div class="cat-thumb">${item.icon}<div class="pick-badge">✦ AI Pick</div></div>
         <div class="cat-info">
           <div class="cat-cat-lbl">${item.cat}</div>
           <div class="cat-n">${item.name}</div>
@@ -484,62 +720,82 @@ function renderCat() {
 function setCat(cat, btn) {
   document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  curCat = cat; renderCat();
+  curCat=cat; renderCat();
 }
 
 function jumpCat(cat) {
-  const btns = document.querySelectorAll('.fb');
-  btns.forEach(b=>b.classList.remove('active'));
-  // Find the right button
-  btns.forEach(b=>{ if(b.onclick?.toString().includes(`'${cat}'`)||cat==='all'&&b.textContent.trim()==='All') b.classList.add('active'); });
-  curCat = cat; renderCat(); go('#catalog');
+  curCat=cat;
+  document.querySelectorAll('.fb').forEach(b=>{
+    const matches = b.getAttribute('onclick')?.includes(`'${cat}'`) || (cat==='all' && b.textContent.trim()==='All');
+    b.classList.toggle('active', !!matches);
+  });
+  renderCat(); go('#catalog');
 }
 
 // ===== CART =====
 function toggleItem(id) {
   const item = CAT.find(i=>i.id===id);
   const idx = cart.findIndex(c=>c.id===id);
-  if (idx>-1) cart.splice(idx,1);
+  if(idx>-1) cart.splice(idx,1);
   else { cart.push(item); document.getElementById('cart-drawer').classList.add('open'); }
   renderCat(); renderCart();
 }
 
 function removeItem(id) {
-  cart = cart.filter(c=>c.id!==id);
+  cart=cart.filter(c=>c.id!==id);
   renderCat(); renderCart();
 }
 
 function renderCart() {
+  document.getElementById('c-badge').textContent = cart.length;
   const el = document.getElementById('cart-items');
-  const badge = document.getElementById('c-badge');
   const tot = document.getElementById('cart-tot');
-  badge.textContent = cart.length;
-  if (!cart.length) {
+  if(!cart.length){
     el.innerHTML=`<div class="cart-empty"><div>🛒</div><p>Your package is empty.<br>Add items from the catalog.</p></div>`;
     tot.textContent='₱0'; return;
   }
-  tot.textContent = '₱' + cart.reduce((s,i)=>s+i.price,0).toLocaleString();
-  el.innerHTML = cart.map(item=>`
+  tot.textContent='₱'+cart.reduce((s,i)=>s+i.price,0).toLocaleString();
+  el.innerHTML=cart.map(item=>`
     <div class="c-item">
       <div class="c-ico">${item.icon}</div>
-      <div class="c-inf">
-        <div class="c-cat">${item.cat}</div>
-        <div class="c-n">${item.name}</div>
-        <div class="c-p">₱${item.price.toLocaleString()}</div>
-      </div>
+      <div class="c-inf"><div class="c-cat">${item.cat}</div><div class="c-n">${item.name}</div><div class="c-p">₱${item.price.toLocaleString()}</div></div>
       <button class="c-rm" onclick="removeItem('${item.id}')">✕</button>
     </div>`).join('');
 }
 
-function toggleCart() { document.getElementById('cart-drawer').classList.toggle('open'); }
+function toggleCart(){ document.getElementById('cart-drawer').classList.toggle('open'); }
+
+// ===== MOBILE NAV =====
+function toggleMobileNav(){
+  const nav = document.getElementById('mobile-nav');
+  const ham = document.getElementById('hamburger');
+  nav.classList.toggle('open');
+  ham.classList.toggle('open');
+}
+function closeMobileNav(){
+  document.getElementById('mobile-nav').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+
+// ===== MOBILE AI DRAWER =====
+function openMobAI(){
+  document.getElementById('mob-ai-drawer').classList.add('open');
+  document.getElementById('mob-overlay').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeMobAI(){
+  document.getElementById('mob-ai-drawer').classList.remove('open');
+  document.getElementById('mob-overlay').classList.remove('on');
+  document.body.style.overflow='';
+}
 
 // ===== AI =====
 const API_KEY = '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';
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-const SYS = `You are Halden's AI Event Planning Assistant for Halden's Catering Service, a premium catering business in the Philippines.
+const SYS = `You are Halden's AI Event Planning Assistant for Halden's Event Management and Catering Service, a premium catering business in the Philippines.
 
-Your job: (1) Have a warm, helpful conversation to understand the client's event, and (2) after EVERY reply where you understand the event, output a JSON block of recommended catalog IDs so the website can highlight those items in real time.
+Your job: (1) Have a warm, helpful conversation to understand the client's event, and (2) after EVERY reply where you understand the event needs, output a JSON block of recommended catalog IDs so the website can highlight those items in real time.
 
 CATALOG IDs:
 food: f1=Pork Dish(₱2500), f2=Beef Dish(₱3000), f3=Chicken Dish(₱2200), f4=Fish Dish(₱2000), f5=Vegetable Dish(₱1200), f6=Pasta(₱1800), f7=Pancit Canton(₱1500), f8=Soup(₱1000), f9=Steamed Rice(₱2000)
@@ -549,57 +805,72 @@ equipment: eq1=Catering Setup(₱5000), eq2=Tables&Chairs(₱4500), eq3=VIP Long
 entertainment: en1=Clowns/Magician(₱6000), en2=Game Prizes(₱2000), en3=Face Painting(₱3500), en4=Photo Standee(₱2500)
 photography: ph1=Photobooth(₱7000), ph2=Photographer(₱8000), ph3=Videographer(₱10000)
 
-RULES FOR JSON OUTPUT:
+RULES:
 - ALWAYS end every response with: {"recommended_ids":["id1","id2",...]}
 - Include 5 to 12 IDs most relevant to the event
 - Kiddie party → always include: f3,f9,d5,d2,d3,d4,en1,en3,eq2,dc2
 - Wedding → always include: f1,f2,f3,f9,d5,eq1,eq2,eq5,eq6,ph2,ph3,dc1
 - Corporate → include: f2,f3,f9,d5,eq1,eq2,eq5,eq6
-- Budget events (under ₱20k) → focus on food only, skip photography/entertainment
+- Budget events (under ₱20k) → focus on food only
 - Large events (100+ pax) → always include eq1,eq2,eq5,eq6
+- Keep replies concise, warm, professional. Use ₱ for prices. Ask ONE question if needed. JSON always goes on its own line at the end.`;
 
-Keep your text reply concise, warm, and professional. Use ₱ for prices. Use line breaks for lists. If you need more info, ask ONE question. Always place the JSON at the very end, on its own line.`;
-
+// Shared message history — both panels share the same conversation
 let hist = [{role:'system',content:SYS}];
+let initialized = {desk:false, mob:false};
 
-function initAI() {
-  addBot("Hi there! 👋 I'm Halden's AI Event Planner.\n\nDescribe your event below — the occasion, number of guests, budget, and any theme ideas — and I'll instantly highlight the most suitable items from our catalog for you. ✦");
+function initAI(panel) {
+  if(initialized[panel]) return;
+  initialized[panel] = true;
+  const msgsId = panel==='desk' ? 'ai-msgs-desk' : 'ai-msgs-mob';
+  addBot("Hi there! 👋 I'm Halden's AI Event Planner.\n\nDescribe your event below — the occasion, number of guests, budget, and any theme ideas — and I'll instantly highlight the most suitable items from our catalog for you. ✦", msgsId);
 }
 
-function addBot(txt) {
-  const c = document.getElementById('ai-msgs');
+function addBot(txt, msgsId) {
+  const c = document.getElementById(msgsId);
+  if(!c) return;
   const d = document.createElement('div');
   d.className='ai-msg bot';
   d.innerHTML=`<div class="ai-msg-ico">✦</div><div class="ai-bub">${txt.replace(/\n/g,'<br>')}</div>`;
   c.appendChild(d); c.scrollTop=c.scrollHeight;
 }
 
-function addUser(txt) {
-  const c = document.getElementById('ai-msgs');
+function addUser(txt, msgsId) {
+  const c = document.getElementById(msgsId);
+  if(!c) return;
   const d = document.createElement('div');
   d.className='ai-msg user';
   d.innerHTML=`<div class="ai-msg-ico">👤</div><div class="ai-bub">${txt.replace(/\n/g,'<br>')}</div>`;
   c.appendChild(d); c.scrollTop=c.scrollHeight;
 }
 
-function showTyping() {
-  const c = document.getElementById('ai-msgs');
+function showTyping(msgsId) {
+  const c = document.getElementById(msgsId);
+  if(!c) return;
   const d = document.createElement('div');
-  d.className='ai-msg bot'; d.id='typin';
+  d.className='ai-msg bot'; d.id='typin-'+msgsId;
   d.innerHTML=`<div class="ai-msg-ico">✦</div><div class="ai-bub typing-dots"><span></span><span></span><span></span></div>`;
   c.appendChild(d); c.scrollTop=c.scrollHeight;
 }
-function hideTyping() { document.getElementById('typin')?.remove(); }
+function hideTyping(msgsId) { document.getElementById('typin-'+msgsId)?.remove(); }
 
-async function sendMsg() {
-  const inp = document.getElementById('ai-inp');
-  const btn = document.getElementById('ai-send');
+async function sendMsg(panel) {
+  const inpId = panel==='desk' ? 'ai-inp-desk' : 'ai-inp-mob';
+  const btnId = panel==='desk' ? 'ai-send-desk' : 'ai-send-mob';
+  const msgsId = panel==='desk' ? 'ai-msgs-desk' : 'ai-msgs-mob';
+  const chipsId = panel==='desk' ? 'ai-chips-desk' : 'ai-chips-mob';
+
+  const inp = document.getElementById(inpId);
+  const btn = document.getElementById(btnId);
   const txt = inp.value.trim();
-  if (!txt) return;
+  if(!txt) return;
+
   inp.value=''; inp.style.height='auto';
-  document.getElementById('ai-chips').style.display='none';
-  addUser(txt); btn.disabled=true; showTyping();
+  document.getElementById(chipsId).style.display='none';
+  addUser(txt, msgsId);
+  btn.disabled=true; showTyping(msgsId);
   hist.push({role:'user',content:txt});
+
   try {
     const res = await fetch(API_URL,{
       method:'POST',
@@ -609,53 +880,76 @@ async function sendMsg() {
     const data = await res.json();
     const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't connect. Please try again.";
     hist.push({role:'assistant',content:reply});
-    hideTyping();
-    // Extract JSON picks
+    hideTyping(msgsId);
+
+    // Extract and apply picks
     const m = reply.match(/\{"recommended_ids"\s*:\s*\[.*?\]\}/s);
     let clean = reply;
-    if (m) {
+    if(m) {
       try {
         const p = JSON.parse(m[0]);
-        if (p.recommended_ids?.length) applyPicks(p.recommended_ids, txt);
+        if(p.recommended_ids?.length) applyPicks(p.recommended_ids, txt);
         clean = reply.replace(m[0],'').trim();
       } catch(e){}
     }
-    addBot(clean);
+    addBot(clean, msgsId);
+
+    // Show AI notif badge on mobile fab when picks are applied
+    if(aiPicks && panel==='desk') {
+      const notif = document.getElementById('ai-notif');
+      notif.textContent = aiPicks.length;
+      notif.classList.add('on');
+    }
   } catch(e) {
-    hideTyping();
-    addBot("I'm having trouble connecting right now. Please try again in a moment.");
+    hideTyping(msgsId);
+    addBot("I'm having trouble connecting right now. Please try again in a moment.", msgsId);
   }
   btn.disabled=false;
 }
 
 function applyPicks(ids, query) {
-  aiPicks = ids;
+  aiPicks=ids;
   const banner = document.getElementById('ai-banner');
   banner.classList.add('on');
-  document.getElementById('aib-title').textContent = `✦ ${ids.length} items recommended for you`;
-  document.getElementById('aib-desc').textContent = `Based on: "${query.substring(0,55)}${query.length>55?'...':''}"`;
-  // Show all so picks are visible
-  curCat = 'all';
+  document.getElementById('aib-title').textContent=`✦ ${ids.length} items recommended for you`;
+  document.getElementById('aib-desc').textContent=`Based on: "${query.substring(0,55)}${query.length>55?'...':''}"`;
+  curCat='all';
   document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
   document.querySelector('.fb').classList.add('active');
   renderCat();
   document.getElementById('cat-panel').scrollTop=0;
+  // On mobile, close AI drawer and scroll to catalog
+  if(window.innerWidth<=768) {
+    closeMobAI();
+    setTimeout(()=>go('#catalog'), 350);
+    const notif = document.getElementById('ai-notif');
+    notif.textContent = ids.length;
+    notif.classList.add('on');
+  }
 }
 
 function clearFilter() {
   aiPicks=null;
   document.getElementById('ai-banner').classList.remove('on');
+  document.getElementById('ai-notif').classList.remove('on');
   renderCat();
 }
 
-function chipSend(el) { document.getElementById('ai-inp').value=el.textContent; sendMsg(); }
-function ar(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,96)+'px'; }
-function go(id) { document.querySelector(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
+function chipSend(el, panel) {
+  const inpId = panel==='desk' ? 'ai-inp-desk' : 'ai-inp-mob';
+  document.getElementById(inpId).value = el.textContent;
+  sendMsg(panel);
+}
+
+function ar(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,96)+'px'; }
+function go(id){ document.querySelector(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
 
 // ===== INIT =====
 renderPkgs();
 renderCat();
-initAI();
+initAI('desk');
+// Init mobile AI lazily when drawer opens
+document.getElementById('mob-ai-fab').addEventListener('click', ()=>{ setTimeout(()=>initAI('mob'),50); });
 </script>
 </body>
 </html>
