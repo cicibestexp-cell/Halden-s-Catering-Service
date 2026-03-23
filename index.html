@@ -309,6 +309,7 @@
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
   import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile }
     from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
   import { getFirestore, collection, getDocs, addDoc, updateDoc, doc }
@@ -318,12 +319,14 @@
     apiKey: "AIzaSyAc9hHRGErQ8R2tByoqMJ04SMvJed5FDro",
     authDomain: "smartserve-e3856.firebaseapp.com",
     projectId: "smartserve-e3856",
-    storageBucket: "smartserve-e3856.firebasestorage.app",
+    storageBucket: "smartserve-e3856.appspot.com",  // corrected
     messagingSenderId: "255403568863",
-    appId: "1:255403568863:web:7187560f64c8730ecec36a"
+    appId: "1:255403568863:web:7187560f64c8730ecec36a",
+    measurementId: "G-B4B22C84MD"
   };
 
   const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
@@ -341,6 +344,8 @@
     updateDoc,
     doc
   };
+
+  console.log("Firebase initialized for project:", app.options.projectId);
 </script>
 
 <script src="app.js"></script>
