@@ -1,4 +1,3 @@
-
 // ===== DATA =====
 const CAT = [
   {id:'f1',name:'Pork Dish',cat:'food',icon:'🥩',price:2500,desc:'Tender slow-cooked pork, serves ~20 pax'},
@@ -367,60 +366,104 @@ function setLoggedOut(){
   document.querySelector('.btn-auth').innerHTML = '👤 <span class="auth-label">Login / Sign Up</span>';
 }
 
+// ===== LOGIN =====
 async function doLogin(){
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-password').value;
   if(!email || !pass){ showAuthMsg('login-msg','error','Please fill in all fields.'); return; }
+
   const btn = document.getElementById('login-btn');
   btn.disabled=true; btn.textContent='Logging in...';
   clearAuthMsg('login-msg');
 
-  // Admin shortcut — replace with Firebase later
+  // Admin shortcut — checks email+pass before hitting Firebase
   if(email === 'admin@gmail.com' && pass === '12345'){
     sessionStorage.setItem('halden_admin', JSON.stringify({name:'Administrator', email}));
     showAuthMsg('login-msg','success','Welcome, Admin! Redirecting...');
     setTimeout(()=>{ window.location.href = 'admin.html'; }, 800);
     return;
   }
-//firebase stuff
-  const { signInWithEmailAndPassword } = window.firebaseFns;
-signInWithEmailAndPassword(window.firebaseAuth, email, pass)
-  .then(userCred => {
+
+  // Regular users — Firebase Auth
+  try {
+    const { signInWithEmailAndPassword } = window.firebaseFns;
+    const userCred = await signInWithEmailAndPassword(window.firebaseAuth, email, pass);
     const user = userCred.user;
-    if (email === 'admin@gmail.com') {
-      sessionStorage.setItem('halden_admin', JSON.stringify({ name: 'Administrator', email }));
-      window.location.href = 'admin.html';
-    } else {
-      setLoggedIn({ displayName: user.displayName, email: user.email });
-      closeAuth();
-    }
-  })
-  .catch(() => showAuthMsg('login-msg', 'error', 'Invalid email or password.'));
-  
-  setTimeout(()=>{
-    showAuthMsg('login-msg','error','Invalid email or password. Please try again.');
-    btn.disabled=false; btn.textContent='Login to My Account';
-  }, 800);
+    setLoggedIn({ displayName: user.displayName, email: user.email });
+    closeAuth();
+  } catch(err) {
+    showAuthMsg('login-msg', 'error', 'Invalid email or password. Please try again.');
+    btn.disabled=false;
+    btn.textContent='Login to My Account';
+  }
 }
 
+// ===== SIGNUP =====
 async function doSignup(){
   const name = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const pass = document.getElementById('signup-password').value;
+
   if(!name||!email||!pass){ showAuthMsg('signup-msg','error','Please fill in all fields.'); return; }
   if(pass.length < 6){ showAuthMsg('signup-msg','error','Password must be at least 6 characters.'); return; }
+
   const btn = document.getElementById('signup-btn');
   btn.disabled=true; btn.textContent='Creating account...';
   clearAuthMsg('signup-msg');
-  // TODO: Replace with Firebase createUserWithEmailAndPassword
-  setTimeout(()=>{
-    showAuthMsg('signup-msg','error','Firebase not connected yet. Come back after setup.');
-    btn.disabled=false; btn.textContent='Create My Account';
-  }, 800);
+
+  try {
+    const { createUserWithEmailAndPassword, updateProfile } = window.firebaseFns;
+    const userCred = await createUserWithEmailAndPassword(window.firebaseAuth, email, pass);
+
+    // Save the display name to Firebase Auth profile
+    await updateProfile(userCred.user, { displayName: name });
+
+    // Also save user record to Firestore users collection
+    const { collection, addDoc } = window.firebaseFns;
+    await addDoc(collection(window.firebaseDB, 'users'), {
+      uid: userCred.user.uid,
+      name: name,
+      email: email,
+      role: 'customer',
+      createdAt: new Date()
+    });
+
+    showAuthMsg('signup-msg', 'success', 'Account created! You can now log in.');
+    btn.disabled=false;
+    btn.textContent='Create My Account';
+
+    // Auto switch to login tab after 1.5 seconds
+    setTimeout(() => switchAuthTab('login'), 1500);
+
+  } catch(err) {
+    let msg = 'Something went wrong. Please try again.';
+    if(err.code === 'auth/email-already-in-use') msg = 'This email is already registered. Try logging in.';
+    if(err.code === 'auth/invalid-email') msg = 'Please enter a valid email address.';
+    showAuthMsg('signup-msg', 'error', msg);
+    btn.disabled=false;
+    btn.textContent='Create My Account';
+  }
 }
 
+// ===== SIGN OUT =====
 async function signOut(){
-  // TODO: Replace with Firebase signOut
+  try {
+    await window.firebaseFns.signOut(window.firebaseAuth);
+  } catch(e) {}
   setLoggedOut();
   closeAuth();
 }
+
+// ===== RESTORE SESSION on page load =====
+// If user was already logged in (Firebase persists auth), restore the nav button
+window.addEventListener('load', () => {
+  const { onAuthStateChanged } = window.firebaseFns || {};
+  if(!onAuthStateChanged || !window.firebaseAuth) return;
+  onAuthStateChanged(window.firebaseAuth, (user) => {
+    if(user) {
+      setLoggedIn({ displayName: user.displayName, email: user.email });
+    } else {
+      setLoggedOut();
+    }
+  });
+});
