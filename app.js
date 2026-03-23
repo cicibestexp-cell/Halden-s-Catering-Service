@@ -410,12 +410,7 @@ async function doLogin(){
       return;
     }
 
-    // ADMIN LOGIN
-
-    if(email === "admin@gmail.com" && pass === "12345"){
-  window.location.href = "admin.html";
-  return;
-      
+    // ADMIN LOGIN   
     if(foundUser.role === "admin"){
       sessionStorage.setItem("halden_admin", JSON.stringify(foundUser));
       showAuthMsg('login-msg','success','Welcome Admin! Redirecting...');
