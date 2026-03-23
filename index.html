@@ -305,30 +305,44 @@
     <span>Made with ✦ for every occasion</span>
   </div>
 </footer>
-<!-- Firebase SDK via CDN -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile }
-    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc }
-    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-  const firebaseConfig = { /* paste your config here */ };
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile }
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc }
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAc9hHRGErQ8R2tByoqMJ04SMvJed5FDro",
+    authDomain: "smartserve-e3856.firebaseapp.com",
+    projectId: "smartserve-e3856",
+    storageBucket: "smartserve-e3856.firebasestorage.app",
+    messagingSenderId: "255403568863",
+    appId: "1:255403568863:web:7187560f64c8730ecec36a"
+  };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Make them globally available to your existing app.js / admin.js
   window.firebaseAuth = auth;
   window.firebaseDB = db;
   window.firebaseFns = {
-    signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    signOut, onAuthStateChanged,
-    collection, getDocs, addDoc, updateDoc, doc
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+    updateProfile,
+    collection,
+    getDocs,
+    addDoc,
+    updateDoc,
+    doc
   };
 </script>
-  
+
 <script src="app.js"></script>
 </body>
 </html>
