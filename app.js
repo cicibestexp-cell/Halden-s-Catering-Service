@@ -188,7 +188,6 @@ RULES:
 - Large events (100+ pax) → always include eq1,eq2,eq5,eq6
 - Keep replies concise, warm, professional. Use ₱ for prices. Ask ONE question if needed. JSON always goes on its own line at the end.`;
 
-// Shared message history — both panels share the same conversation
 let hist = [{role:'system',content:SYS}];
 let initialized = {desk:false, mob:false};
 
@@ -255,7 +254,6 @@ async function sendMsg(panel) {
     hist.push({role:'assistant',content:reply});
     hideTyping(msgsId);
 
-    // Extract and apply picks
     const m = reply.match(/\{"recommended_ids"\s*:\s*\[.*?\]\}/s);
     let clean = reply;
     if(m) {
@@ -267,7 +265,6 @@ async function sendMsg(panel) {
     }
     addBot(clean, msgsId);
 
-    // Show AI notif badge on mobile fab when picks are applied
     if(aiPicks && panel==='desk') {
       const notif = document.getElementById('ai-notif');
       notif.textContent = aiPicks.length;
@@ -291,7 +288,6 @@ function applyPicks(ids, query) {
   document.querySelector('.fb').classList.add('active');
   renderCat();
   document.getElementById('cat-panel').scrollTop=0;
-  // On mobile, close AI drawer and scroll to catalog
   if(window.innerWidth<=768) {
     closeMobAI();
     setTimeout(()=>go('#catalog'), 350);
@@ -321,7 +317,6 @@ function go(id){ document.querySelector(id)?.scrollIntoView({behavior:'smooth',b
 renderPkgs();
 renderCat();
 initAI('desk');
-// Init mobile AI lazily when drawer opens
 document.getElementById('mob-ai-fab').addEventListener('click', ()=>{ setTimeout(()=>initAI('mob'),50); });
 
 // ===== AUTH =====
@@ -356,7 +351,6 @@ function setLoggedIn(user){
   document.getElementById('panel-signup').classList.remove('active');
   document.getElementById('auth-display-name').textContent = user.displayName || 'Welcome back!';
   document.getElementById('auth-display-email').textContent = user.email;
-  // Update nav button
   document.querySelector('.btn-auth').innerHTML = '👤 <span class="auth-label">' + (user.displayName?.split(' ')[0] || 'Account') + '</span>';
 }
 
@@ -364,6 +358,24 @@ function setLoggedOut(){
   document.getElementById('auth-logged-in').classList.remove('on');
   document.getElementById('panel-login').classList.add('active');
   document.querySelector('.btn-auth').innerHTML = '👤 <span class="auth-label">Login / Sign Up</span>';
+}
+
+// ===== FIREBASE READY HELPER =====
+// Polls until Firebase module has finished loading and exposed its globals
+function waitForFirebase(timeout = 5000) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const check = () => {
+      if (window.firebaseFns && window.firebaseDB) {
+        resolve();
+      } else if (Date.now() - start > timeout) {
+        reject(new Error('Firebase took too long to initialize.'));
+      } else {
+        setTimeout(check, 80);
+      }
+    };
+    check();
+  });
 }
 
 // ===== LOGIN =====
@@ -378,13 +390,17 @@ async function doLogin(){
 
   const btn = document.getElementById('login-btn');
   btn.disabled = true;
+  btn.textContent = 'Logging in...';
+  clearAuthMsg('login-msg');
 
   try {
+    // Wait for Firebase module to finish loading before using it
+    await waitForFirebase();
+
     const { collection, getDocs } = window.firebaseFns;
-    const snapshot = await getDocs(collection(window.firebaseDB, "users"));
+    const snapshot = await getDocs(collection(window.firebaseDB, 'users'));
 
     let foundUser = null;
-
     snapshot.forEach(doc => {
       const data = doc.data();
       if(
@@ -398,13 +414,14 @@ async function doLogin(){
     if(!foundUser){
       showAuthMsg('login-msg','error','Invalid email or password.');
       btn.disabled = false;
+      btn.textContent = 'Login to My Account';
       return;
     }
 
-    // ADMIN LOGIN
-    if(foundUser.role === "admin"){
-      sessionStorage.setItem("halden_admin", JSON.stringify(foundUser));
-      window.location.href = "admin.html";
+    // ADMIN LOGIN — redirect to admin panel
+    if(foundUser.role === 'admin'){
+      sessionStorage.setItem('halden_admin', JSON.stringify(foundUser));
+      window.location.href = 'admin.html';
       return;
     }
 
@@ -413,13 +430,13 @@ async function doLogin(){
       displayName: foundUser.name,
       email: foundUser.email
     });
-
     closeAuth();
 
   } catch(err){
-    console.error(err);
+    console.error('Login error:', err);
     showAuthMsg('login-msg','error','Login failed. Please try again.');
     btn.disabled = false;
+    btn.textContent = 'Login to My Account';
   }
 }
 
@@ -437,13 +454,13 @@ async function doSignup(){
   clearAuthMsg('signup-msg');
 
   try {
+    await waitForFirebase();
+
     const { createUserWithEmailAndPassword, updateProfile } = window.firebaseFns;
     const userCred = await createUserWithEmailAndPassword(window.firebaseAuth, email, pass);
 
-    // Save the display name to Firebase Auth profile
     await updateProfile(userCred.user, { displayName: name });
 
-    // Also save user record to Firestore users collection
     const { collection, addDoc } = window.firebaseFns;
     await addDoc(collection(window.firebaseDB, 'users'), {
       uid: userCred.user.uid,
@@ -457,8 +474,6 @@ async function doSignup(){
     showAuthMsg('signup-msg', 'success', 'Account created! You can now log in.');
     btn.disabled=false;
     btn.textContent='Create My Account';
-
-    // Auto switch to login tab after 1.5 seconds
     setTimeout(() => switchAuthTab('login'), 1500);
 
   } catch(err) {
@@ -481,7 +496,6 @@ async function signOut(){
 }
 
 // ===== RESTORE SESSION on page load =====
-// If user was already logged in (Firebase persists auth), restore the nav button
 window.addEventListener('load', () => {
   const { onAuthStateChanged } = window.firebaseFns || {};
   if(!onAuthStateChanged || !window.firebaseAuth) return;
