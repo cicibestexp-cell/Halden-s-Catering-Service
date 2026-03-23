@@ -308,28 +308,41 @@
 
 <!-- Firebase SDK -->
 <script type="module">
+  // Import Firebase modules
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile }
-    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc }
-    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+  import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged, 
+    updateProfile 
+  } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  import { 
+    getFirestore, 
+    collection, 
+    getDocs, 
+    addDoc, 
+    updateDoc, 
+    doc 
+  } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
+  // Your Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyAc9hHRGErQ8R2tByoqMJ04SMvJed5FDro",
     authDomain: "smartserve-e3856.firebaseapp.com",
     projectId: "smartserve-e3856",
-    storageBucket: "smartserve-e3856.appspot.com",  // corrected
+    storageBucket: "smartserve-e3856.firebasestorage.app",
     messagingSenderId: "255403568863",
-    appId: "1:255403568863:web:7187560f64c8730ecec36a",
-    measurementId: "G-B4B22C84MD"
+    appId: "1:255403568863:web:7187560f64c8730ecec36a"
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  // Expose Firebase objects to the window for global access
   window.firebaseAuth = auth;
   window.firebaseDB = db;
   window.firebaseFns = {
@@ -344,10 +357,7 @@
     updateDoc,
     doc
   };
-
-  console.log("Firebase initialized for project:", app.options.projectId);
 </script>
-
 <script src="app.js"></script>
 </body>
 </html>
