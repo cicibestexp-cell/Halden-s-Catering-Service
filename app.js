@@ -44,6 +44,8 @@ const PKGS = [
 let cart = [];
 let curCat = 'all';
 let aiPicks = null;
+let currentUser = null;
+let pendingCheckout = null;
 
 // ===== PACKAGES =====
 function renderPkgs() {
@@ -55,7 +57,7 @@ function renderPkgs() {
         <div class="pkg-tagline">${p.tagline}</div>
         <div class="pkg-price">${p.price} <span>/ ${p.pax}</span></div>
         <ul class="pkg-list">${p.inc.map(i=>`<li>${i}</li>`).join('')}</ul>
-        <button class="btn-pkg" onclick="go('#catalog')">Inquire / Book This Package</button>
+        <button class="btn-pkg" onclick="startCheckout('pkg', '${p.name}', '${p.price}')">Inquire / Book This Package</button>
       </div>
     </div>`).join('');
 }
@@ -346,15 +348,24 @@ function showAuthMsg(id, type, text){
 function clearAuthMsg(id){ const el=document.getElementById(id); el.className='auth-msg'; el.textContent=''; }
 
 function setLoggedIn(user){
+  currentUser = user;
   document.getElementById('auth-logged-in').classList.add('on');
   document.getElementById('panel-login').classList.remove('active');
   document.getElementById('panel-signup').classList.remove('active');
   document.getElementById('auth-display-name').textContent = user.displayName || 'Welcome back!';
   document.getElementById('auth-display-email').textContent = user.email;
   document.querySelector('.btn-auth').innerHTML = '👤 <span class="auth-label">' + (user.displayName?.split(' ')[0] || 'Account') + '</span>';
+  
+  if(pendingCheckout) {
+    const intent = pendingCheckout;
+    pendingCheckout = null;
+    closeAuth();
+    setTimeout(() => { openCheckout(intent); }, 400);
+  }
 }
 
 function setLoggedOut(){
+  currentUser = null;
   document.getElementById('auth-logged-in').classList.remove('on');
   document.getElementById('panel-login').classList.add('active');
   document.querySelector('.btn-auth').innerHTML = '👤 <span class="auth-label">Login / Sign Up</span>';
@@ -377,6 +388,52 @@ function waitForFirebase(timeout = 5000) {
     check();
   });
 }
+
+// ===== GOOGLE LOGIN =====
+async function doGoogleLogin() {
+  const btns = document.querySelectorAll('.btn-google');
+  btns.forEach(b => { b.disabled=true; b.innerHTML='Logging in...'; });
+  
+  try {
+    await waitForFirebase();
+    const { GoogleAuthProvider, signInWithPopup, collection, getDocs, addDoc } = window.firebaseFns;
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(window.firebaseAuth, provider);
+    const user = result.user;
+
+    const snap = await getDocs(collection(window.firebaseDB, 'users'));
+    let found = false;
+    snap.forEach(doc => { 
+      const d = doc.data();
+      if(d.uid === user.uid || (d.email && d.email.toLowerCase() === user.email.toLowerCase())) {
+        found = true;
+      }
+    });
+
+    if(!found) {
+      await addDoc(collection(window.firebaseDB, 'users'), {
+        uid: user.uid,
+        name: user.displayName,
+        email: user.email,
+        role: 'customer',
+        createdAt: new Date()
+      });
+    }
+
+    setLoggedIn({ displayName: user.displayName, email: user.email });
+    closeAuth();
+    
+  } catch(err) {
+    console.error(err);
+    alert('Google connection failed. Please try again.');
+  } finally {
+    btns.forEach(b => { 
+      b.disabled=false; 
+      b.innerHTML='<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Continue with Google'; 
+    });
+  }
+}
+window.doGoogleLogin = doGoogleLogin;
 
 // ===== LOGIN =====
 async function doLogin(){
@@ -486,6 +543,126 @@ async function doSignup(){
   }
 }
 
+// ===== CHECKOUT & RESERVATION =====
+function startCheckout(src, pkgName = '', pkgPrice = '') {
+  const intent = { src, pkgName, pkgPrice };
+  if(src === 'cart' && cart.length === 0) {
+    alert("Your cart is empty. Please add items from the catalog first.");
+    return;
+  }
+  
+  if(!currentUser) {
+    pendingCheckout = intent;
+    openAuth();
+    showAuthMsg('login-msg', 'success', 'Please log in or sign up to continue with your reservation.');
+    if(src === 'cart') toggleCart();
+    return;
+  }
+  
+  if(src === 'cart') toggleCart();
+  openCheckout(intent);
+}
+window.startCheckout = startCheckout;
+
+function openCheckout(intent) {
+  document.getElementById('checkout-drawer').classList.add('open');
+  document.getElementById('checkout-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+  const msgEl = document.getElementById('chk-msg');
+  msgEl.className = 'auth-msg';
+  msgEl.textContent = '';
+  msgEl.style.display = 'none';
+  document.getElementById('btn-confirm-res').disabled = false;
+  
+  const sumEl = document.getElementById('chk-summary');
+  let html = '';
+  let totalNum = 0;
+  let totalStr = '₱0';
+  
+  if(intent.src === 'pkg') {
+    html += `<div class="chk-sum-title">Selected Package</div>`;
+    html += `<div class="chk-sum-item"><span>${intent.pkgName}</span><span>${intent.pkgPrice}</span></div>`;
+    html += `<div class="chk-sum-tot"><span>Estimated Total</span><span id="chk-final-amt">${intent.pkgPrice}</span></div>`;
+  } else {
+    html += `<div class="chk-sum-title">Custom Package (Cart)</div>`;
+    cart.forEach(c => {
+      html += `<div class="chk-sum-item"><span>${c.name}</span><span>₱${c.price.toLocaleString()}</span></div>`;
+      totalNum += c.price;
+    });
+    totalStr = '₱' + totalNum.toLocaleString();
+    html += `<div class="chk-sum-tot"><span>Estimated Total</span><span id="chk-final-amt">${totalStr}</span></div>`;
+  }
+  sumEl.innerHTML = html;
+}
+
+function closeCheckout() {
+  document.getElementById('checkout-drawer').classList.remove('open');
+  document.getElementById('checkout-overlay').classList.remove('on');
+  document.body.style.overflow = '';
+}
+window.closeCheckout = closeCheckout;
+
+async function submitReservation() {
+  const dateObj = document.getElementById('chk-date').value;
+  const type = document.getElementById('chk-type').value;
+  const pax = document.getElementById('chk-pax').value;
+  const amountStr = document.getElementById('chk-final-amt').textContent;
+  const msgEl = document.getElementById('chk-msg');
+  
+  if(!dateObj || !pax) {
+    msgEl.className = 'auth-msg error';
+    msgEl.textContent = 'Please select an event date and guest count.';
+    msgEl.style.display = 'block';
+    return;
+  }
+  
+  const btn = document.getElementById('btn-confirm-res');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  
+  try {
+    await waitForFirebase();
+    const { collection, addDoc } = window.firebaseFns;
+    
+    const d = new Date(dateObj);
+    const fmtDate = d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    
+    await addDoc(collection(window.firebaseDB, 'reservations'), {
+      client: currentUser.displayName || currentUser.name || 'Guest',
+      email: currentUser.email,
+      type: type,
+      date: fmtDate,
+      pax: parseInt(pax),
+      amount: amountStr.replace('Starting ', ''),
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    });
+    
+    msgEl.className = 'auth-msg success';
+    msgEl.textContent = 'Reservation completed! Our team will contact you shortly.';
+    msgEl.style.display = 'block';
+    
+    cart = [];
+    renderCart();
+    renderCat();
+    
+    setTimeout(() => {
+      closeCheckout();
+      btn.disabled = false;
+      btn.textContent = 'Confirm Reservation';
+    }, 2500);
+    
+  } catch(e) {
+    console.error(e);
+    msgEl.className = 'auth-msg error';
+    msgEl.textContent = 'Failed to submit reservation. Please try again.';
+    msgEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Confirm Reservation';
+  }
+}
+window.submitReservation = submitReservation;
+
 // ===== SIGN OUT =====
 async function signOut(){
   try {
@@ -494,6 +671,84 @@ async function signOut(){
   setLoggedOut();
   closeAuth();
 }
+
+// ===== DRAGGABLE CAROUSEL =====
+function initCarousel() {
+  const container = document.getElementById('carousel-container');
+  const track = document.getElementById('carousel-track');
+  if(!container || !track) return;
+
+  // Clone items to create an infinite loop effect
+  const items = Array.from(track.children);
+  items.forEach(item => {
+    let clone = item.cloneNode(true);
+    track.appendChild(clone);
+  });
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+  let animationId;
+  const scrollSpeed = 0.8; // Pixels per frame
+
+  const startDrag = (e) => {
+    isDown = true;
+    container.style.cursor = 'grabbing';
+    startX = (e.pageX || e.touches?.[0]?.pageX || 0) - container.offsetLeft;
+    scrollLeft = container.scrollLeft;
+    cancelAnimationFrame(animationId);
+  };
+
+  const stopDrag = () => {
+    isDown = false;
+    container.style.cursor = 'grab';
+    startAutoScroll();
+  };
+
+  const moveDrag = (e) => {
+    if(!isDown) return;
+    e.preventDefault();
+    const x = (e.pageX || e.touches?.[0]?.pageX || 0) - container.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    container.scrollLeft = scrollLeft - walk;
+  };
+
+  container.addEventListener('mousedown', startDrag);
+  container.addEventListener('mouseleave', stopDrag);
+  container.addEventListener('mouseup', stopDrag);
+  container.addEventListener('mousemove', moveDrag);
+  
+  container.addEventListener('touchstart', startDrag, {passive: true});
+  container.addEventListener('touchend', stopDrag);
+  container.addEventListener('touchmove', moveDrag, {passive: false});
+
+  function startAutoScroll() {
+    cancelAnimationFrame(animationId);
+    
+    function play() {
+      container.scrollLeft += scrollSpeed;
+      
+      // If we've scrolled past the original items, reset to 0 seamlessly
+      // Because we cloned the items, scrollWidth is exactly double the original width
+      if (container.scrollLeft >= track.scrollWidth / 2) {
+        container.scrollLeft = 0;
+      } else if (container.scrollLeft <= 0 && scrollSpeed < 0) {
+        // Handle backwards dragging looping if needed
+        container.scrollLeft = track.scrollWidth / 2;
+      }
+      
+      animationId = requestAnimationFrame(play);
+    }
+    
+    animationId = requestAnimationFrame(play);
+  }
+
+  // Ensure scroll behavior is auto so continuous JS scroll works smoothly
+  container.style.scrollBehavior = 'auto';
+  startAutoScroll();
+}
+
+window.addEventListener('load', () => setTimeout(initCarousel, 100));
 
 // ===== RESTORE SESSION on page load =====
 window.addEventListener('load', () => {
