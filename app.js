@@ -748,7 +748,32 @@ function initCarousel() {
   startAutoScroll();
 }
 
-window.addEventListener('load', () => setTimeout(initCarousel, 100));
+// ===== SCROLL REVEAL ANIMATIONS =====
+function initScrollReveal() {
+  const reveals = document.querySelectorAll('.reveal');
+  if(!reveals.length) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        entry.target.classList.add('active');
+      } else {
+        entry.target.classList.remove('active');
+      }
+    });
+  }, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.12
+  });
+
+  reveals.forEach(el => observer.observe(el));
+}
+
+window.addEventListener('load', () => {
+  setTimeout(initCarousel, 100);
+  setTimeout(initScrollReveal, 100);
+});
 
 // ===== RESTORE SESSION on page load =====
 window.addEventListener('load', () => {
