@@ -392,9 +392,12 @@ async function doLogin(){
     snapshot.forEach(doc => {
       const data = doc.data();
 
-      if(data.email === email && data.password === pass){
-        foundUser = data;
-      }
+      if(
+  data.email.trim().toLowerCase() === email.trim().toLowerCase() &&
+  data.password.trim() === pass.trim()
+){
+  foundUser = data;
+}
     });
 
     if(!foundUser){
