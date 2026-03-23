@@ -387,7 +387,6 @@ async function doLogin(){
 
     snapshot.forEach(doc => {
       const data = doc.data();
-
       if(
         data.email?.trim().toLowerCase() === email.toLowerCase() &&
         data.password?.trim() === pass
@@ -421,20 +420,6 @@ async function doLogin(){
     console.error(err);
     showAuthMsg('login-msg','error','Login failed. Please try again.');
     btn.disabled = false;
-  }
-}
-    // CUSTOMER LOGIN
-    setLoggedIn({
-      displayName: foundUser.name,
-      email: foundUser.email
-    });
-
-    closeAuth();
-
-  } catch(err){
-    showAuthMsg('login-msg','error','Login failed. Please try again.');
-    btn.disabled=false;
-    btn.textContent='Login to My Account';
   }
 }
 
