@@ -305,7 +305,30 @@
     <span>Made with ✦ for every occasion</span>
   </div>
 </footer>
+<!-- Firebase SDK via CDN -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
+  const firebaseConfig = { /* paste your config here */ };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Make them globally available to your existing app.js / admin.js
+  window.firebaseAuth = auth;
+  window.firebaseDB = db;
+  window.firebaseFns = {
+    signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    signOut, onAuthStateChanged,
+    collection, getDocs, addDoc, updateDoc, doc
+  };
+</script>
+  
 <script src="app.js"></script>
 </body>
 </html>
