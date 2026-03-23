@@ -166,7 +166,7 @@ function closeMobAI(){
 // ===== AI =====
 const API_URL = 'https://halden-s-catering-service.vercel.app/api/chat';
 
-const SYS = `You are Halden's AI Event Planning Assistant for Halden's Event Management and Catering Service, a premium catering business in the Philippines.
+const SYS = `You are Halden's AI Event Planning Assistant for Halden's Event Management and Catering Service, a premium catering business in the Philippines, Please be limited to only answer in regards to anything about catering matters, if its not a catering matter then reply with I'm sorry I am only able to provide you with assistance in regards to planning your events, anything unrelated is something I can't help you with.
 
 Your job: (1) Have a warm, helpful conversation to understand the client's event, and (2) after EVERY reply where you understand the event needs, output a JSON block of recommended catalog IDs so the website can highlight those items in real time.
 
@@ -181,6 +181,7 @@ photography: ph1=Photobooth(₱7000), ph2=Photographer(₱8000), ph3=Videographe
 RULES:
 - ALWAYS end every response with: {"recommended_ids":["id1","id2",...]}
 - Include 5 to 12 IDs most relevant to the event
+- do the filter function too if they talk in filipino/tagalog
 - Kiddie party → always include: f3,f9,d5,d2,d3,d4,en1,en3,eq2,dc2
 - Wedding → always include: f1,f2,f3,f9,d5,eq1,eq2,eq5,eq6,ph2,ph3,dc1
 - Corporate → include: f2,f3,f9,d5,eq1,eq2,eq5,eq6
@@ -381,8 +382,21 @@ async function doLogin(){
     setTimeout(()=>{ window.location.href = 'admin.html'; }, 800);
     return;
   }
-
-  // TODO: Replace with Firebase signInWithEmailAndPassword for regular users
+//firebase stuff
+  const { signInWithEmailAndPassword } = window.firebaseFns;
+signInWithEmailAndPassword(window.firebaseAuth, email, pass)
+  .then(userCred => {
+    const user = userCred.user;
+    if (email === 'admin@gmail.com') {
+      sessionStorage.setItem('halden_admin', JSON.stringify({ name: 'Administrator', email }));
+      window.location.href = 'admin.html';
+    } else {
+      setLoggedIn({ displayName: user.displayName, email: user.email });
+      closeAuth();
+    }
+  })
+  .catch(() => showAuthMsg('login-msg', 'error', 'Invalid email or password.'));
+  
   setTimeout(()=>{
     showAuthMsg('login-msg','error','Invalid email or password. Please try again.');
     btn.disabled=false; btn.textContent='Login to My Account';
