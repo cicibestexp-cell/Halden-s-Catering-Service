@@ -367,13 +367,11 @@ function setLoggedOut(){
 }
 
 // ===== LOGIN =====
-
 async function doLogin(){
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-password').value;
-  
 
-}
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value.trim();
+
   if(!email || !pass){
     showAuthMsg('login-msg','error','Please fill in all fields.');
     return;
@@ -381,8 +379,6 @@ async function doLogin(){
 
   const btn = document.getElementById('login-btn');
   btn.disabled = true;
-  btn.textContent = 'Logging in...';
-  clearAuthMsg('login-msg');
 
   try {
 
@@ -396,28 +392,31 @@ async function doLogin(){
       const data = doc.data();
 
       if(
-  data.email.trim().toLowerCase() === email.trim().toLowerCase() &&
-  data.password.trim() === pass.trim()
-){
-  foundUser = data;
-}
+        data.email?.trim().toLowerCase() === email.toLowerCase() &&
+        data.password?.trim() === pass
+      ){
+        foundUser = data;
+      }
     });
 
     if(!foundUser){
       showAuthMsg('login-msg','error','Invalid email or password.');
       btn.disabled=false;
-      btn.textContent='Login to My Account';
       return;
     }
 
-    // ADMIN LOGIN   
+    // ADMIN LOGIN
     if(foundUser.role === "admin"){
       sessionStorage.setItem("halden_admin", JSON.stringify(foundUser));
-      showAuthMsg('login-msg','success','Welcome Admin! Redirecting...');
-      setTimeout(()=>{ window.location.href = "admin.html"; }, 800);
+      window.location.href = "admin.html";
       return;
     }
 
+  } catch(err){
+    console.error(err);
+  }
+
+}
     // CUSTOMER LOGIN
     setLoggedIn({
       displayName: foundUser.name,
