@@ -368,7 +368,6 @@ function setLoggedOut(){
 
 // ===== LOGIN =====
 async function doLogin(){
-
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-password').value.trim();
 
@@ -381,9 +380,7 @@ async function doLogin(){
   btn.disabled = true;
 
   try {
-
     const { collection, getDocs } = window.firebaseFns;
-
     const snapshot = await getDocs(collection(window.firebaseDB, "users"));
 
     let foundUser = null;
@@ -401,7 +398,7 @@ async function doLogin(){
 
     if(!foundUser){
       showAuthMsg('login-msg','error','Invalid email or password.');
-      btn.disabled=false;
+      btn.disabled = false;
       return;
     }
 
@@ -412,10 +409,19 @@ async function doLogin(){
       return;
     }
 
+    // CUSTOMER LOGIN
+    setLoggedIn({
+      displayName: foundUser.name,
+      email: foundUser.email
+    });
+
+    closeAuth();
+
   } catch(err){
     console.error(err);
+    showAuthMsg('login-msg','error','Login failed. Please try again.');
+    btn.disabled = false;
   }
-
 }
     // CUSTOMER LOGIN
     setLoggedIn({
