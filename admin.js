@@ -28,31 +28,11 @@ function showSection(name, el) {
   if (el) el.classList.add('active');
 }
 
-// ===== DATA =====
-const INVENTORY = [
-  {name:'Chicken',     cat:'Protein',   stock:8,   unit:'kg', min:30, status:'critical'},
-  {name:'Pork',        cat:'Protein',   stock:25,  unit:'kg', min:20, status:'ok'},
-  {name:'Beef',        cat:'Protein',   stock:15,  unit:'kg', min:15, status:'ok'},
-  {name:'Fish',        cat:'Protein',   stock:18,  unit:'kg', min:12, status:'ok'},
-  {name:'Steamed Rice',cat:'Staple',    stock:20,  unit:'kg', min:30, status:'low'},
-  {name:'Pasta',       cat:'Staple',    stock:12,  unit:'kg', min:8,  status:'ok'},
-  {name:'Vegetables',  cat:'Produce',   stock:22,  unit:'kg', min:15, status:'ok'},
-  {name:'Cooking Oil', cat:'Pantry',    stock:8,   unit:'L',  min:6,  status:'ok'},
-  {name:'Flour',       cat:'Pantry',    stock:10,  unit:'kg', min:5,  status:'ok'},
-  {name:'Soft Drinks', cat:'Beverages', stock:120, unit:'pcs',min:80, status:'ok'},
-];
+// ===== LIVE DATA (loaded from Firestore) =====
+let INVENTORY = [];
+let RESERVATIONS = [];
 
-const RESERVATIONS = [
-  {client:'Santos Family',     type:'Kiddie Party',      date:'Mar 17, 2026', pax:80,  amount:'₱85,000',  status:'confirmed'},
-  {client:'Reyes Wedding',     type:'Wedding Reception', date:'Mar 19, 2026', pax:150, amount:'₱120,000', status:'confirmed'},
-  {client:'Cruz Corporate',    type:'Corporate Lunch',   date:'Mar 21, 2026', pax:60,  amount:'₱42,000',  status:'pending'},
-  {client:'Dela Cruz Family',  type:'Birthday Party',    date:'Mar 24, 2026', pax:50,  amount:'₱35,000',  status:'pending'},
-  {client:'Mendoza Reunion',   type:'Family Gathering',  date:'Mar 27, 2026', pax:40,  amount:'₱28,000',  status:'pending'},
-  {client:'Garcia Wedding',    type:'Wedding Reception', date:'Apr 2, 2026',  pax:120, amount:'₱95,000',  status:'confirmed'},
-  {client:'Lim Birthday',      type:'Birthday Party',    date:'Apr 5, 2026',  pax:30,  amount:'₱22,000',  status:'confirmed'},
-  {client:'Tan Corporate',     type:'Corporate Dinner',  date:'Apr 8, 2026',  pax:80,  amount:'₱58,000',  status:'cancelled'},
-];
-
+// Static data that doesn't need Firestore yet
 const FORECAST = [
   {name:'Chicken',     needed:45, available:8,   pct:95, unit:'kg'},
   {name:'Steamed Rice',needed:60, available:20,  pct:85, unit:'kg'},
@@ -76,11 +56,156 @@ const CHART_WEEKS = [
   {label:'W4', pct:45, highlight:false},
 ];
 
+// ===== LOAD FROM FIRESTORE =====
+async function loadData() {
+  // Show loading state
+  document.getElementById('inv-tbody').innerHTML = `
+    <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-dim);">
+      Loading inventory...
+    </td></tr>`;
+  document.getElementById('res-tbody').innerHTML = `
+    <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-dim);">
+      Loading reservations...
+    </td></tr>`;
+
+  try {
+    const { collection, getDocs } = window.firebaseFns;
+    const db = window.firebaseDB;
+
+    // Load reservations
+    const resSnap = await getDocs(collection(db, 'reservations'));
+    RESERVATIONS = resSnap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        client: data.client,
+        type: data.type,
+        date: data.date,
+        pax: data.pax,
+        // Format amount back to ₱ display string
+        amount: '₱' + Number(data.amount).toLocaleString(),
+        status: data.status,
+      };
+    });
+
+    // Sort reservations by status: pending first, then confirmed, then cancelled
+    RESERVATIONS.sort((a, b) => {
+      const order = { pending: 0, confirmed: 1, cancelled: 2 };
+      return (order[a.status] ?? 3) - (order[b.status] ?? 3);
+    });
+
+    // Load inventory
+    const invSnap = await getDocs(collection(db, 'inventory'));
+    INVENTORY = invSnap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        name: data.name,
+        cat: data.cat,
+        stock: data.stock,
+        unit: data.unit,
+        min: data.min,
+        status: data.status,
+      };
+    });
+
+    // Sort inventory: critical first, then low, then ok
+    INVENTORY.sort((a, b) => {
+      const order = { critical: 0, low: 1, ok: 2 };
+      return (order[a.status] ?? 3) - (order[b.status] ?? 3);
+    });
+
+    // Render everything with live data
+    renderDashboard();
+    renderInventory();
+    renderForecast();
+    renderReservations();
+    renderEvents();
+    renderInsights();
+
+  } catch(err) {
+    console.error('Firestore load error:', err);
+    document.getElementById('inv-tbody').innerHTML = `
+      <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--red);">
+        ⚠ Failed to load inventory. Check your Firebase connection.
+      </td></tr>`;
+    document.getElementById('res-tbody').innerHTML = `
+      <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red);">
+        ⚠ Failed to load reservations. Check your Firebase connection.
+      </td></tr>`;
+  }
+}
+
+// ===== UPDATE RESERVATION STATUS IN FIRESTORE =====
+async function updateReservationStatus(id, newStatus) {
+  try {
+    const { doc, updateDoc } = window.firebaseFns;
+    const db = window.firebaseDB;
+    await updateDoc(doc(db, 'reservations', id), { status: newStatus });
+
+    // Update local array too so UI refreshes instantly without re-fetching
+    const res = RESERVATIONS.find(r => r.id === id);
+    if (res) res.status = newStatus;
+
+    renderReservations(currentFilter);
+    renderDashboard();
+    renderEvents();
+  } catch(err) {
+    alert('Failed to update reservation. Please try again.');
+    console.error(err);
+  }
+}
+
+// ===== UPDATE INVENTORY STOCK IN FIRESTORE =====
+async function updateStock(id, newStock) {
+  try {
+    const { doc, updateDoc } = window.firebaseFns;
+    const db = window.firebaseDB;
+
+    // Recalculate status based on new stock vs min
+    const item = INVENTORY.find(i => i.id === id);
+    if (!item) return;
+    const ratio = newStock / item.min;
+    const newStatus = ratio <= 0.3 ? 'critical' : ratio < 1 ? 'low' : 'ok';
+
+    await updateDoc(doc(db, 'inventory', id), {
+      stock: newStock,
+      status: newStatus
+    });
+
+    // Update local array
+    item.stock = newStock;
+    item.status = newStatus;
+
+    renderInventory();
+    renderDashboard();
+  } catch(err) {
+    alert('Failed to update stock. Please try again.');
+    console.error(err);
+  }
+}
+
 // ===== RENDER DASHBOARD =====
 function renderDashboard() {
-  // Upcoming reservations
+  // Stats counters
+  const pendingCount = RESERVATIONS.filter(r => r.status === 'pending').length;
+  const criticalCount = INVENTORY.filter(i => i.status === 'critical').length;
+  const lowCount = INVENTORY.filter(i => i.status === 'low').length;
+
+  // Update stat cards dynamically
+  const statCards = document.querySelectorAll('.stat-card .stat-value');
+  if (statCards[1]) statCards[1].textContent = pendingCount;
+  if (statCards[2]) statCards[2].textContent = criticalCount + lowCount;
+
+  // Update sidebar badges
+  const resBadge = document.querySelector('.sidebar-item[onclick*="reservations"] .sidebar-badge');
+  const invBadge = document.querySelector('.sidebar-item[onclick*="inventory"] .sidebar-badge');
+  if (resBadge) resBadge.textContent = pendingCount;
+  if (invBadge) invBadge.textContent = criticalCount + lowCount;
+
+  // Upcoming confirmed reservations (next 3)
   const upcoming = RESERVATIONS.filter(r => r.status === 'confirmed').slice(0, 3);
-  document.getElementById('dash-reservations').innerHTML = upcoming.map(r => {
+  document.getElementById('dash-reservations').innerHTML = upcoming.length ? upcoming.map(r => {
     const parts = r.date.split(' ');
     return `
       <div class="res-item">
@@ -97,7 +222,7 @@ function renderDashboard() {
           <span class="badge ${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span>
         </div>
       </div>`;
-  }).join('');
+  }).join('') : `<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:13px;">No upcoming confirmed reservations.</div>`;
 
   // Booking chart
   document.getElementById('booking-chart').innerHTML = CHART_WEEKS.map(w => `
@@ -120,6 +245,11 @@ function renderDashboard() {
 
 // ===== RENDER INVENTORY =====
 function renderInventory() {
+  if (!INVENTORY.length) {
+    document.getElementById('inv-tbody').innerHTML = `
+      <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-dim);">No inventory items found.</td></tr>`;
+    return;
+  }
   document.getElementById('inv-tbody').innerHTML = INVENTORY.map(item => {
     const pct = Math.min(100, Math.round((item.stock / item.min) * 100));
     return `
@@ -132,7 +262,9 @@ function renderInventory() {
           </div>
         </td>
         <td style="font-size:12px;color:var(--text-dim);">${item.min} ${item.unit}</td>
-        <td><span class="badge ${item.status}">${item.status==='ok'?'✓ OK':item.status==='low'?'⚠ Low':'🚨 Critical'}</span></td>
+        <td>
+          <span class="badge ${item.status}">${item.status==='ok'?'✓ OK':item.status==='low'?'⚠ Low':'🚨 Critical'}</span>
+        </td>
       </tr>`;
   }).join('');
 }
@@ -149,8 +281,20 @@ function renderForecast() {
 }
 
 // ===== RENDER RESERVATIONS =====
+let currentFilter = 'all';
+
 function renderReservations(filter = 'all') {
+  currentFilter = filter;
   const filtered = filter === 'all' ? RESERVATIONS : RESERVATIONS.filter(r => r.status === filter);
+
+  if (!filtered.length) {
+    document.getElementById('res-tbody').innerHTML = `
+      <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-dim);">
+        No ${filter === 'all' ? '' : filter} reservations found.
+      </td></tr>`;
+    return;
+  }
+
   document.getElementById('res-tbody').innerHTML = filtered.map(r => `
     <tr>
       <td><div class="item-name">${r.client}</div></td>
@@ -161,7 +305,8 @@ function renderReservations(filter = 'all') {
       <td><span class="badge ${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span></td>
       <td>
         ${r.status === 'pending'
-          ? `<button class="btn-approve">Approve</button><button class="btn-reject">Reject</button>`
+          ? `<button class="btn-approve" onclick="updateReservationStatus('${r.id}','confirmed')">Approve</button>
+             <button class="btn-reject"  onclick="updateReservationStatus('${r.id}','cancelled')">Reject</button>`
           : `<button class="btn-view">View</button>`}
       </td>
     </tr>`).join('');
@@ -176,7 +321,7 @@ function filterRes(filter, btn) {
 // ===== RENDER EVENTS =====
 function renderEvents() {
   const confirmed = RESERVATIONS.filter(r => r.status === 'confirmed');
-  document.getElementById('events-body').innerHTML = confirmed.map(ev => {
+  document.getElementById('events-body').innerHTML = confirmed.length ? confirmed.map(ev => {
     const parts = ev.date.split(' ');
     return `
       <div style="display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-bottom:1px solid rgba(196,154,60,0.06);">
@@ -195,7 +340,7 @@ function renderEvents() {
           </div>
         </div>
       </div>`;
-  }).join('');
+  }).join('') : `<div style="text-align:center;padding:24px;color:var(--text-dim);font-size:13px;">No confirmed events yet.</div>`;
 }
 
 // ===== RENDER INSIGHTS =====
@@ -235,10 +380,19 @@ function renderInsights() {
     </div>`).join('');
 }
 
-// ===== INIT =====
-renderDashboard();
-renderInventory();
-renderForecast();
-renderReservations();
-renderEvents();
-renderInsights();
+// ===== INIT — wait for Firebase to be ready, then load =====
+// Firebase SDK loads as a module so we wait briefly for window.firebaseFns to be available
+function waitForFirebase(attempts = 0) {
+  if (window.firebaseFns && window.firebaseDB) {
+    loadData();
+  } else if (attempts < 20) {
+    setTimeout(() => waitForFirebase(attempts + 1), 150);
+  } else {
+    console.error('Firebase did not initialize in time.');
+    // Fallback: render empty states so the page doesn't just break
+    renderForecast();
+    renderInsights();
+  }
+}
+
+waitForFirebase();
