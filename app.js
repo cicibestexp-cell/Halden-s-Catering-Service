@@ -370,29 +370,58 @@ function setLoggedOut(){
 async function doLogin(){
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-password').value;
-  if(!email || !pass){ showAuthMsg('login-msg','error','Please fill in all fields.'); return; }
 
-  const btn = document.getElementById('login-btn');
-  btn.disabled=true; btn.textContent='Logging in...';
-  clearAuthMsg('login-msg');
-
-  // Admin shortcut — checks email+pass before hitting Firebase
-  if(email === 'admin@gmail.com' && pass === '12345'){
-    sessionStorage.setItem('halden_admin', JSON.stringify({name:'Administrator', email}));
-    showAuthMsg('login-msg','success','Welcome, Admin! Redirecting...');
-    setTimeout(()=>{ window.location.href = 'admin.html'; }, 800);
+  if(!email || !pass){
+    showAuthMsg('login-msg','error','Please fill in all fields.');
     return;
   }
 
-  // Regular users — Firebase Auth
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.textContent = 'Logging in...';
+  clearAuthMsg('login-msg');
+
   try {
-    const { signInWithEmailAndPassword } = window.firebaseFns;
-    const userCred = await signInWithEmailAndPassword(window.firebaseAuth, email, pass);
-    const user = userCred.user;
-    setLoggedIn({ displayName: user.displayName, email: user.email });
+
+    const { collection, getDocs } = window.firebaseFns;
+
+    const snapshot = await getDocs(collection(window.firebaseDB, "users"));
+
+    let foundUser = null;
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+
+      if(data.email === email && data.password === pass){
+        foundUser = data;
+      }
+    });
+
+    if(!foundUser){
+      showAuthMsg('login-msg','error','Invalid email or password.');
+      btn.disabled=false;
+      btn.textContent='Login to My Account';
+      return;
+    }
+
+    // ADMIN LOGIN
+    if(foundUser.role === "admin"){
+      sessionStorage.setItem("halden_admin", JSON.stringify(foundUser));
+      showAuthMsg('login-msg','success','Welcome Admin! Redirecting...');
+      setTimeout(()=>{ window.location.href = "admin.html"; }, 800);
+      return;
+    }
+
+    // CUSTOMER LOGIN
+    setLoggedIn({
+      displayName: foundUser.name,
+      email: foundUser.email
+    });
+
     closeAuth();
-  } catch(err) {
-    showAuthMsg('login-msg', 'error', 'Invalid email or password. Please try again.');
+
+  } catch(err){
+    showAuthMsg('login-msg','error','Login failed. Please try again.');
     btn.disabled=false;
     btn.textContent='Login to My Account';
   }
@@ -423,6 +452,7 @@ async function doSignup(){
     await addDoc(collection(window.firebaseDB, 'users'), {
       uid: userCred.user.uid,
       name: name,
+      password: pass,
       email: email,
       role: 'customer',
       createdAt: new Date()
