@@ -770,7 +770,39 @@ function initScrollReveal() {
   reveals.forEach(el => observer.observe(el));
 }
 
+// ===== HERO SLIDESHOW =====
+const HERO_IMAGES = [
+  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774321988/halden1_sdv4yf.png',
+  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323082/halden_4_fwsgdo.png',
+  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323083/halden5_itbx3u.png',
+  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden7_bqts0y.png',
+  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323086/halden8_xh2jgu.png',
+  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323089/halden3_selh2o.png',
+  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden6_gz1sfv.png',
+  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323092/halden2_z1enpn.png'
+];
+
+function initHeroSlideshow() {
+  const slider = document.getElementById('hero-slider');
+  if(!slider) return;
+  
+  slider.innerHTML = HERO_IMAGES.map((url, i) => 
+    `<div class="hero-slide ${i === 0 ? 'active' : ''}" style="background-image: url('${url}')"></div>`
+  ).join('');
+  
+  let cur = 0;
+  const slides = slider.querySelectorAll('.hero-slide');
+  if(!slides.length) return;
+  
+  setInterval(() => {
+    slides[cur].classList.remove('active');
+    cur = (cur + 1) % slides.length;
+    slides[cur].classList.add('active');
+  }, 4000);
+}
+
 window.addEventListener('load', () => {
+  setTimeout(initHeroSlideshow, 50);
   setTimeout(initCarousel, 100);
   setTimeout(initScrollReveal, 100);
 });
