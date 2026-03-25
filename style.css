@@ -370,12 +370,13 @@
       .logo-sub{font-size:9px;}
 
       /* Hero */
-      #hero{min-height:80vh;padding:60px 6% 80px;align-items:flex-start;}
-      .hero-image{display:none;}
-      .hero-content{max-width:100%;}
+      #hero{min-height:auto;padding:100px 5% 60px;flex-direction:column;align-items:center;text-align:center;}
+      .hero-image{display:block;position:relative;width:100%;right:auto;top:auto;transform:none;margin-top:40px;aspect-ratio:4/3;box-shadow:0 15px 40px rgba(44,30,16,0.15);}
+      .hero-content{max-width:100%;display:flex;flex-direction:column;align-items:center;}
+      .hero-badge{margin:0 auto 22px;display:inline-flex;}
       .hero-title{font-size:clamp(34px,8vw,48px);}
       .hero-btns .btn-primary,.hero-btns .btn-outline{width:100%;justify-content:center;}
-      .hero-btns{flex-direction:column;}
+      .hero-btns{flex-direction:column;width:100%;max-width:300px;margin:0 auto;}
 
       /* Packages */
       #packages{padding:60px 5%;}
@@ -396,12 +397,25 @@
       .catalog-intro{padding:44px 5% 0;}
 
       /* Show mobile AI fab */
-      .mob-ai-fab{display:flex;}
+      .mob-ai-fab{
+        display:flex;top:50%;bottom:auto;right:0;
+        transform:translateY(-50%);border-radius:15px 0 0 15px;
+        padding:10px 12px;
+      }
+      .mob-ai-fab:hover{background:var(--brown-light);transform:translateY(-50%) translateX(-3px);}
       .mob-ai-drawer{display:flex;}
 
       /* Cart */
       #cart-drawer{width:100%;top:var(--nav-h);}
-      .cart-fab{bottom:16px;right:auto;left:0;border-radius:0 13px 13px 0;}
+      .cart-fab{
+        top:calc(50% + 55px);bottom:auto;right:0;left:auto;
+        transform:translateY(-50%);border-radius:15px 0 0 15px;
+        padding:10px 14px;
+        border-left:1px solid var(--gold-light);
+        border-top:1px solid var(--gold-light);
+        border-bottom:1px solid var(--gold-light);
+      }
+      .cart-fab:hover{background:var(--brown-light);transform:translateY(-50%) translateX(-3px);}
 
       /* Footer */
       .ft-top{grid-template-columns:1fr;gap:28px;}
