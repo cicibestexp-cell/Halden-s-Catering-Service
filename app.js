@@ -804,10 +804,66 @@ function initHeroSlideshow() {
   }, 4000);
 }
 
+// ===== MOBILE CAROUSELS =====
+function initMobileHeroCarousel() {
+  const track = document.getElementById('hmc-track');
+  if(!track) return;
+  track.innerHTML = HERO_IMAGES.map((url, i) => `<div class="hmc-item ${i===1 ? 'active' : ''}" style="background-image:url('${url}')"></div>`).join('');
+  
+  const items = track.querySelectorAll('.hmc-item');
+  if(!items.length) return;
+  
+  let hmcIndex = 1;
+
+  function centerItem() {
+     const w = window.innerWidth;
+     // The width is roughly 58vw, margin is 12px each side
+     // It's safer to measure exactly using getBoundingClientRect
+     const el = items[0];
+     const rect = el.getBoundingClientRect();
+     if(rect.width === 0) return; // not rendered
+     const itemTotalWidth = rect.width + 24; // 24 = 12px*2 horizontal margins
+     
+     // Target offset:
+     const offset = (w / 2) - ((hmcIndex * itemTotalWidth) + (itemTotalWidth / 2));
+     track.style.transform = `translateX(${offset}px)`;
+  }
+  
+  setInterval(() => {
+     if(window.innerWidth > 768) return; 
+     hmcIndex = (hmcIndex + 1) % items.length;
+     items.forEach((it, i) => it.classList.toggle('active', i === hmcIndex));
+     centerItem();
+  }, 10000); 
+  
+  window.addEventListener('resize', () => { if(window.innerWidth <= 768) centerItem() });
+  setTimeout(() => { if(window.innerWidth <= 768) centerItem() }, 100);
+}
+
+function initMobileFadeCarousel() {
+  const fader = document.getElementById('mob-fade-carousel');
+  if(!fader) return;
+  fader.innerHTML = HERO_IMAGES.map((url, i) => `<div class="mob-fade-slide ${i===0 ? 'active' : ''}" style="background-image:url('${url}')"></div>`).join('');
+  
+  let cur = 0;
+  const slides = fader.querySelectorAll('.mob-fade-slide');
+  if(!slides.length) return;
+  
+  setInterval(() => {
+    if(window.innerWidth > 768) return;
+    slides[cur].classList.remove('active');
+    cur = (cur + 1) % slides.length;
+    slides[cur].classList.add('active');
+  }, 3500);
+}
+
+
 window.addEventListener('load', () => {
   setTimeout(initHeroSlideshow, 50);
   setTimeout(initCarousel, 100);
   setTimeout(initScrollReveal, 100);
+  setTimeout(initMobileHeroCarousel, 120);
+  setTimeout(initMobileFadeCarousel, 120);
 });
 
 // ===== RESTORE SESSION on page load =====
