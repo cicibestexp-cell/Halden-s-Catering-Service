@@ -767,7 +767,7 @@ function initScrollReveal() {
   }, {
     root: null,
     rootMargin: '0px',
-    threshold: 0.12
+    threshold: 0.02
   });
 
   reveals.forEach(el => observer.observe(el));
