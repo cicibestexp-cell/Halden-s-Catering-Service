@@ -47,6 +47,18 @@ let aiPicks = null;
 let currentUser = null;
 let pendingCheckout = null;
 
+// ===== HERO IMAGES (shared between desktop slideshow + mobile carousels) =====
+const HERO_IMAGES = [
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774321988/halden1_sdv4yf.png',   label: 'Wedding Reception' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323082/halden_4_fwsgdo.png',  label: 'Kiddie Party' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323083/halden5_itbx3u.png',   label: 'Birthday Celebration' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden7_bqts0y.png',   label: 'Corporate Dinner' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323086/halden8_xh2jgu.png',   label: 'Grand Reception' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323089/halden3_selh2o.png',   label: 'Family Gathering' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden6_gz1sfv.png',   label: 'Debut Celebration' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323092/halden2_z1enpn.png',   label: 'Wedding Banquet' },
+];
+
 // ===== PACKAGES =====
 function renderPkgs() {
   document.getElementById('pkgs-grid').innerHTML = PKGS.map(p => `
@@ -375,18 +387,13 @@ function setLoggedOut() {
 }
 
 // ===== FIREBASE READY HELPER =====
-// Polls until Firebase module has finished loading and exposed its globals
 function waitForFirebase(timeout = 5000) {
   return new Promise((resolve, reject) => {
     const start = Date.now();
     const check = () => {
-      if (window.firebaseFns && window.firebaseDB) {
-        resolve();
-      } else if (Date.now() - start > timeout) {
-        reject(new Error('Firebase took too long to initialize.'));
-      } else {
-        setTimeout(check, 80);
-      }
+      if (window.firebaseFns && window.firebaseDB) { resolve(); }
+      else if (Date.now() - start > timeout) { reject(new Error('Firebase took too long to initialize.')); }
+      else { setTimeout(check, 80); }
     };
     check();
   });
@@ -396,44 +403,25 @@ function waitForFirebase(timeout = 5000) {
 async function doGoogleLogin() {
   const btns = document.querySelectorAll('.btn-google');
   btns.forEach(b => { b.disabled = true; b.innerHTML = 'Logging in...'; });
-
   try {
     await waitForFirebase();
     const { GoogleAuthProvider, signInWithPopup, collection, getDocs, addDoc } = window.firebaseFns;
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(window.firebaseAuth, provider);
     const user = result.user;
-
     const snap = await getDocs(collection(window.firebaseDB, 'users'));
     let found = false;
-    snap.forEach(doc => {
-      const d = doc.data();
-      if (d.uid === user.uid || (d.email && d.email.toLowerCase() === user.email.toLowerCase())) {
-        found = true;
-      }
-    });
-
+    snap.forEach(doc => { const d = doc.data(); if (d.uid === user.uid || (d.email && d.email.toLowerCase() === user.email.toLowerCase())) found = true; });
     if (!found) {
-      await addDoc(collection(window.firebaseDB, 'users'), {
-        uid: user.uid,
-        name: user.displayName,
-        email: user.email,
-        role: 'customer',
-        createdAt: new Date()
-      });
+      await addDoc(collection(window.firebaseDB, 'users'), { uid: user.uid, name: user.displayName, email: user.email, role: 'customer', createdAt: new Date() });
     }
-
     setLoggedIn({ displayName: user.displayName, email: user.email });
     closeAuth();
-
   } catch (err) {
     console.error(err);
     alert('Google connection failed. Please try again.');
   } finally {
-    btns.forEach(b => {
-      b.disabled = false;
-      b.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Continue with Google';
-    });
+    btns.forEach(b => { b.disabled = false; b.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Continue with Google'; });
   }
 }
 window.doGoogleLogin = doGoogleLogin;
@@ -442,61 +430,27 @@ window.doGoogleLogin = doGoogleLogin;
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-password').value.trim();
-
-  if (!email || !pass) {
-    showAuthMsg('login-msg', 'error', 'Please fill in all fields.');
-    return;
-  }
-
+  if (!email || !pass) { showAuthMsg('login-msg', 'error', 'Please fill in all fields.'); return; }
   const btn = document.getElementById('login-btn');
-  btn.disabled = true;
-  btn.textContent = 'Logging in...';
+  btn.disabled = true; btn.textContent = 'Logging in...';
   clearAuthMsg('login-msg');
-
   try {
-    // Wait for Firebase module to finish loading before using it
     await waitForFirebase();
-
     const { collection, getDocs } = window.firebaseFns;
     const snapshot = await getDocs(collection(window.firebaseDB, 'users'));
-
     let foundUser = null;
     snapshot.forEach(doc => {
       const data = doc.data();
-      if (
-        data.email?.trim().toLowerCase() === email.toLowerCase() &&
-        data.password?.trim() === pass
-      ) {
-        foundUser = data;
-      }
+      if (data.email?.trim().toLowerCase() === email.toLowerCase() && data.password?.trim() === pass) foundUser = data;
     });
-
-    if (!foundUser) {
-      showAuthMsg('login-msg', 'error', 'Invalid email or password.');
-      btn.disabled = false;
-      btn.textContent = 'Login to My Account';
-      return;
-    }
-
-    // ADMIN LOGIN — redirect to admin panel
-    if (foundUser.role === 'admin') {
-      sessionStorage.setItem('halden_admin', JSON.stringify(foundUser));
-      window.location.href = 'admin.html';
-      return;
-    }
-
-    // CUSTOMER LOGIN
-    setLoggedIn({
-      displayName: foundUser.name,
-      email: foundUser.email
-    });
+    if (!foundUser) { showAuthMsg('login-msg', 'error', 'Invalid email or password.'); btn.disabled = false; btn.textContent = 'Login to My Account'; return; }
+    if (foundUser.role === 'admin') { sessionStorage.setItem('halden_admin', JSON.stringify(foundUser)); window.location.href = 'admin.html'; return; }
+    setLoggedIn({ displayName: foundUser.name, email: foundUser.email });
     closeAuth();
-
   } catch (err) {
     console.error('Login error:', err);
     showAuthMsg('login-msg', 'error', 'Login failed. Please try again.');
-    btn.disabled = false;
-    btn.textContent = 'Login to My Account';
+    btn.disabled = false; btn.textContent = 'Login to My Account';
   }
 }
 
@@ -505,63 +459,35 @@ async function doSignup() {
   const name = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const pass = document.getElementById('signup-password').value;
-
   if (!name || !email || !pass) { showAuthMsg('signup-msg', 'error', 'Please fill in all fields.'); return; }
   if (pass.length < 6) { showAuthMsg('signup-msg', 'error', 'Password must be at least 6 characters.'); return; }
-
   const btn = document.getElementById('signup-btn');
   btn.disabled = true; btn.textContent = 'Creating account...';
   clearAuthMsg('signup-msg');
-
   try {
     await waitForFirebase();
-
     const { createUserWithEmailAndPassword, updateProfile } = window.firebaseFns;
     const userCred = await createUserWithEmailAndPassword(window.firebaseAuth, email, pass);
-
     await updateProfile(userCred.user, { displayName: name });
-
     const { collection, addDoc } = window.firebaseFns;
-    await addDoc(collection(window.firebaseDB, 'users'), {
-      uid: userCred.user.uid,
-      name: name,
-      password: pass,
-      email: email,
-      role: 'customer',
-      createdAt: new Date()
-    });
-
+    await addDoc(collection(window.firebaseDB, 'users'), { uid: userCred.user.uid, name, password: pass, email, role: 'customer', createdAt: new Date() });
     showAuthMsg('signup-msg', 'success', 'Account created! You can now log in.');
-    btn.disabled = false;
-    btn.textContent = 'Create My Account';
+    btn.disabled = false; btn.textContent = 'Create My Account';
     setTimeout(() => switchAuthTab('login'), 1500);
-
   } catch (err) {
     let msg = 'Something went wrong. Please try again.';
     if (err.code === 'auth/email-already-in-use') msg = 'This email is already registered. Try logging in.';
     if (err.code === 'auth/invalid-email') msg = 'Please enter a valid email address.';
     showAuthMsg('signup-msg', 'error', msg);
-    btn.disabled = false;
-    btn.textContent = 'Create My Account';
+    btn.disabled = false; btn.textContent = 'Create My Account';
   }
 }
 
 // ===== CHECKOUT & RESERVATION =====
 function startCheckout(src, pkgName = '', pkgPrice = '') {
   const intent = { src, pkgName, pkgPrice };
-  if (src === 'cart' && cart.length === 0) {
-    alert("Your cart is empty. Please add items from the catalog first.");
-    return;
-  }
-
-  if (!currentUser) {
-    pendingCheckout = intent;
-    openAuth();
-    showAuthMsg('login-msg', 'success', 'Please log in or sign up to continue with your reservation.');
-    if (src === 'cart') toggleCart();
-    return;
-  }
-
+  if (src === 'cart' && cart.length === 0) { alert("Your cart is empty. Please add items from the catalog first."); return; }
+  if (!currentUser) { pendingCheckout = intent; openAuth(); showAuthMsg('login-msg', 'success', 'Please log in or sign up to continue with your reservation.'); if (src === 'cart') toggleCart(); return; }
   if (src === 'cart') toggleCart();
   openCheckout(intent);
 }
@@ -572,26 +498,17 @@ function openCheckout(intent) {
   document.getElementById('checkout-overlay').classList.add('on');
   document.body.style.overflow = 'hidden';
   const msgEl = document.getElementById('chk-msg');
-  msgEl.className = 'auth-msg';
-  msgEl.textContent = '';
-  msgEl.style.display = 'none';
+  msgEl.className = 'auth-msg'; msgEl.textContent = ''; msgEl.style.display = 'none';
   document.getElementById('btn-confirm-res').disabled = false;
-
   const sumEl = document.getElementById('chk-summary');
-  let html = '';
-  let totalNum = 0;
-  let totalStr = '₱0';
-
+  let html = '', totalNum = 0, totalStr = '₱0';
   if (intent.src === 'pkg') {
     html += `<div class="chk-sum-title">Selected Package</div>`;
     html += `<div class="chk-sum-item"><span>${intent.pkgName}</span><span>${intent.pkgPrice}</span></div>`;
     html += `<div class="chk-sum-tot"><span>Estimated Total</span><span id="chk-final-amt">${intent.pkgPrice}</span></div>`;
   } else {
     html += `<div class="chk-sum-title">Custom Package (Cart)</div>`;
-    cart.forEach(c => {
-      html += `<div class="chk-sum-item"><span>${c.name}</span><span>₱${c.price.toLocaleString()}</span></div>`;
-      totalNum += c.price;
-    });
+    cart.forEach(c => { html += `<div class="chk-sum-item"><span>${c.name}</span><span>₱${c.price.toLocaleString()}</span></div>`; totalNum += c.price; });
     totalStr = '₱' + totalNum.toLocaleString();
     html += `<div class="chk-sum-tot"><span>Estimated Total</span><span id="chk-final-amt">${totalStr}</span></div>`;
   }
@@ -611,270 +528,173 @@ async function submitReservation() {
   const pax = document.getElementById('chk-pax').value;
   const amountStr = document.getElementById('chk-final-amt').textContent;
   const msgEl = document.getElementById('chk-msg');
-
-  if (!dateObj || !pax) {
-    msgEl.className = 'auth-msg error';
-    msgEl.textContent = 'Please select an event date and guest count.';
-    msgEl.style.display = 'block';
-    return;
-  }
-
+  if (!dateObj || !pax) { msgEl.className = 'auth-msg error'; msgEl.textContent = 'Please select an event date and guest count.'; msgEl.style.display = 'block'; return; }
   const btn = document.getElementById('btn-confirm-res');
-  btn.disabled = true;
-  btn.textContent = 'Submitting...';
-
+  btn.disabled = true; btn.textContent = 'Submitting...';
   try {
     await waitForFirebase();
     const { collection, addDoc } = window.firebaseFns;
-
     const d = new Date(dateObj);
     const fmtDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-    await addDoc(collection(window.firebaseDB, 'reservations'), {
-      client: currentUser.displayName || currentUser.name || 'Guest',
-      email: currentUser.email,
-      type: type,
-      date: fmtDate,
-      pax: parseInt(pax),
-      amount: amountStr.replace('Starting ', ''),
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    });
-
-    msgEl.className = 'auth-msg success';
-    msgEl.textContent = 'Reservation completed! Our team will contact you shortly.';
-    msgEl.style.display = 'block';
-
-    cart = [];
-    renderCart();
-    renderCat();
-
-    setTimeout(() => {
-      closeCheckout();
-      btn.disabled = false;
-      btn.textContent = 'Confirm Reservation';
-    }, 2500);
-
+    await addDoc(collection(window.firebaseDB, 'reservations'), { client: currentUser.displayName || currentUser.name || 'Guest', email: currentUser.email, type, date: fmtDate, pax: parseInt(pax), amount: amountStr.replace('Starting ', ''), status: 'pending', createdAt: new Date().toISOString() });
+    msgEl.className = 'auth-msg success'; msgEl.textContent = 'Reservation completed! Our team will contact you shortly.'; msgEl.style.display = 'block';
+    cart = []; renderCart(); renderCat();
+    setTimeout(() => { closeCheckout(); btn.disabled = false; btn.textContent = 'Confirm Reservation'; }, 2500);
   } catch (e) {
     console.error(e);
-    msgEl.className = 'auth-msg error';
-    msgEl.textContent = 'Failed to submit reservation. Please try again.';
-    msgEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Confirm Reservation';
+    msgEl.className = 'auth-msg error'; msgEl.textContent = 'Failed to submit reservation. Please try again.'; msgEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Confirm Reservation';
   }
 }
 window.submitReservation = submitReservation;
 
 // ===== SIGN OUT =====
 async function signOut() {
-  try {
-    await window.firebaseFns.signOut(window.firebaseAuth);
-  } catch (e) { }
-  setLoggedOut();
-  closeAuth();
+  try { await window.firebaseFns.signOut(window.firebaseAuth); } catch (e) {}
+  setLoggedOut(); closeAuth();
 }
 
-// ===== DRAGGABLE CAROUSEL =====
+// ===== DESKTOP DRAGGABLE CAROUSEL =====
 function initCarousel() {
   const container = document.getElementById('carousel-container');
   const track = document.getElementById('carousel-track');
   if (!container || !track) return;
-
-  // Clone items to create an infinite loop effect
   const items = Array.from(track.children);
-  items.forEach(item => {
-    let clone = item.cloneNode(true);
-    track.appendChild(clone);
-  });
-
-  let isDown = false;
-  let startX;
-  let scrollLeft;
-  let animationId;
-  const scrollSpeed = 0.8; // Pixels per frame
-
-  const startDrag = (e) => {
-    isDown = true;
-    container.style.cursor = 'grabbing';
-    startX = (e.pageX || e.touches?.[0]?.pageX || 0) - container.offsetLeft;
-    scrollLeft = container.scrollLeft;
-    cancelAnimationFrame(animationId);
-  };
-
-  const stopDrag = () => {
-    isDown = false;
-    container.style.cursor = 'grab';
-    startAutoScroll();
-  };
-
-  const moveDrag = (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = (e.pageX || e.touches?.[0]?.pageX || 0) - container.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    container.scrollLeft = scrollLeft - walk;
-  };
-
+  items.forEach(item => track.appendChild(item.cloneNode(true)));
+  let isDown = false, startX, scrollLeft, animationId;
+  const scrollSpeed = 0.8;
+  const startDrag = (e) => { isDown = true; container.style.cursor = 'grabbing'; startX = (e.pageX || e.touches?.[0]?.pageX || 0) - container.offsetLeft; scrollLeft = container.scrollLeft; cancelAnimationFrame(animationId); };
+  const stopDrag = () => { isDown = false; container.style.cursor = 'grab'; startAutoScroll(); };
+  const moveDrag = (e) => { if (!isDown) return; e.preventDefault(); const x = (e.pageX || e.touches?.[0]?.pageX || 0) - container.offsetLeft; container.scrollLeft = scrollLeft - (x - startX) * 1.5; };
   container.addEventListener('mousedown', startDrag);
   container.addEventListener('mouseleave', stopDrag);
   container.addEventListener('mouseup', stopDrag);
   container.addEventListener('mousemove', moveDrag);
-
   container.addEventListener('touchstart', startDrag, { passive: true });
   container.addEventListener('touchend', stopDrag);
   container.addEventListener('touchmove', moveDrag, { passive: false });
-
   function startAutoScroll() {
     cancelAnimationFrame(animationId);
-
-    function play() {
-      container.scrollLeft += scrollSpeed;
-
-      // If we've scrolled past the original items, reset to 0 seamlessly
-      // Because we cloned the items, scrollWidth is exactly double the original width
-      if (container.scrollLeft >= track.scrollWidth / 2) {
-        container.scrollLeft = 0;
-      } else if (container.scrollLeft <= 0 && scrollSpeed < 0) {
-        // Handle backwards dragging looping if needed
-        container.scrollLeft = track.scrollWidth / 2;
-      }
-
-      animationId = requestAnimationFrame(play);
-    }
-
+    function play() { container.scrollLeft += scrollSpeed; if (container.scrollLeft >= track.scrollWidth / 2) container.scrollLeft = 0; animationId = requestAnimationFrame(play); }
     animationId = requestAnimationFrame(play);
   }
-
-  // Ensure scroll behavior is auto so continuous JS scroll works smoothly
   container.style.scrollBehavior = 'auto';
   startAutoScroll();
 }
 
-// ===== SCROLL REVEAL ANIMATIONS =====
-function initScrollReveal() {
-  const reveals = document.querySelectorAll('.reveal');
-  if (!reveals.length) return;
+// ===== MOBILE HERO FIGMA-STYLE CAROUSEL =====
+function initMobileHeroCarousel() {
+  if (window.innerWidth > 768) return; // mobile only
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('active');
-      } else {
-        entry.target.classList.remove('active');
-      }
-    });
-  }, {
-    root: null,
-    rootMargin: '0px',
-    threshold: 0.02
+  const track = document.getElementById('hmc-track');
+  if (!track) return;
+
+  // Build items
+  HERO_IMAGES.forEach((img, i) => {
+    const el = document.createElement('div');
+    el.className = 'hmc-item' + (i === 0 ? ' active' : '');
+    el.style.backgroundImage = `url('${img.url}')`;
+    track.appendChild(el);
   });
 
-  reveals.forEach(el => observer.observe(el));
-}
+  let current = 0;
 
-// ===== HERO SLIDESHOW =====
-const HERO_IMAGES = [
-  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774321988/halden1_sdv4yf.png',
-  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323082/halden_4_fwsgdo.png',
-  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323083/halden5_itbx3u.png',
-  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden7_bqts0y.png',
-  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323086/halden8_xh2jgu.png',
-  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323089/halden3_selh2o.png',
-  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden6_gz1sfv.png',
-  'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323092/halden2_z1enpn.png'
-];
+  function goTo(idx) {
+    const items = track.querySelectorAll('.hmc-item');
+    if (!items.length) return;
+    items[current].classList.remove('active');
+    current = (idx + items.length) % items.length;
+    items[current].classList.add('active');
 
-function initHeroSlideshow() {
-  const slider = document.getElementById('hero-slider');
-  if (!slider) return;
-
-  slider.innerHTML = HERO_IMAGES.map((url, i) =>
-    `<div class="hero-slide ${i === 0 ? 'active' : ''}" style="background-image: url('${url}')"></div>`
-  ).join('');
-
-  let cur = 0;
-  const slides = slider.querySelectorAll('.hero-slide');
-  if (!slides.length) return;
-
-  setInterval(() => {
-    slides[cur].classList.remove('active');
-    cur = (cur + 1) % slides.length;
-    slides[cur].classList.add('active');
-  }, 4000);
-}
-
-// ===== MOBILE CAROUSELS =====
-function initMobileHeroCarousel() {
-  const track = document.getElementById('hmc-track');
-  if(!track) return;
-  track.innerHTML = HERO_IMAGES.map((url, i) => `<div class="hmc-item ${i===1 ? 'active' : ''}" style="background-image:url('${url}')"></div>`).join('');
-  
-  const items = track.querySelectorAll('.hmc-item');
-  if(!items.length) return;
-  
-  let hmcIndex = 1;
-
-  function centerItem() {
-     const w = window.innerWidth;
-     // The width is roughly 58vw, margin is 12px each side
-     // It's safer to measure exactly using getBoundingClientRect
-     const el = items[0];
-     const rect = el.getBoundingClientRect();
-     if(rect.width === 0) return; // not rendered
-     const itemTotalWidth = rect.width + 24; // 24 = 12px*2 horizontal margins
-     
-     // Target offset:
-     const offset = (w / 2) - ((hmcIndex * itemTotalWidth) + (itemTotalWidth / 2));
-     track.style.transform = `translateX(${offset}px)`;
+    // Center the active card in the viewport
+    const screenW = window.innerWidth;
+    const itemW = items[current].offsetWidth;
+    // Each item is 52vw wide + 16px gap
+    const itemStep = itemW + 16;
+    // Translate so active card is centered
+    const offset = (screenW / 2) - (current * itemStep) - (itemW / 2) - 20; // 20 = padding
+    track.style.transform = `translateX(${offset}px)`;
   }
-  
-  setInterval(() => {
-     if(window.innerWidth > 768) return; 
-     hmcIndex = (hmcIndex + 1) % items.length;
-     items.forEach((it, i) => it.classList.toggle('active', i === hmcIndex));
-     centerItem();
-  }, 10000); 
-  
-  window.addEventListener('resize', () => { if(window.innerWidth <= 768) centerItem() });
-  setTimeout(() => { if(window.innerWidth <= 768) centerItem() }, 100);
+
+  // Initial position
+  goTo(0);
+
+  // Auto-advance every 10 seconds
+  setInterval(() => goTo(current + 1), 10000);
 }
 
+// ===== MOBILE FADING SQUARE CAROUSEL (Moments section) =====
 function initMobileFadeCarousel() {
-  const fader = document.getElementById('mob-fade-carousel');
-  if(!fader) return;
-  fader.innerHTML = HERO_IMAGES.map((url, i) => `<div class="mob-fade-slide ${i===0 ? 'active' : ''}" style="background-image:url('${url}')"></div>`).join('');
-  
+  if (window.innerWidth > 768) return; // mobile only
+
+  const container = document.getElementById('mob-fade-carousel');
+  if (!container) return;
+
+  // Build slides + label
+  HERO_IMAGES.forEach((img, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'mfc-slide' + (i === 0 ? ' active' : '');
+    slide.style.backgroundImage = `url('${img.url}')`;
+    container.appendChild(slide);
+  });
+
+  // Single label element that updates
+  const label = document.createElement('div');
+  label.className = 'mfc-label';
+  label.textContent = HERO_IMAGES[0].label;
+  container.appendChild(label);
+
   let cur = 0;
-  const slides = fader.querySelectorAll('.mob-fade-slide');
-  if(!slides.length) return;
-  
+
   setInterval(() => {
-    if(window.innerWidth > 768) return;
+    const slides = container.querySelectorAll('.mfc-slide');
     slides[cur].classList.remove('active');
     cur = (cur + 1) % slides.length;
     slides[cur].classList.add('active');
+    label.textContent = HERO_IMAGES[cur].label;
   }, 3500);
 }
 
+// ===== SCROLL REVEAL =====
+function initScrollReveal() {
+  const reveals = document.querySelectorAll('.reveal');
+  if (!reveals.length) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('active');
+      else entry.target.classList.remove('active');
+    });
+  }, { root: null, rootMargin: '0px', threshold: 0.02 });
+  reveals.forEach(el => observer.observe(el));
+}
+
+// ===== DESKTOP HERO SLIDESHOW =====
+function initHeroSlideshow() {
+  const slider = document.getElementById('hero-slider');
+  if (!slider) return;
+  slider.innerHTML = HERO_IMAGES.map((img, i) =>
+    `<div class="hero-slide ${i === 0 ? 'active' : ''}" style="background-image: url('${img.url}')"></div>`
+  ).join('');
+  let cur = 0;
+  const slides = slider.querySelectorAll('.hero-slide');
+  if (!slides.length) return;
+  setInterval(() => { slides[cur].classList.remove('active'); cur = (cur + 1) % slides.length; slides[cur].classList.add('active'); }, 4000);
+}
 
 window.addEventListener('load', () => {
   setTimeout(initHeroSlideshow, 50);
-  setTimeout(initCarousel, 100);
+  setTimeout(initMobileHeroCarousel, 80);   // mobile hero bg carousel
+  setTimeout(initMobileFadeCarousel, 100);  // mobile moments square
+  setTimeout(initCarousel, 100);            // desktop strip carousel
   setTimeout(initScrollReveal, 100);
-  setTimeout(initMobileHeroCarousel, 120);
-  setTimeout(initMobileFadeCarousel, 120);
 });
 
-// ===== RESTORE SESSION on page load =====
+// ===== RESTORE SESSION =====
 window.addEventListener('load', () => {
   const { onAuthStateChanged } = window.firebaseFns || {};
   if (!onAuthStateChanged || !window.firebaseAuth) return;
   onAuthStateChanged(window.firebaseAuth, (user) => {
-    if (user) {
-      setLoggedIn({ displayName: user.displayName, email: user.email });
-    } else {
-      setLoggedOut();
-    }
+    if (user) setLoggedIn({ displayName: user.displayName, email: user.email });
+    else setLoggedOut();
   });
 });
