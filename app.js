@@ -35,13 +35,14 @@ const CAT = [
 ];
 
 const PKGS = [
-  {name:'Kiddie Party Package B',tagline:'100 pax Plus • 30 Kids',price:'₱85,000',pax:'100 pax + 30 kids',icon:'🎉',image:'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774324108/halden_kiddie_party_vhghct.png',badge:'Popular',inc:['Complete Catering Setup & Centerpiece','Tables & Chairs with Theme Cover','VIP Long Table Setup','Full Catering Equipment, Utensils & Glassware','Waiter in Uniform','5 Main Dishes (Pork/Beef, Chicken, Veggies, Fish, Pasta)','Special Pancit Canton, Soup & Dessert','Unlimited Drinks & Steamed Rice','Full Lights & Sounds Setup','Theme Backdrop, Balloon Ceiling, Centerpieces','Entrance Setup, Styro Name Cutouts','Photobooth (2hrs) + Photographer + MTV Videographer','2 Clowns/Magician + 2x3 Photo Standee','Face Painting (3hrs) + 20 Game Prizes','FREE Kiddie Meals: Spaghetti, Fried Chicken, Hotdog & Mallows']},
-  {name:'Simple Celebration Package',tagline:'Budget-Friendly • 50 pax',price:'Starting ₱25,000',pax:'50 pax',icon:'🌸',image:'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323089/halden3_selh2o.png',badge:'Starter',inc:['Basic Catering Setup','Tables & Chairs','3 Main Dishes (Choice of menu)','Steamed Rice (Unlimited)','Soup & Dessert','Unlimited Drinks','Waiter in Uniform']},
-  {name:'Custom Package',tagline:'Fully Personalized • Any size',price:'Quote on request',pax:'Any size',icon:'✦',badge:'Best Value',inc:['Choose any items from our full catalog','AI-powered recommendations based on your budget','Flexible guest count','Mix & match food, decor, entertainment & more','Personalized quotation from our team']},
+  { name: 'Kiddie Party Package B', tagline: '100 pax Plus • 30 Kids', price: '₱85,000', pax: '100 pax + 30 kids', icon: '🎉', image: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774324108/halden_kiddie_party_vhghct.png', badge: 'Popular', inc: ['Complete Catering Setup & Centerpiece', 'Tables & Chairs with Theme Cover', 'VIP Long Table Setup', 'Full Catering Equipment, Utensils & Glassware', 'Waiter in Uniform', '5 Main Dishes (Pork/Beef, Chicken, Veggies, Fish, Pasta)', 'Special Pancit Canton, Soup & Dessert', 'Unlimited Drinks & Steamed Rice', 'Full Lights & Sounds Setup', 'Theme Backdrop, Balloon Ceiling, Centerpieces', 'Entrance Setup, Styro Name Cutouts', 'Photobooth (2hrs) + Photographer + MTV Videographer', '2 Clowns/Magician + 2x3 Photo Standee', 'Face Painting (3hrs) + 20 Game Prizes', 'FREE Kiddie Meals: Spaghetti, Fried Chicken, Hotdog & Mallows'] },
+  { name: 'Simple Celebration Package', tagline: 'Budget-Friendly • 50 pax', price: 'Starting ₱25,000', pax: '50 pax', icon: '🌸', image: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323089/halden3_selh2o.png', badge: 'Starter', inc: ['Basic Catering Setup', 'Tables & Chairs', '3 Main Dishes (Choice of menu)', 'Steamed Rice (Unlimited)', 'Soup & Dessert', 'Unlimited Drinks', 'Waiter in Uniform'] },
+  { name: 'Custom Package', tagline: 'Fully Personalized • Any size', price: 'Quote on request', pax: 'Any size', icon: '✦', badge: 'Best Value', inc: ['Choose any items from our full catalog', 'AI-powered recommendations based on your budget', 'Flexible guest count', 'Mix & match food, decor, entertainment & more', 'Personalized quotation from our team'] },
 ];
 
 // ===== STATE =====
-let cart = [];
+let cart = [];           // finalized packages only
+let customPkgItems = []; // items being built in the sidebar
 let curCat = 'all';
 let aiPicks = null;
 let currentUser = null;
@@ -49,14 +50,14 @@ let pendingCheckout = null;
 
 // ===== HERO IMAGES (shared between desktop slideshow + mobile carousels) =====
 const HERO_IMAGES = [
-  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774321988/halden1_sdv4yf.png',   label: 'Wedding Reception' },
-  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323082/halden_4_fwsgdo.png',  label: 'Kiddie Party' },
-  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323083/halden5_itbx3u.png',   label: 'Birthday Celebration' },
-  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden7_bqts0y.png',   label: 'Corporate Dinner' },
-  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323086/halden8_xh2jgu.png',   label: 'Grand Reception' },
-  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323089/halden3_selh2o.png',   label: 'Family Gathering' },
-  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden6_gz1sfv.png',   label: 'Debut Celebration' },
-  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323092/halden2_z1enpn.png',   label: 'Wedding Banquet' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774321988/halden1_sdv4yf.png', label: 'Wedding Reception' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323082/halden_4_fwsgdo.png', label: 'Kiddie Party' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323083/halden5_itbx3u.png', label: 'Birthday Celebration' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden7_bqts0y.png', label: 'Corporate Dinner' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323086/halden8_xh2jgu.png', label: 'Grand Reception' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323089/halden3_selh2o.png', label: 'Family Gathering' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden6_gz1sfv.png', label: 'Debut Celebration' },
+  { url: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323092/halden2_z1enpn.png', label: 'Wedding Banquet' },
 ];
 
 // ===== PACKAGES =====
@@ -88,7 +89,7 @@ function renderCat() {
     ? `<strong>${pickCount} AI picks</strong> · ${items.length} shown`
     : `<strong>${items.length}</strong> items`;
   grid.innerHTML = items.map(item => {
-    const inCart = cart.find(c => c.id === item.id);
+    const inPkg = customPkgItems.find(c => c.id === item.id);
     const isPick = aiPicks && aiPicks.includes(item.id);
     const isDim = aiPicks && !isPick;
     return `
@@ -99,8 +100,8 @@ function renderCat() {
           <div class="cat-n">${item.name}</div>
           <div class="cat-d">${item.desc}</div>
           <div class="cat-p">₱${item.price.toLocaleString()}</div>
-          <button class="btn-add ${inCart ? 'added' : ''}" onclick="toggleItem('${item.id}')">
-            ${inCart ? '✓ Added' : '+ Add to Package'}
+          <button class="btn-add ${inPkg ? 'added' : ''}" onclick="toggleItem('${item.id}')">
+            ${inPkg ? '✓ Added' : '+ Add to Package'}
           </button>
         </div>
       </div>`;
@@ -122,35 +123,126 @@ function jumpCat(cat) {
   renderCat(); go('#catalog');
 }
 
-// ===== CART =====
+// ===== CUSTOM PACKAGE =====
 function toggleItem(id) {
   const item = CAT.find(i => i.id === id);
-  const idx = cart.findIndex(c => c.id === id);
-  if (idx > -1) cart.splice(idx, 1);
-  else { cart.push(item); document.getElementById('cart-drawer').classList.add('open'); }
-  renderCat(); renderCart();
+  const idx = customPkgItems.findIndex(c => c.id === id);
+  if (idx > -1) customPkgItems.splice(idx, 1);
+  else customPkgItems.push(item);
+  renderCat(); renderCustomPkg();
 }
 
-function removeItem(id) {
-  cart = cart.filter(c => c.id !== id);
-  renderCat(); renderCart();
+function removePkgItem(id) {
+  customPkgItems = customPkgItems.filter(c => c.id !== id);
+  renderCat(); renderCustomPkg();
 }
 
-function renderCart() {
-  document.getElementById('c-badge').textContent = cart.length;
-  const el = document.getElementById('cart-items');
-  const tot = document.getElementById('cart-tot');
-  if (!cart.length) {
-    el.innerHTML = `<div class="cart-empty"><div>🛒</div><p>Your package is empty.<br>Add items from the catalog.</p></div>`;
+function renderCustomPkg() {
+  const el = document.getElementById('cpkg-items');
+  const tot = document.getElementById('cpkg-total');
+  const cnt = document.getElementById('cpkg-count');
+  if (!el) return;
+  cnt.textContent = customPkgItems.length + ' item' + (customPkgItems.length !== 1 ? 's' : '');
+  if (!customPkgItems.length) {
+    el.innerHTML = `<div class="cpkg-empty"><div>🧺</div><p>No items yet.<br>Browse the catalog and add items to your package.</p></div>`;
     tot.textContent = '₱0'; return;
   }
-  tot.textContent = '₱' + cart.reduce((s, i) => s + i.price, 0).toLocaleString();
-  el.innerHTML = cart.map(item => `
-    <div class="c-item">
-      <div class="c-ico">${item.icon}</div>
-      <div class="c-inf"><div class="c-cat">${item.cat}</div><div class="c-n">${item.name}</div><div class="c-p">₱${item.price.toLocaleString()}</div></div>
-      <button class="c-rm" onclick="removeItem('${item.id}')">✕</button>
+  tot.textContent = '₱' + customPkgItems.reduce((s, i) => s + i.price, 0).toLocaleString();
+  el.innerHTML = customPkgItems.map(item => `
+    <div class="cpkg-item-row">
+      <div class="cpkg-item-icon">${item.icon}</div>
+      <div class="cpkg-item-inf">
+        <div class="cpkg-item-name">${item.name}</div>
+        <div class="cpkg-item-price">₱${item.price.toLocaleString()}</div>
+      </div>
+      <button class="cpkg-item-rm" onclick="removePkgItem('${item.id}')">✕</button>
     </div>`).join('');
+}
+
+function finalizePackage() {
+  // Validate required fields
+  const desc = document.getElementById('cpkg-desc')?.value.trim();
+  const theme = document.getElementById('cpkg-theme')?.value.trim();
+  const pax = document.getElementById('cpkg-pax')?.value.trim();
+  const occasion = document.getElementById('cpkg-occasion')?.value.trim();
+  const venue = document.getElementById('cpkg-venue')?.value.trim();
+
+  if (!desc || !theme || !pax || !occasion || !venue) {
+    alert('Please fill in all event details before finalizing your package.');
+    return;
+  }
+  if (!customPkgItems.length) {
+    alert('Please add at least one item from the catalog to your package.');
+    return;
+  }
+
+  const name = prompt('Give your package a name:', `${occasion} Package`);
+  if (!name) return;
+
+  const total = customPkgItems.reduce((s, i) => s + i.price, 0);
+  const summary = {
+    id: 'custom_' + Date.now(),
+    isCustom: true,
+    name: name.trim(),
+    desc, theme, pax, occasion, venue,
+    items: [...customPkgItems],
+    total,
+    price: total,
+    icon: '📋'
+  };
+
+  cart.push(summary);
+  renderCart();
+  document.getElementById('cart-drawer').classList.add('open');
+
+  // Reset custom package panel
+  customPkgItems = [];
+  renderCustomPkg();
+  ['cpkg-desc','cpkg-theme','cpkg-pax','cpkg-occasion','cpkg-venue'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  renderCat();
+}
+
+// ===== CART (finalized packages) =====
+function renderCart() {
+  const badge = document.getElementById('c-badge');
+  if(badge) badge.textContent = cart.length;
+  const el = document.getElementById('cart-items');
+  const tot = document.getElementById('cart-tot');
+  if (!el) return;
+  if (!cart.length) {
+    el.innerHTML = `<div class="cart-empty"><div>🛒</div><p>No finalized packages yet.<br>Build and finalize a package from the catalog.</p></div>`;
+    if(tot) tot.textContent = '₱0'; return;
+  }
+  if(tot) tot.textContent = '₱' + cart.filter(c => typeof c.price === 'number').reduce((s, i) => s + i.price, 0).toLocaleString();
+  el.innerHTML = cart.map((pkg, pi) => {
+    if (pkg.isCustom) {
+      return `<div class="c-item" style="flex-direction:column;align-items:flex-start;gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;width:100%;">
+          <div class="c-ico">${pkg.icon}</div>
+          <div class="c-inf" style="flex:1">
+            <div class="c-cat">${pkg.occasion} · ${pkg.pax} pax · ${pkg.venue}</div>
+            <div class="c-n">${pkg.name}</div>
+            <div class="c-p">₱${pkg.total.toLocaleString()}</div>
+          </div>
+          <button class="c-rm" onclick="removeCartPkg(${pi})">✕</button>
+        </div>
+        <div style="font-size:11px;color:var(--text-light);padding:0 0 0 34px;">${pkg.items.map(i=>i.name).join(' · ')}</div>
+      </div>`;
+    }
+    return `<div class="c-item">
+      <div class="c-ico">${pkg.icon||'📦'}</div>
+      <div class="c-inf"><div class="c-cat">${pkg.tagline||''}</div><div class="c-n">${pkg.name}</div><div class="c-p">${pkg.price}</div></div>
+      <button class="c-rm" onclick="removeCartPkg(${pi})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function removeCartPkg(idx) {
+  cart.splice(idx, 1);
+  renderCart();
 }
 
 function toggleCart() { document.getElementById('cart-drawer').classList.toggle('open'); }
@@ -178,6 +270,62 @@ function closeMobAI() {
   document.getElementById('mob-overlay').classList.remove('on');
   document.body.style.overflow = '';
 }
+
+// ===== DESKTOP FLOATING AI WINDOW =====
+function getCustomPkgContext() {
+  const desc = document.getElementById('cpkg-desc')?.value.trim();
+  const theme = document.getElementById('cpkg-theme')?.value.trim();
+  const pax = document.getElementById('cpkg-pax')?.value.trim();
+  const occasion = document.getElementById('cpkg-occasion')?.value.trim();
+  const venue = document.getElementById('cpkg-venue')?.value.trim();
+  const hasForm = desc || theme || pax || occasion || venue;
+  const hasItems = customPkgItems.length > 0;
+  if (!hasForm && !hasItems) return null;
+  let ctx = "[CURRENT CUSTOM PACKAGE]\n";
+  if (occasion) ctx += `Occasion: ${occasion}\n`;
+  if (desc) ctx += `Description: ${desc}\n`;
+  if (theme) ctx += `Theme: ${theme}\n`;
+  if (pax) ctx += `Guests: ${pax} pax\n`;
+  if (venue) ctx += `Venue: ${venue}\n`;
+  if (hasItems) {
+    ctx += `Items selected (${customPkgItems.length}): ${customPkgItems.map(i => `${i.name} (₱${i.price.toLocaleString()})`).join(', ')}\n`;
+    ctx += `Current total: ₱${customPkgItems.reduce((s,i) => s+i.price, 0).toLocaleString()}\n`;
+  }
+  return ctx;
+}
+
+function updateDawContextBar() {
+  const bar = document.getElementById('daw-context-bar');
+  if (!bar) return;
+  const ctx = getCustomPkgContext();
+  if (ctx) {
+    const cnt = customPkgItems.length;
+    const occasion = document.getElementById('cpkg-occasion')?.value.trim();
+    bar.textContent = `Reading your package${occasion ? (' — ' + occasion) : ''}${cnt ? (' · ' + cnt + ' item' + (cnt!==1?'s':'')) : ''}`;
+    bar.classList.add('on');
+  } else {
+    bar.classList.remove('on');
+  }
+}
+
+function toggleDeskAI() {
+  const win = document.getElementById('desk-ai-window');
+  const overlay = document.getElementById('desk-ai-overlay');
+  if (win.classList.contains('open')) {
+    closeDeskAI();
+  } else {
+    win.classList.add('open');
+    overlay.classList.add('on');
+    initAI('desk');
+    updateDawContextBar();
+  }
+}
+function closeDeskAI() {
+  document.getElementById('desk-ai-window').classList.remove('open');
+  document.getElementById('desk-ai-overlay').classList.remove('on');
+}
+window.toggleDeskAI = toggleDeskAI;
+window.closeDeskAI = closeDeskAI;
 
 // ===== AI =====
 const API_URL = 'https://halden-s-catering-service.vercel.app/api/chat';
@@ -258,7 +406,15 @@ async function sendMsg(panel) {
   document.getElementById(chipsId).style.display = 'none';
   addUser(txt, msgsId);
   btn.disabled = true; showTyping(msgsId);
-  hist.push({ role: 'user', content: txt });
+
+  // For desktop, prepend the current package context to give the AI full awareness
+  let userContent = txt;
+  if (panel === 'desk') {
+    const ctx = getCustomPkgContext();
+    if (ctx) userContent = ctx + '\nUser message: ' + txt;
+    updateDawContextBar();
+  }
+  hist.push({ role: 'user', content: userContent });
 
   try {
     const res = await fetch(API_URL, {
@@ -283,9 +439,8 @@ async function sendMsg(panel) {
     addBot(clean, msgsId);
 
     if (aiPicks && panel === 'desk') {
-      const notif = document.getElementById('ai-notif');
-      notif.textContent = aiPicks.length;
-      notif.classList.add('on');
+      const notif = document.getElementById('ai-notif-desk');
+      if(notif) { notif.textContent = aiPicks.length; notif.classList.add('on'); }
     }
   } catch (e) {
     hideTyping(msgsId);
@@ -550,7 +705,7 @@ window.submitReservation = submitReservation;
 
 // ===== SIGN OUT =====
 async function signOut() {
-  try { await window.firebaseFns.signOut(window.firebaseAuth); } catch (e) {}
+  try { await window.firebaseFns.signOut(window.firebaseAuth); } catch (e) { }
   setLoggedOut(); closeAuth();
 }
 
