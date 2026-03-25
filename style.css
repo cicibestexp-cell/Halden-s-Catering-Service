@@ -244,7 +244,7 @@
 
     /* ===== DESKTOP FLOATING AI BUTTON + WINDOW ===== */
     .desk-ai-fab{
-      display:flex;position:fixed;bottom:60px;right:16px;
+      display:flex;position:fixed;bottom:45px;right:16px;
       background:linear-gradient(135deg,var(--brown),var(--brown-light));
       color:var(--gold-light);border:none;border-radius:50px;
       padding:13px 18px;font-size:13px;font-weight:600;
@@ -262,7 +262,7 @@
     /* Window uses visibility+opacity so it animates without display:none flickering */
     .desk-ai-window{
       visibility:hidden;opacity:0;pointer-events:none;
-      position:fixed;bottom:110px;right:20px;
+      position:fixed;bottom:100px;right:20px;
       width:400px;height:520px;
       background:var(--warm-white);border:1px solid var(--border);border-radius:20px;
       z-index:420;display:flex;flex-direction:column;
