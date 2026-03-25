@@ -202,27 +202,12 @@
     </div>
 
     <div class="catalog-workspace reveal delay-3">
-      <!-- LEFT: AI PANEL (desktop only) -->
-      <div class="ai-panel">
-        <div class="ai-panel-hdr">
-          <div class="ai-hdr-row">
-            <div class="ai-ava">✦</div>
+      <!-- LEFT: CUSTOM PACKAGE PANEL (desktop only) -->
+      <div class="cpkg-panel" id="cpkg-panel">
+        <div class="cpkg-panel-hdr">
+          <div class="cpkg-hdr-title">
+            <div class="cpkg-icon">📋</div>
             <div>
-              <div class="ai-name">Halden's AI Planner</div>
-              <div class="ai-status">
-                <div class="ai-dot"></div>Ready to assist
-              </div>
-            </div>
-          </div>
-          <div class="ai-hint"><strong>Tell me about your event</strong> and I'll highlight the best items from the
-            catalog for you in real time.</div>
-        </div>
-        <div class="ai-msgs" id="ai-msgs-desk"></div>
-        <div class="ai-chips" id="ai-chips-desk">
-          <span class="ai-chip" onclick="chipSend(this,'desk')">Birthday for 50 guests</span>
-          <span class="ai-chip" onclick="chipSend(this,'desk')">Wedding reception</span>
-          <span class="ai-chip" onclick="chipSend(this,'desk')">Kiddie party ₱50k budget</span>
-          <span class="ai-chip" onclick="chipSend(this,'desk')">Corporate event 100 pax</span>
               <div class="cpkg-title">My Custom Package</div>
               <div class="cpkg-subtitle">Fill all fields before finalizing</div>
             </div>
@@ -260,7 +245,7 @@
           <div class="cpkg-items-list" id="cpkg-items">
             <div class="cpkg-empty">
               <div>🧺</div>
-              <p>No items yet.<br>Browse the catalog and add items to your package.</p>
+              <p>No items yet.<br>Browse the catalog and add items.</p>
             </div>
           </div>
           <div class="cpkg-total-row">
@@ -271,9 +256,7 @@
 
         <!-- Finalize -->
         <div class="cpkg-footer">
-          <button class="btn-finalize" onclick="finalizePackage()">
-            ✦ Finalize Package → Add to Cart
-          </button>
+          <button class="btn-finalize" onclick="finalizePackage()">✦ Finalize Package → Add to Cart</button>
         </div>
       </div>
 
@@ -303,6 +286,7 @@
       </div>
     </div>
   </section>
+
 
   <!-- DESKTOP: AI Floating Button (above cart) -->
   <button class="desk-ai-fab" id="desk-ai-fab" onclick="toggleDeskAI()">
