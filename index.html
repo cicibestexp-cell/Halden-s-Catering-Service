@@ -34,10 +34,13 @@
         </span>
         <div class="dropdown-menu">
           <span class="dropdown-item" onclick="jumpCat('food')"><span class="di-icon">🍽️</span>Food &amp; Dishes</span>
-          <span class="dropdown-item" onclick="jumpCat('dessert')"><span class="di-icon">🍰</span>Desserts &amp; Drinks</span>
+          <span class="dropdown-item" onclick="jumpCat('dessert')"><span class="di-icon">🍰</span>Desserts &amp;
+            Drinks</span>
           <span class="dropdown-item" onclick="jumpCat('decoration')"><span class="di-icon">🎨</span>Decorations</span>
-          <span class="dropdown-item" onclick="jumpCat('equipment')"><span class="di-icon">🪑</span>Equipment &amp; Setup</span>
-          <span class="dropdown-item" onclick="jumpCat('entertainment')"><span class="di-icon">🎉</span>Entertainment</span>
+          <span class="dropdown-item" onclick="jumpCat('equipment')"><span class="di-icon">🪑</span>Equipment &amp;
+            Setup</span>
+          <span class="dropdown-item" onclick="jumpCat('entertainment')"><span
+              class="di-icon">🎉</span>Entertainment</span>
           <span class="dropdown-item" onclick="jumpCat('photography')"><span class="di-icon">📸</span>Photography</span>
           <span class="dropdown-item" onclick="jumpCat('all')"><span class="di-icon">✦</span>View All</span>
         </div>
@@ -47,7 +50,8 @@
 
     <div style="display:flex;align-items:center;gap:8px;">
       <button class="btn-auth" onclick="openAuth()">👤 <span class="auth-label">Login / Sign Up</span></button>
-      <button class="btn-nav-cta" onclick="go('#catalog')" style="display:var(--cta-display,flex);">✦ Plan My Event</button>
+      <button class="btn-nav-cta" onclick="go('#catalog')" style="display:var(--cta-display,flex);">✦ Plan My
+        Event</button>
     </div>
     <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -114,14 +118,62 @@
     <!-- Desktop: draggable horizontal carousel -->
     <div class="carousel-container reveal delay-3" id="carousel-container">
       <div class="carousel-track" id="carousel-track">
-        <div class="c-item"><div class="c-img" style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774321988/halden1_sdv4yf.png') center/cover;"><p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding Reception</p></div></div>
-        <div class="c-item"><div class="c-img" style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323082/halden_4_fwsgdo.png') center/cover;"><p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding Reception</p></div></div>
-        <div class="c-item"><div class="c-img" style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323083/halden5_itbx3u.png') center/cover;"><p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding Reception</p></div></div>
-        <div class="c-item"><div class="c-img" style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden7_bqts0y.png') center/cover;"><p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding Reception</p></div></div>
-        <div class="c-item"><div class="c-img" style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323086/halden8_xh2jgu.png') center/cover;"><p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding Reception</p></div></div>
-        <div class="c-item"><div class="c-img" style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323089/halden3_selh2o.png') center/cover;"><p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding Reception</p></div></div>
-        <div class="c-item"><div class="c-img" style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden6_gz1sfv.png') center/cover;"><p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding Reception</p></div></div>
-        <div class="c-item"><div class="c-img" style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323092/halden2_z1enpn.png') center/cover;"><p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding Reception</p></div></div>
+        <div class="c-item">
+          <div class="c-img"
+            style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774321988/halden1_sdv4yf.png') center/cover;">
+            <p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding
+              Reception</p>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-img"
+            style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323082/halden_4_fwsgdo.png') center/cover;">
+            <p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding
+              Reception</p>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-img"
+            style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323083/halden5_itbx3u.png') center/cover;">
+            <p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding
+              Reception</p>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-img"
+            style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden7_bqts0y.png') center/cover;">
+            <p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding
+              Reception</p>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-img"
+            style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323086/halden8_xh2jgu.png') center/cover;">
+            <p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding
+              Reception</p>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-img"
+            style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323089/halden3_selh2o.png') center/cover;">
+            <p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding
+              Reception</p>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-img"
+            style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323085/halden6_gz1sfv.png') center/cover;">
+            <p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding
+              Reception</p>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-img"
+            style="background: url('https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323092/halden2_z1enpn.png') center/cover;">
+            <p style="color:white;text-shadow:0 3px 8px rgba(0,0,0,0.9);margin-top:auto;margin-bottom:16px;">Wedding
+              Reception</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -134,7 +186,8 @@
     <div class="packages-header">
       <p class="section-label reveal">Our Packages</p>
       <h2 class="section-title reveal delay-1">Ready-Made Packages</h2>
-      <p class="section-sub reveal delay-2">Curated bundles for every type of event — complete, hassle-free, and elegantly delivered.</p>
+      <p class="section-sub reveal delay-2">Curated bundles for every type of event — complete, hassle-free, and
+        elegantly delivered.</p>
     </div>
     <div class="packages-grid reveal delay-3" id="pkgs-grid"></div>
   </section>
@@ -144,7 +197,8 @@
     <div class="catalog-intro">
       <p class="section-label reveal">Build Your Package</p>
       <h2 class="section-title reveal delay-1">AI-Assisted Catalog</h2>
-      <p class="section-sub reveal delay-2">Describe your event to the AI planner — it highlights the best catalog items for you in real time.</p>
+      <p class="section-sub reveal delay-2">Describe your event to the AI planner — it highlights the best catalog items
+        for you in real time.</p>
     </div>
 
     <div class="catalog-workspace reveal delay-3">
@@ -155,10 +209,13 @@
             <div class="ai-ava">✦</div>
             <div>
               <div class="ai-name">Halden's AI Planner</div>
-              <div class="ai-status"><div class="ai-dot"></div>Ready to assist</div>
+              <div class="ai-status">
+                <div class="ai-dot"></div>Ready to assist
+              </div>
             </div>
           </div>
-          <div class="ai-hint"><strong>Tell me about your event</strong> and I'll highlight the best items from the catalog for you in real time.</div>
+          <div class="ai-hint"><strong>Tell me about your event</strong> and I'll highlight the best items from the
+            catalog for you in real time.</div>
         </div>
         <div class="ai-msgs" id="ai-msgs-desk"></div>
         <div class="ai-chips" id="ai-chips-desk">
@@ -166,12 +223,57 @@
           <span class="ai-chip" onclick="chipSend(this,'desk')">Wedding reception</span>
           <span class="ai-chip" onclick="chipSend(this,'desk')">Kiddie party ₱50k budget</span>
           <span class="ai-chip" onclick="chipSend(this,'desk')">Corporate event 100 pax</span>
+              <div class="cpkg-title">My Custom Package</div>
+              <div class="cpkg-subtitle">Fill all fields before finalizing</div>
+            </div>
+          </div>
         </div>
-        <div class="ai-inp-row">
-          <textarea class="ai-inp" id="ai-inp-desk" placeholder="Describe your event — type, guests, budget, theme..." rows="1"
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg('desk');}"
-            oninput="ar(this)"></textarea>
-          <button class="ai-send" id="ai-send-desk" onclick="sendMsg('desk')">➤</button>
+
+        <!-- Event Details Form -->
+        <div class="cpkg-form" id="cpkg-form">
+          <div class="cpkg-form-title">✦ Event Details <span class="cpkg-required-note">(all required)</span></div>
+          <div class="cpkg-field">
+            <label for="cpkg-desc">Event Description</label>
+            <textarea id="cpkg-desc" class="cpkg-textarea" placeholder="Describe your event in detail..." rows="2" oninput="ar(this)"></textarea>
+          </div>
+          <div class="cpkg-field">
+            <label for="cpkg-theme">Theme / Style</label>
+            <input type="text" id="cpkg-theme" class="cpkg-input" placeholder="e.g. Rustic, Floral, Modern..." />
+          </div>
+          <div class="cpkg-field">
+            <label for="cpkg-pax">Number of Guests (Pax)</label>
+            <input type="number" id="cpkg-pax" class="cpkg-input" placeholder="e.g. 80" min="1" />
+          </div>
+          <div class="cpkg-field">
+            <label for="cpkg-occasion">Occasion / What it's for</label>
+            <input type="text" id="cpkg-occasion" class="cpkg-input" placeholder="e.g. 18th Birthday, Wedding..." />
+          </div>
+          <div class="cpkg-field">
+            <label for="cpkg-venue">Venue / Location</label>
+            <input type="text" id="cpkg-venue" class="cpkg-input" placeholder="e.g. Quezon City, Home, Events Hall..." />
+          </div>
+        </div>
+
+        <!-- Items List -->
+        <div class="cpkg-items-section">
+          <div class="cpkg-items-title">Selected Items <span class="cpkg-count" id="cpkg-count">0 items</span></div>
+          <div class="cpkg-items-list" id="cpkg-items">
+            <div class="cpkg-empty">
+              <div>🧺</div>
+              <p>No items yet.<br>Browse the catalog and add items to your package.</p>
+            </div>
+          </div>
+          <div class="cpkg-total-row">
+            <span class="cpkg-total-lbl">Package Subtotal</span>
+            <span class="cpkg-total-amt" id="cpkg-total">₱0</span>
+          </div>
+        </div>
+
+        <!-- Finalize -->
+        <div class="cpkg-footer">
+          <button class="btn-finalize" onclick="finalizePackage()">
+            ✦ Finalize Package → Add to Cart
+          </button>
         </div>
       </div>
 
@@ -202,6 +304,43 @@
     </div>
   </section>
 
+  <!-- DESKTOP: AI Floating Button (above cart) -->
+  <button class="desk-ai-fab" id="desk-ai-fab" onclick="toggleDeskAI()">
+    ✦ AI Planner
+    <div class="ai-notif" id="ai-notif-desk"></div>
+  </button>
+
+  <!-- DESKTOP: AI Window Overlay -->
+  <div class="desk-ai-overlay" id="desk-ai-overlay" onclick="closeDeskAI()"></div>
+
+  <!-- DESKTOP: Floating AI Chat Window -->
+  <div class="desk-ai-window" id="desk-ai-window">
+    <div class="daw-hdr">
+      <div class="daw-hdr-left">
+        <div class="ai-ava">✦</div>
+        <div>
+          <div class="ai-name">Halden's AI Planner</div>
+          <div class="ai-status"><div class="ai-dot"></div>Ready to assist</div>
+        </div>
+      </div>
+      <button class="daw-close" onclick="closeDeskAI()">✕</button>
+    </div>
+    <div class="daw-context-bar" id="daw-context-bar"></div>
+    <div class="ai-msgs" id="ai-msgs-desk" style="flex:1;overflow-y:auto;"></div>
+    <div class="ai-chips" id="ai-chips-desk">
+      <span class="ai-chip" onclick="chipSend(this,'desk')">Birthday for 50 guests</span>
+      <span class="ai-chip" onclick="chipSend(this,'desk')">Wedding reception</span>
+      <span class="ai-chip" onclick="chipSend(this,'desk')">Review my package</span>
+      <span class="ai-chip" onclick="chipSend(this,'desk')">Corporate event 100 pax</span>
+    </div>
+    <div class="ai-inp-row">
+      <textarea class="ai-inp" id="ai-inp-desk" placeholder="Describe your event or ask about your package..."
+        rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg('desk');}"
+        oninput="ar(this)"></textarea>
+      <button class="ai-send" id="ai-send-desk" onclick="sendMsg('desk')">➤</button>
+    </div>
+  </div>
+
   <!-- MOBILE: Floating AI Button -->
   <button class="mob-ai-fab" id="mob-ai-fab" onclick="openMobAI()">
     ✦ AI Planner
@@ -219,7 +358,9 @@
         <div class="ai-ava">✦</div>
         <div>
           <div class="ai-name">Halden's AI Planner</div>
-          <div class="ai-status"><div class="ai-dot"></div>Ready to assist</div>
+          <div class="ai-status">
+            <div class="ai-dot"></div>Ready to assist
+          </div>
         </div>
       </div>
       <button class="mob-drawer-close" onclick="closeMobAI()">✕</button>
@@ -249,7 +390,10 @@
       <button class="cart-x" onclick="toggleCart()">✕</button>
     </div>
     <div class="cart-items" id="cart-items">
-      <div class="cart-empty"><div>🛒</div><p>Your package is empty.<br>Add items from the catalog.</p></div>
+      <div class="cart-empty">
+        <div>🛒</div>
+        <p>Your package is empty.<br>Add items from the catalog.</p>
+      </div>
     </div>
     <div class="cart-ftr">
       <div class="cart-tot-row">
@@ -287,23 +431,38 @@
         <button class="btn-signout" onclick="signOut()">Sign Out</button>
       </div>
       <div class="auth-panel active" id="panel-login">
-        <div class="auth-welcome"><h3>Welcome back ✦</h3><p>Log in to manage your reservations and saved packages.</p></div>
+        <div class="auth-welcome">
+          <h3>Welcome back ✦</h3>
+          <p>Log in to manage your reservations and saved packages.</p>
+        </div>
         <div class="auth-msg" id="login-msg"></div>
-        <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com" /></div>
-        <div class="auth-field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" /></div>
+        <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com" />
+        </div>
+        <div class="auth-field"><label>Password</label><input type="password" id="login-password"
+            placeholder="••••••••" /></div>
         <button class="auth-submit" id="login-btn" onclick="doLogin()">Login to My Account</button>
         <div class="auth-switch">Don't have an account? <a onclick="switchAuthTab('signup')">Sign up here</a></div>
-        <button class="btn-google" onclick="doGoogleLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Continue with Google</button>
+        <button class="btn-google" onclick="doGoogleLogin()"><img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Continue with
+          Google</button>
       </div>
       <div class="auth-panel" id="panel-signup">
-        <div class="auth-welcome"><h3>Create an account ✦</h3><p>Sign up to save your custom packages and track your reservations.</p></div>
+        <div class="auth-welcome">
+          <h3>Create an account ✦</h3>
+          <p>Sign up to save your custom packages and track your reservations.</p>
+        </div>
         <div class="auth-msg" id="signup-msg"></div>
-        <div class="auth-field"><label>Full Name</label><input type="text" id="signup-name" placeholder="Your full name" /></div>
-        <div class="auth-field"><label>Email</label><input type="email" id="signup-email" placeholder="your@email.com" /></div>
-        <div class="auth-field"><label>Password</label><input type="password" id="signup-password" placeholder="Create a password (min 6 chars)" /></div>
+        <div class="auth-field"><label>Full Name</label><input type="text" id="signup-name"
+            placeholder="Your full name" /></div>
+        <div class="auth-field"><label>Email</label><input type="email" id="signup-email"
+            placeholder="your@email.com" /></div>
+        <div class="auth-field"><label>Password</label><input type="password" id="signup-password"
+            placeholder="Create a password (min 6 chars)" /></div>
         <button class="auth-submit" id="signup-btn" onclick="doSignup()">Create My Account</button>
         <div class="auth-switch">Already have an account? <a onclick="switchAuthTab('login')">Login here</a></div>
-        <button class="btn-google" onclick="doGoogleLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Continue with Google</button>
+        <button class="btn-google" onclick="doGoogleLogin()"><img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Continue with
+          Google</button>
       </div>
     </div>
   </div>
@@ -313,10 +472,16 @@
     <div class="ft-top">
       <div>
         <div class="ft-brand">Halden's Event Management &amp; Catering</div>
-        <p class="ft-desc">Premium catering services for all occasions. From intimate gatherings to grand celebrations, we bring warmth and excellence to every table.</p>
+        <p class="ft-desc">Premium catering services for all occasions. From intimate gatherings to grand celebrations,
+          we bring warmth and excellence to every table.</p>
       </div>
-      <div class="ft-col"><h4>Explore</h4><a onclick="go('#packages')">Packages</a><a onclick="go('#catalog')">Full Catalog</a><a onclick="openMobAI()">AI Planner</a></div>
-      <div class="ft-col"><h4>Contact</h4><a>Facebook: Halden's Catering</a><a>Phone: (placeholder)</a><a>Email: (placeholder)</a></div>
+      <div class="ft-col">
+        <h4>Explore</h4><a onclick="go('#packages')">Packages</a><a onclick="go('#catalog')">Full Catalog</a><a
+          onclick="openMobAI()">AI Planner</a>
+      </div>
+      <div class="ft-col">
+        <h4>Contact</h4><a>Facebook: Halden's Catering</a><a>Phone: (placeholder)</a><a>Email: (placeholder)</a>
+      </div>
     </div>
     <div class="ft-bottom">
       <span>© 2025 Halden's Event Management &amp; Catering Service. All rights reserved.</span>
@@ -338,13 +503,14 @@
       <div class="chk-form">
         <div class="chk-field"><label>Event Date</label><input type="date" id="chk-date" /></div>
         <div class="chk-field"><label>Event Type</label><select id="chk-type">
-          <option value="Birthday Party">Birthday Party</option>
-          <option value="Wedding">Wedding</option>
-          <option value="Corporate">Corporate</option>
-          <option value="Family Gathering">Family Gathering</option>
-          <option value="Other">Other</option>
-        </select></div>
-        <div class="chk-field"><label>Guest Count (Pax)</label><input type="number" id="chk-pax" value="50" min="10" /></div>
+            <option value="Birthday Party">Birthday Party</option>
+            <option value="Wedding">Wedding</option>
+            <option value="Corporate">Corporate</option>
+            <option value="Family Gathering">Family Gathering</option>
+            <option value="Other">Other</option>
+          </select></div>
+        <div class="chk-field"><label>Guest Count (Pax)</label><input type="number" id="chk-pax" value="50" min="10" />
+        </div>
         <div class="chk-field"><label>Payment Method</label>
           <div class="pay-options">
             <label class="pay-opt"><input type="radio" name="pay-method" value="GCash" checked /> GCash</label>
@@ -389,4 +555,5 @@
   </script>
   <script src="app.js"></script>
 </body>
+
 </html>
