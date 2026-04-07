@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — Halden's</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="admin.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FOUC prevention: apply saved theme before first paint -->
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('halden_theme') || 'dark');</script>
+  <script src="theme.js"></script>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="nav-brand">
+    <div class="nav-brand-icon">H</div>
+    <div>
+      <span class="nav-brand-name">Halden's</span>
+      <span class="nav-brand-badge">Admin</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-admin-info">Logged in as <strong id="admin-name">Administrator</strong></div>
+    <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span class="theme-icon">☀️</span><span class="theme-label">Light</span>
+    </button>
+    <button class="btn-logout" onclick="adminLogout()">Sign Out</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <div class="sidebar-item active" onclick="showSection('dashboard',this)"><span class="s-icon">📊</span> Dashboard</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <div class="sidebar-item" onclick="showSection('reservations',this)"><span class="s-icon">📅</span> Reservations <span class="sidebar-badge">3</span></div>
+      <div class="sidebar-item" onclick="showSection('inventory',this)"><span class="s-icon">📦</span> Inventory <span class="sidebar-badge amber">2</span></div>
+      <div class="sidebar-item" onclick="showSection('events',this)"><span class="s-icon">🎉</span> Events</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Business</div>
+      <div class="sidebar-item" onclick="showSection('catalog',this)"><span class="s-icon">🍽️</span> Catalog</div>
+      <div class="sidebar-item" onclick="showSection('insights',this)"><span class="s-icon">📈</span> Insights</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Support</div>
+      <div class="sidebar-item" id="nav-chat" onclick="showSection('chat',this)">
+        <span class="s-icon">💬</span> Chat Support 
+        <span id="chat-notif" class="sidebar-badge amber" style="display:none;">!</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="section-dashboard">
+      <div class="page-hdr">
+        <div class="page-hdr-left"><h1>Good morning, Admin ✦</h1><p id="dash-date">Loading date...</p></div>
+        <button class="btn-primary">+ New Reservation</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">Upcoming Events</div><div class="stat-value">8</div><div class="stat-change up">↑ 2 this week</div></div>
+        <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-label">Pending Approval</div><div class="stat-value">3</div><div class="stat-change neutral">Needs review</div></div>
+        <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-label">Low Stock Alerts</div><div class="stat-value">2</div><div class="stat-change down">Restock needed</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Est. Revenue (Mar)</div><div class="stat-value">₱248k</div><div class="stat-change up">↑ 18% vs last month</div></div>
+      </div>
+      <div class="three-col">
+        <div class="panel">
+          <div class="panel-hdr"><div><div class="panel-title">Upcoming Reservations</div><div class="panel-sub">Next 7 days</div></div><span class="panel-action" onclick="showSection('reservations',null)">View all →</span></div>
+          <div class="panel-body" id="dash-reservations"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div><div class="panel-title">Stock Alerts</div><div class="panel-sub">Requires attention</div></div></div>
+          <div class="panel-body">
+            <div class="alert-item critical"><div class="alert-icon">🚨</div><div class="alert-text"><div class="alert-title">Chicken — Critical</div><div class="alert-sub">Only 8kg left. 3 events need 45kg total.</div></div><span class="alert-action">Restock</span></div>
+            <div class="alert-item low" style="margin-top:8px;"><div class="alert-icon">⚠️</div><div class="alert-text"><div class="alert-title">Steamed Rice — Low</div><div class="alert-sub">20kg remaining. Restock before Mar 19.</div></div><span class="alert-action">Restock</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-hdr"><div><div class="panel-title">Bookings This Month</div><div class="panel-sub">March 2026</div></div></div>
+          <div class="panel-body">
+            <div class="big-stat">14 <span class="big-stat-sub">events confirmed</span></div>
+            <div class="stat-change up" style="margin-bottom:16px;">↑ 3 more than February</div>
+            <div style="height:140px; position:relative;"><canvas id="booking-chart"></canvas></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div><div class="panel-title">Recent Activity</div></div></div>
+          <div class="panel-body" style="padding-top:12px;" id="activity-log"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="section" id="section-inventory">
+      <div class="page-hdr">
+        <div class="page-hdr-left"><h1>Inventory Management</h1><p>Track ingredient stock levels and forecasted demand</p></div>
+        <div>
+          <button class="btn-outline" style="padding:9px 16px; border-radius:9px; margin-right:8px; font-size:13px; font-weight:600;" onclick="openRestockModal()">📦 Restock</button>
+          <button class="btn-primary" onclick="openAddStock()">+ Add Stock</button>
+        </div>
+      </div>
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-label">Total Ingredients</div><div class="stat-value">10</div><div class="stat-change neutral">Tracked items</div></div>
+        <div class="stat-card"><div class="stat-icon">🚨</div><div class="stat-label">Critical Stock</div><div class="stat-value">1</div><div class="stat-change down">Immediate restock</div></div>
+        <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-label">Low Stock</div><div class="stat-value">1</div><div class="stat-change down">Monitor closely</div></div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-hdr"><div><div class="panel-title">Current Stock Levels</div><div class="panel-sub">Auto-updated on reservation confirmation</div></div></div>
+          <div class="panel-body" style="padding:0;"><table class="inv-table"><thead><tr><th>Ingredient</th><th>Stock</th><th>Min. Required</th><th>Status</th></tr></thead><tbody id="inv-tbody"></tbody></table></div>
+        </div>
+        <div>
+          <div class="panel" style="margin-bottom:20px;">
+            <div class="panel-hdr"><div><div class="panel-title">Approved Event Requirements</div><div class="panel-sub">Itemized breakdown for confirmed bookings</div></div></div>
+            <div class="panel-body" id="pending-dispatch-list" style="max-height: 400px; overflow-y: auto; padding-right:10px;"></div>
+          </div>
+          <div class="panel" style="margin-bottom:20px;">
+            <div class="panel-hdr"><div><div class="panel-title">Total Ingredient Shortfall</div><div class="panel-sub">Assessing all approved events against inventory</div></div></div>
+            <div class="panel-body" id="forecast-bars"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-hdr"><div><div class="panel-title">Stock Alerts</div></div></div>
+            <div class="panel-body" id="dynamic-alerts"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESERVATIONS -->
+    <div class="section" id="section-reservations">
+      <div class="page-hdr">
+        <div class="page-hdr-left"><h1>Reservations</h1><p>Manage all incoming and confirmed bookings</p></div>
+        <button class="btn-primary">+ New Reservation</button>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="filterRes('all',this)">All</button>
+            <button class="tab-btn" onclick="filterRes('pending',this)">Pending (3)</button>
+            <button class="tab-btn" onclick="filterRes('confirmed',this)">Confirmed (4)</button>
+            <button class="tab-btn" onclick="filterRes('cancelled',this)">Cancelled (1)</button>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0;overflow-x:auto;"><table class="inv-table"><thead><tr><th>Client</th><th>Event Type</th><th>Date</th><th>Pax</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody id="res-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- EVENTS -->
+    <div class="section" id="section-events">
+      <div class="page-hdr"><div class="page-hdr-left"><h1>Event Schedule</h1><p>Huge calendar view for confirmed bookings</p></div></div>
+      <div class="panel"><div class="panel-body" style="padding:20px;"><div id="calendar"></div></div></div>
+    </div>
+
+    <!-- EVENT DETAILS FULL VIEW -->
+    <div class="section" id="section-event-details">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <button class="btn-outline" style="padding:6px 12px; margin-bottom:14px; font-size:12px;" onclick="backToCalendar()">← Back to Calendar</button>
+          <h1 id="ed-title">Event Details</h1>
+          <p id="ed-date">Date</p>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Total Amount (<span id="ed-pax"></span>)</div>
+          <div style="font-family:'Playfair Display'; font-size:24px; font-weight:700; color:var(--cream);" id="ed-amount"></div>
+        </div>
+      </div>
+      
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-hdr"><div><div class="panel-title">Event Status</div><div class="panel-sub">Change live status</div></div></div>
+          <div class="panel-body">
+            <select id="ed-status" class="input-field" style="max-width:260px;" onchange="changeEventStatus()">
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="preparing">Preparing</option>
+              <option value="on-going">On-going</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <p style="margin-top:14px; font-size:12px; color:var(--text-dim);">Updating the status will immediately reflect on the calendar and forecast system.</p>
+          </div>
+        </div>
+        
+        <div class="panel">
+          <div class="panel-hdr"><div><div class="panel-title">Ingredient Extrapolation</div><div class="panel-sub">Calculated based on pax</div></div></div>
+          <div class="panel-body" id="ed-stocks-list" style="display:block; max-height:400px; overflow-y:auto; padding-right:10px;">
+             <!-- dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATALOG -->
+    <div class="section" id="section-catalog">
+      <div class="page-hdr"><div class="page-hdr-left"><h1>Catalog Management</h1><p>Manage menu items, packages, and pricing</p></div><button class="btn-primary">+ Add Item</button></div>
+      <div class="panel"><div class="panel-hdr"><div class="panel-title">Menu Catalog</div></div><div class="panel-body"><div class="coming-soon">🍽️<p>Catalog management coming soon.</p><small>Will connect to Firebase.</small></div></div></div>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="section" id="section-insights">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Business Insights</h1>
+          <p>Real-time analytics and growth metrics</p>
+        </div>
+        <button class="btn-primary" onclick="generateAIReport()" id="btn-ai-report">✦ Generate Intelligence Report</button>
+      </div>
+
+      <!-- AI INSIGHTS ENGINE -->
+      <div id="ai-insights-container" style="display:none; margin-bottom: 24px;">
+        <div class="panel" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid var(--gold);">
+          <div class="panel-hdr">
+            <div style="color:var(--gold); font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase;">Halden's intelligence Engine v1.0</div>
+          </div>
+          <div class="panel-body" id="ai-insights-body" style="color:var(--cream); line-height:1.6; font-size:14px;">
+             <!-- AI content here -->
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">Total Events (2026)</div><div class="stat-value">42</div><div class="stat-change up">↑ 28% vs 2025</div></div>
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Guests Served</div><div class="stat-value">3.8k</div><div class="stat-change up">↑ 15% vs last year</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Revenue YTD</div><div class="stat-value">₱1.2M</div><div class="stat-change up">↑ 22% vs last year</div></div>
+        <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-label">Top Package</div><div class="stat-value" style="font-size:18px;">Kiddie B</div><div class="stat-change neutral">18 bookings</div></div>
+      </div>
+      <div class="two-col">
+        <div class="panel"><div class="panel-hdr"><div class="panel-title">Top Menu Items</div></div><div class="panel-body"><div style="height:220px; position:relative;"><canvas id="top-items-chart"></canvas></div></div></div>
+        <div class="panel"><div class="panel-hdr"><div class="panel-title">Event Types Breakdown</div></div><div class="panel-body"><div style="height:220px; position:relative;"><canvas id="event-types-chart"></canvas></div></div></div>
+      </div>
+    </div>
+
+    <!-- CHAT SUPPORT -->
+    <div class="section" id="section-chat">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Chat Support Inbox ✦</h1>
+          <p>Respond to customer inquiries in real-time</p>
+        </div>
+      </div>
+      <div class="chat-manager-layout">
+        <!-- Inbox List -->
+        <div class="chat-inbox">
+          <div class="inbox-hdr">Active Conversations</div>
+          <div id="chat-inbox-list" class="inbox-list">
+            <div style="padding:20px; text-align:center; color:var(--text-dim); font-size:12px;">No active chats yet.</div>
+          </div>
+        </div>
+        <!-- Active Chat Window -->
+        <div class="chat-viewport">
+          <div id="active-chat-hdr" class="active-chat-hdr">
+            <div class="ach-info">
+              <div class="ach-name">Select a conversation</div>
+              <div class="ach-status">to start messaging</div>
+            </div>
+          </div>
+          <div id="admin-chat-box" class="chat-messages">
+            <div class="chat-empty-state">
+              <div class="ces-icon">📬</div>
+              <p>Select a customer from the inbox to view their message history.</p>
+            </div>
+          </div>
+          <div class="chat-input-area" id="admin-chat-input-row" style="display:none;">
+            <input type="text" id="admin-chat-input" placeholder="Type your response..." onkeydown="if(event.key==='Enter') sendAdminMsg()"/>
+            <button onclick="sendAdminMsg()">Reply ✦</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- Firebase SDK via CDN -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile }
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, query, where, onSnapshot, orderBy }
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAc9hHRGErQ8R2tByoqMJ04SMvJed5FDro",
+    authDomain: "smartserve-e3856.firebaseapp.com",
+    projectId: "smartserve-e3856",
+    storageBucket: "smartserve-e3856.firebasestorage.app",
+    messagingSenderId: "255403568863",
+    appId: "1:255403568863:web:7187560f64c8730ecec36a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app, "default");
+
+  window.firebaseAuth = auth;
+  window.firebaseDB = db;
+  window.firebaseFns = {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+    updateProfile,
+    collection,
+    getDocs,
+    addDoc,
+    updateDoc,
+    doc,
+    query,
+    where,
+    onSnapshot,
+    orderBy
+  };
+</script>
+
+<!-- ADD STOCK MODAL -->
+<div id="add-stock-overlay" class="modal-overlay"></div>
+<div id="add-stock-modal" class="modal">
+  <div class="modal-hdr">
+    <div class="modal-title">Add New Stock Item</div>
+    <button class="modal-close" onclick="closeAddStock()">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label>Item Name</label>
+      <input type="text" id="add-stock-name" class="input-field" placeholder="e.g., Potatoes" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="add-stock-cat" class="input-field">
+          <option value="food">Food</option>
+          <option value="beverage">Beverage</option>
+          <option value="supplies">Supplies</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Unit</label>
+        <input type="text" id="add-stock-unit" class="input-field" placeholder="kg, pcs, etc." />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Initial Stock</label>
+        <input type="number" id="add-stock-qty" class="input-field" placeholder="0" />
+      </div>
+      <div class="form-group">
+        <label>Min. Threshold</label>
+        <input type="number" id="add-stock-min" class="input-field" placeholder="0" />
+      </div>
+    </div>
+    <button class="btn-primary" style="width:100%; justify-content:center; margin-top:10px;" onclick="submitAddStock()" id="btn-submit-stock">Add Item</button>
+  </div>
+</div>
+
+<!-- RESTOCK MODAL -->
+<div id="restock-overlay" class="modal-overlay"></div>
+<div id="restock-modal" class="modal fullscreen-modal">
+  <div class="modal-hdr">
+    <div class="modal-title">Restock Inventory</div>
+    <button class="modal-close" onclick="closeRestockModal()">✕</button>
+  </div>
+  <div class="modal-body" style="display:flex; gap:24px; flex-wrap:wrap;">
+    <!-- left side: item selection -->
+    <div style="flex:1; min-width:250px;">
+      <h3 style="font-size:14px; color:var(--text); margin-bottom:12px;">Select Item to Restock</h3>
+      <div class="form-group">
+        <label>Ingredient / Supply</label>
+        <select id="restock-item-select" class="input-field" onchange="updateRestockUnit()">
+          <option value="">Choose an item...</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+           <label>Quantity to add</label>
+           <input type="number" id="restock-qty-input" class="input-field" placeholder="e.g. 50">
+        </div>
+        <div class="form-group">
+           <label>Unit</label>
+           <input type="text" id="restock-unit-display" class="input-field" placeholder="kg, pcs" disabled style="background:var(--bg2);">
+         </div>
+      </div>
+      <button class="btn-primary" style="width:100%; justify-content:center; margin-top:20px;" onclick="submitRestock()" id="btn-submit-restock">Confirm Restock</button>
+    </div>
+    <!-- right side: list representation (sample) -->
+    <div style="flex:1; min-width:250px; background:var(--bg3); border-radius:12px; padding:16px;">
+      <h3 style="font-size:12px; color:var(--text-mid); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;">Summary</h3>
+      <p style="font-size:12px; color:var(--text-dim); line-height:1.6;">Selecting an item and adding quantity will immediately update the main database and resolve any lacking alerts in the pending dispatch list.</p>
+    </div>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
