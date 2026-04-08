@@ -1652,3 +1652,22 @@ window.addEventListener('load', () => {
     else setLoggedOut();
   });
 });
+// ===== EXPOSE GLOBALS =====
+window.finalizePackage = finalizePackage;
+window.toggleItem = toggleItem;
+window.removePkgItem = removePkgItem;
+window.renderCustomPkg = renderCustomPkg;
+window.toggleSelectedItemsView = toggleSelectedItemsView;
+window.openErrorModal = openErrorModal;
+window.closeErrorModal = closeErrorModal;
+window.setCat = setCat;
+window.jumpCat = jumpCat;
+window.renderCat = renderCat;
+window.toggleCart = toggleCart;
+window.removeCartPkg = removeCartPkg;
+window.modifyCartPkg = modifyCartPkg;
+window.openAuth = openAuth;
+window.closeAuth = closeAuth;
+window.switchAuthTab = switchAuthTab;
+window.ar = ar;
+window.go = go;
