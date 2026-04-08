@@ -318,7 +318,7 @@
 
         <!-- Finalize -->
         <div class="cpkg-footer">
-          <button class="btn-finalize" onclick="finalizePackage()">✦ Finalize Package → Add to Cart</button>
+          <button class="btn-finalize" onclick="finalizePackage()">Finalize Package & Add to Cart</button>
         </div>
       </div>
 
@@ -727,27 +727,30 @@
               <button onclick="sendCustomerMsg()">Send ✦</button>
             </div>
           </div>
-      <!-- NOTIFICATION PANEL -->
-      <div id="dash-notif-panel" class="dash-notif-panel">
-        <div class="dnp-hdr">
-          <span>Notifications ✦</span>
-          <button onclick="toggleNotifPanel()">✕</button>
         </div>
-        <div class="dnp-body" id="dash-notif-list">
-          <div class="dnp-item unread">
-            <div class="dnp-icon">🎉</div>
-            <div class="dnp-info">
-              <div class="dnp-title">Welcome to Halden's!</div>
-              <div class="dnp-text">Thank you for joining our elite catering community.</div>
-              <div class="dnp-time">Just now</div>
-            </div>
+
+        <!-- NOTIFICATION PANEL -->
+        <div id="dash-notif-panel" class="dash-notif-panel">
+          <div class="dnp-hdr">
+            <span>Notifications ✦</span>
+            <button onclick="toggleNotifPanel()">✕</button>
           </div>
-          <div class="dnp-item">
-            <div class="dnp-icon">📍</div>
-            <div class="dnp-info">
-              <div class="dnp-title">New Feature: Venue GPS</div>
-              <div class="dnp-text">Pin your venue location directly in the app.</div>
-              <div class="dnp-time">2h ago</div>
+          <div class="dnp-body" id="dash-notif-list">
+            <div class="dnp-item unread">
+              <div class="dnp-icon">🎉</div>
+              <div class="dnp-info">
+                <div class="dnp-title">Welcome to Halden's!</div>
+                <div class="dnp-text">Thank you for joining our elite catering community.</div>
+                <div class="dnp-time">Just now</div>
+              </div>
+            </div>
+            <div class="dnp-item">
+              <div class="dnp-icon">📍</div>
+              <div class="dnp-info">
+                <div class="dnp-title">New Feature: Venue GPS</div>
+                <div class="dnp-text">Pin your venue location directly in the app.</div>
+                <div class="dnp-time">2h ago</div>
+              </div>
             </div>
           </div>
         </div>
