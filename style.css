@@ -3960,66 +3960,83 @@
   display: none !important;
 }
 
-/* ===== ERROR MODAL ===== */
+
+/* ===== ERROR MODAL (Consolidated) ===== */
 .error-overlay {
-  display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.error-overlay.on {
+  background: rgba(10, 8, 6, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
   display: flex;
-  opacity: 1;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.error-overlay.on {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  display: flex !important;
+}
+
 .error-modal {
   background: var(--bg2);
-  width: 90%;
-  max-width: 400px;
-  border-radius: 24px;
-  padding: 30px;
+  width: 95%;
+  max-width: 440px;
+  padding: 40px;
+  border-radius: 28px;
   text-align: center;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-  transform: scale(0.8);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border: 1px solid var(--border);
+  position: relative;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+  transform: translateY(30px) scale(0.95);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 .error-overlay.on .error-modal {
-  transform: scale(1);
+  transform: translateY(0) scale(1);
 }
+
 .error-icon {
-  font-size: 50px;
-  margin-bottom: 20px;
+  font-size: 64px;
+  margin-bottom: 24px;
+  display: block;
 }
+
 .error-title {
   font-family: 'Playfair Display', serif;
-  font-size: 22px;
-  margin-bottom: 10px;
-  color: var(--red) !important;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 12px;
 }
+
 .error-msg {
   color: var(--text-mid);
-  margin-bottom: 25px;
+  font-size: 16px;
   line-height: 1.6;
+  margin-bottom: 30px;
 }
+
 .btn-error-close {
-  background: var(--brown);
-  color: white;
+  background: var(--gold);
+  color: #1a1612;
   border: none;
-  padding: 12px 30px;
+  padding: 14px 40px;
   border-radius: 12px;
   font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.3s ease;
+  width: 100%;
 }
+
 .btn-error-close:hover {
-  background: var(--gold);
-  color: var(--black);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(196, 154, 60, 0.3);
+  filter: brightness(1.1);
 }
 
 @keyframes fadeIn {
@@ -4446,7 +4463,7 @@
   padding: 30px;
 }
 .dash-res-card.approved::before {
-  content: '✦ CONFIRMED';
+  content: 'âœ¦ CONFIRMED';
   position: absolute;
   top: 15px;
   left: 20px;
@@ -4556,7 +4573,6 @@
 }
 .chat-input-area button {
   background: var(--brown);
-  color: white;
   border: none;
   padding: 0 24px;
   border-radius: 14px;
@@ -4568,83 +4584,4 @@
   .dash-panel { grid-template-columns: 1fr; }
   .dash-sidebar { display: none; }
   .dash-res-groups { grid-template-columns: 1fr; }
-}
-
-/* ===== ERROR MODAL ===== */
-.error-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-  align-items: center;
-  justify-content: center;
-}
-
-.error-overlay.on {
-  display: flex;
-}
-
-.error-modal {
-  background: var(--warm-white);
-  border-radius: 16px;
-  padding: 32px;
-  max-width: 400px;
-  box-shadow: 0 20px 60px rgba(44, 30, 16, 0.25);
-  border: 1px solid var(--border);
-  text-align: center;
-  animation: modalIn 0.3s ease;
-}
-
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.error-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-  display: block;
-}
-
-.error-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--brown);
-  margin-bottom: 12px;
-}
-
-.error-msg {
-  font-size: 14px;
-  color: var(--text-mid);
-  line-height: 1.6;
-  margin-bottom: 24px;
-}
-
-.btn-error-close {
-  background: var(--brown);
-  color: var(--cream);
-  border: none;
-  padding: 11px 28px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-error-close:hover {
-  background: var(--brown-light);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(44, 30, 16, 0.15);
 }
