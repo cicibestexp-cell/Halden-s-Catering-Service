@@ -1,3 +1,26 @@
+// ===== GLOBAL EXPOSURE (Early) =====
+window.openErrorModal = function(msg) {
+  console.log('Opening Error Modal:', msg);
+  const overlay = document.getElementById('error-overlay');
+  const msgEl = document.getElementById('error-msg');
+  if (overlay && msgEl) {
+    msgEl.textContent = msg;
+    overlay.classList.add('on');
+    overlay.style.display = 'flex'; // Force display
+  } else {
+    console.error('Error modal elements not found!', { overlay, msgEl });
+    alert(msg);
+  }
+};
+
+window.closeErrorModal = function() {
+  const overlay = document.getElementById('error-overlay');
+  if (overlay) {
+    overlay.classList.remove('on');
+    overlay.style.display = 'none'; // Re-hide
+  }
+};
+
 // ===== DATA =====
 const CAT = [
   { id: 'f1', name: 'Pork Dish', cat: 'food', icon: '🥩', price: 2500, desc: 'Tender slow-cooked pork, serves ~20 pax' },
@@ -190,6 +213,8 @@ function removePkgItem(id) {
   customPkgItems = customPkgItems.filter(c => c.id !== id);
   renderCat(); renderCustomPkg();
 }
+window.toggleItem = toggleItem;
+window.removePkgItem = removePkgItem;
 
 function renderCustomPkg() {
   const tot = document.getElementById('cpkg-total');
@@ -234,6 +259,7 @@ function renderCustomPkg() {
     }
   });
 }
+window.renderCustomPkg = renderCustomPkg;
 
 function toggleSelectedItemsView() {
   const panel = document.getElementById('cpkg-panel');
@@ -250,39 +276,37 @@ function toggleSelectedItemsView() {
 }
 window.toggleSelectedItemsView = toggleSelectedItemsView;
 
-function openErrorModal(msg) {
-  const overlay = document.getElementById('error-overlay');
-  const msgEl = document.getElementById('error-msg');
-  if (overlay && msgEl) {
-    msgEl.textContent = msg;
-    overlay.classList.add('on');
-  }
-}
-window.openErrorModal = openErrorModal;
-
-function closeErrorModal() {
-  document.getElementById('error-overlay')?.classList.remove('on');
-}
-window.closeErrorModal = closeErrorModal;
+window.toggleSelectedItemsView = toggleSelectedItemsView;
 
 function finalizePackage() {
-  const desc = document.getElementById('cpkg-desc')?.value.trim();
-  const theme = document.getElementById('cpkg-theme')?.value.trim();
-  const pax = document.getElementById('cpkg-pax')?.value.trim();
-  const occasion = document.getElementById('cpkg-occasion')?.value.trim();
-  const city = document.getElementById('cpkg-city')?.value.trim();
-  const venue = document.getElementById('cpkg-venue')?.value.trim();
+  console.log('Finalize triggered');
+  // Validate required fields safely
+  const getV = (id) => (document.getElementById(id)?.value || '').trim();
+  
+  const desc = getV('cpkg-desc');
+  const theme = getV('cpkg-theme');
+  const pax = getV('cpkg-pax');
+  const occasion = getV('cpkg-occasion');
+  const city = getV('cpkg-city');
+  const venue = getV('cpkg-venue');
 
-  if (!desc || !theme || !pax || !occasion || !city) {
-    openErrorModal('Please fill in all event details (Description, Theme, Pax, Occasion, and City) before finalizing your package.');
+  if (!desc || !theme || !pax || !occasion || !city || !venue) {
+    const msg = 'Please fill in all event details including City before finalizing your package.';
+    console.warn(msg);
+    if (typeof openErrorModal === 'function') openErrorModal(msg);
+    else alert(msg);
     return;
   }
 
+  // Strict category validation
   const hasFood = customPkgItems.some(i => i.cat === 'food' || i.cat === 'dessert');
   const hasEquip = customPkgItems.some(i => i.cat === 'equipment' || i.cat === 'decoration');
 
   if (!hasFood || !hasEquip) {
-    openErrorModal('Food and Equipment selections are absolutely required. Please select at least one item from each category before finalizing.');
+    const msg = 'Food and Equipment selections are absolutely required. Please select at least one item from each category before finalizing.';
+    console.warn(msg);
+    if (typeof openErrorModal === 'function') openErrorModal(msg);
+    else alert(msg);
     return;
   }
 
@@ -294,9 +318,7 @@ function finalizePackage() {
     id: 'custom_' + Date.now(),
     isCustom: true,
     name: name.trim(),
-    desc, theme, pax, occasion,
-    city,                          // ← FIX: was missing from summary
-    venue: venue || city,          // ← FIX: fall back to city if map wasn't used
+    desc, theme, pax, occasion, venue, city,
     items: [...customPkgItems],
     total,
     price: total,
@@ -305,19 +327,25 @@ function finalizePackage() {
 
   cart.push(summary);
   renderCart();
-  document.getElementById('cart-drawer').classList.add('open');
+  const drawer = document.getElementById('cart-drawer');
+  if (drawer) drawer.classList.add('open');
 
   customPkgItems = [];
   renderCustomPkg();
-  ['cpkg-desc','cpkg-theme','cpkg-pax','cpkg-occasion','cpkg-city','cpkg-venue'].forEach(id => {
+  ['cpkg-desc','cpkg-theme','cpkg-pax','cpkg-occasion', 'cpkg-city', 'cpkg-venue'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.value = '';
+    if(el) el.value = '';
   });
-
-  document.getElementById('cpkg-panel').classList.remove('view-items-open');
-  document.getElementById('cpkg-selected-items-view').classList.remove('open');
-
+  
   renderCat();
+
+  // Close items view if open
+  const panel = document.getElementById('cpkg-panel');
+  const view = document.getElementById('cpkg-selected-items-view');
+  if (panel) panel.classList.remove('view-items-open');
+  if (view) view.classList.remove('open');
+  
+  console.log('Finalize successful');
 }
 
 // ===== CART (finalized packages) =====
@@ -357,11 +385,13 @@ function renderCart() {
     </div>`;
   }).join('');
 }
+window.renderCart = renderCart;
 
 function removeCartPkg(idx) {
   cart.splice(idx, 1);
   renderCart();
 }
+window.removeCartPkg = removeCartPkg;
 
 function modifyCartPkg(idx) {
   const pkg = cart[idx];
@@ -390,6 +420,7 @@ function modifyCartPkg(idx) {
 window.modifyCartPkg = modifyCartPkg;
 
 function toggleCart() { document.getElementById('cart-drawer').classList.toggle('open'); }
+window.toggleCart = toggleCart;
 
 // ===== DATA INSIGHTS PANEL =====
 let insightChart = null;
@@ -758,6 +789,7 @@ function clearFilter() {
   document.getElementById('ai-notif').classList.remove('on');
   renderCat();
 }
+window.clearFilter = clearFilter;
 
 function chipSend(el, panel) {
   const inpId = panel === 'desk' ? 'ai-inp-desk' : 'ai-inp-mob';
@@ -1652,22 +1684,33 @@ window.addEventListener('load', () => {
     else setLoggedOut();
   });
 });
-// ===== EXPOSE GLOBALS =====
+// ===== GLOBAL EXPOSURE =====
 window.finalizePackage = finalizePackage;
 window.toggleItem = toggleItem;
 window.removePkgItem = removePkgItem;
+window.renderCart = renderCart;
+window.removeCartPkg = removeCartPkg;
 window.renderCustomPkg = renderCustomPkg;
-window.toggleSelectedItemsView = toggleSelectedItemsView;
+window.toggleCart = toggleCart;
+window.clearFilter = clearFilter;
 window.openErrorModal = openErrorModal;
 window.closeErrorModal = closeErrorModal;
+window.toggleSelectedItemsView = toggleSelectedItemsView;
 window.setCat = setCat;
 window.jumpCat = jumpCat;
-window.renderCat = renderCat;
-window.toggleCart = toggleCart;
-window.removeCartPkg = removeCartPkg;
-window.modifyCartPkg = modifyCartPkg;
-window.openAuth = openAuth;
-window.closeAuth = closeAuth;
-window.switchAuthTab = switchAuthTab;
-window.ar = ar;
-window.go = go;
+window.startCheckout = startCheckout;
+window.openMapModal = openMapModal;
+window.confirmLocation = confirmLocation;
+window.closeMapModal = closeMapModal;
+window.toggleMobAI = toggleMobAI;
+window.closeMobAI = closeMobAI;
+window.sendMsg = sendMsg;
+window.chipSend = chipSend;
+
+// ===== INITIAL RENDER =====
+window.addEventListener('DOMContentLoaded', () => {
+  renderPkgs();
+  renderCat();
+  renderCustomPkg();
+  renderCart();
+});
