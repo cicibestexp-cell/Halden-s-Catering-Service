@@ -266,7 +266,6 @@ function closeErrorModal() {
 window.closeErrorModal = closeErrorModal;
 
 function finalizePackage() {
-  // Validate required fields
   const desc = document.getElementById('cpkg-desc')?.value.trim();
   const theme = document.getElementById('cpkg-theme')?.value.trim();
   const pax = document.getElementById('cpkg-pax')?.value.trim();
@@ -274,12 +273,11 @@ function finalizePackage() {
   const city = document.getElementById('cpkg-city')?.value.trim();
   const venue = document.getElementById('cpkg-venue')?.value.trim();
 
-  if (!desc || !theme || !pax || !occasion || !city || !venue) {
-    openErrorModal('Please fill in all event details including City before finalizing your package.');
+  if (!desc || !theme || !pax || !occasion || !city) {
+    openErrorModal('Please fill in all event details (Description, Theme, Pax, Occasion, and City) before finalizing your package.');
     return;
   }
 
-  // Strict category validation
   const hasFood = customPkgItems.some(i => i.cat === 'food' || i.cat === 'dessert');
   const hasEquip = customPkgItems.some(i => i.cat === 'equipment' || i.cat === 'decoration');
 
@@ -296,7 +294,9 @@ function finalizePackage() {
     id: 'custom_' + Date.now(),
     isCustom: true,
     name: name.trim(),
-    desc, theme, pax, occasion, venue,
+    desc, theme, pax, occasion,
+    city,                          // ← FIX: was missing from summary
+    venue: venue || city,          // ← FIX: fall back to city if map wasn't used
     items: [...customPkgItems],
     total,
     price: total,
@@ -309,12 +309,11 @@ function finalizePackage() {
 
   customPkgItems = [];
   renderCustomPkg();
-  ['cpkg-desc','cpkg-theme','cpkg-pax','cpkg-occasion', 'cpkg-city', 'cpkg-venue'].forEach(id => {
+  ['cpkg-desc','cpkg-theme','cpkg-pax','cpkg-occasion','cpkg-city','cpkg-venue'].forEach(id => {
     const el = document.getElementById(id);
-    if(el) el.value = '';
+    if (el) el.value = '';
   });
-  
-  // Close items view if open
+
   document.getElementById('cpkg-panel').classList.remove('view-items-open');
   document.getElementById('cpkg-selected-items-view').classList.remove('open');
 
