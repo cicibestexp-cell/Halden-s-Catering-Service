@@ -66,7 +66,7 @@ CAT.forEach(item => {
 const PKGS = [
   { name: 'Kiddie Party Package B', tagline: '100 pax Plus • 30 Kids', price: '₱85,000', pax: '100 pax + 30 kids', icon: '🎉', image: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774324108/halden_kiddie_party_vhghct.png', badge: 'Popular', inc: ['Complete Catering Setup & Centerpiece', 'Tables & Chairs with Theme Cover', 'VIP Long Table Setup', 'Full Catering Equipment, Utensils & Glassware', 'Waiter in Uniform', '5 Main Dishes (Pork/Beef, Chicken, Veggies, Fish, Pasta)', 'Special Pancit Canton, Soup & Dessert', 'Unlimited Drinks & Steamed Rice', 'Full Lights & Sounds Setup', 'Theme Backdrop, Balloon Ceiling, Centerpieces', 'Entrance Setup, Styro Name Cutouts', 'Photobooth (2hrs) + Photographer + MTV Videographer', '2 Clowns/Magician + 2x3 Photo Standee', 'Face Painting (3hrs) + 20 Game Prizes', 'FREE Kiddie Meals: Spaghetti, Fried Chicken, Hotdog & Mallows'] },
   { name: 'Simple Celebration Package', tagline: 'Budget-Friendly • 50 pax', price: 'Starting ₱25,000', pax: '50 pax', icon: '🌸', image: 'https://res.cloudinary.com/dg8ytmck5/image/upload/v1774323089/halden3_selh2o.png', badge: 'Starter', inc: ['Basic Catering Setup', 'Tables & Chairs', '3 Main Dishes (Choice of menu)', 'Steamed Rice (Unlimited)', 'Soup & Dessert', 'Unlimited Drinks', 'Waiter in Uniform'] },
-  { name: 'Custom Package', tagline: 'Fully Personalized • Any size', price: 'Quote on request', pax: 'Any size', icon: '✦', badge: 'Best Value', inc: ['Choose any items from our full catalog', 'AI-powered recommendations based on your budget', 'Flexible guest count', 'Mix & match food, decor, entertainment & more', 'Personalized quotation from our team'] },
+  { name: 'Custom Package', tagline: 'Fully Personalized • Any size', price: 'Quote on request', pax: 'Any size', icon: '', badge: 'Best Value', inc: ['Choose any items from our full catalog', 'AI-powered recommendations based on your budget', 'Flexible guest count', 'Mix & match food, decor, entertainment & more', 'Personalized quotation from our team'] },
 ];
 
 // ===== STATE =====
@@ -124,7 +124,7 @@ function renderCat() {
     const isDim = aiPicks && !isPick;
     return `
       <div class="cat-card ${isPick ? 'ai-pick' : ''} ${isDim ? 'dimmed' : ''}">
-        <div class="cat-thumb">${item.icon}<div class="pick-badge">✦ AI Pick</div></div>
+        <div class="cat-thumb">${item.icon}<div class="pick-badge"> AI Pick</div></div>
         <div class="cat-info">
           <div class="cat-cat-lbl">${item.cat}</div>
           <div class="cat-n">${item.name}</div>
@@ -674,7 +674,7 @@ function initAI(panel) {
   if (initialized[panel]) return;
   initialized[panel] = true;
   const msgsId = panel === 'desk' ? 'ai-msgs-desk' : 'ai-msgs-mob';
-  addBot("Hi there! 👋 I'm Halden's AI Event Planner.\n\nDescribe your event below — the occasion, number of guests, budget, and any theme ideas — and I'll instantly highlight the most suitable items from our catalog for you. ✦", msgsId);
+  addBot("Hi there! 👋 I'm Halden's AI Event Planner.\n\nDescribe your event below — the occasion, number of guests, budget, and any theme ideas — and I'll instantly highlight the most suitable items from our catalog for you. ", msgsId);
 }
 
 function addBot(txt, msgsId) {
@@ -682,7 +682,7 @@ function addBot(txt, msgsId) {
   if (!c) return;
   const d = document.createElement('div');
   d.className = 'ai-msg bot';
-  d.innerHTML = `<div class="ai-msg-ico">✦</div><div class="ai-bub">${txt.replace(/\n/g, '<br>')}</div>`;
+  d.innerHTML = `<div class="ai-msg-ico"></div><div class="ai-bub">${txt.replace(/\n/g, '<br>')}</div>`;
   c.appendChild(d); c.scrollTop = c.scrollHeight;
 }
 
@@ -700,7 +700,7 @@ function showTyping(msgsId) {
   if (!c) return;
   const d = document.createElement('div');
   d.className = 'ai-msg bot'; d.id = 'typin-' + msgsId;
-  d.innerHTML = `<div class="ai-msg-ico">✦</div><div class="ai-bub typing-dots"><span></span><span></span><span></span></div>`;
+  d.innerHTML = `<div class="ai-msg-ico"></div><div class="ai-bub typing-dots"><span></span><span></span><span></span></div>`;
   c.appendChild(d); c.scrollTop = c.scrollHeight;
 }
 function hideTyping(msgsId) { document.getElementById('typin-' + msgsId)?.remove(); }
@@ -734,7 +734,7 @@ async function sendMsg(panel) {
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'HTTP-Referer': location.href, 'X-Title': "Halden's AI Planner" },
-      body: JSON.stringify({ model: 'arcee-ai/trinity-large-preview:free', messages: hist, max_tokens: 900 })
+      body: JSON.stringify({ model: 'openai/gpt-oss-120b:free', messages: hist, max_tokens: 900 })
     });
     const data = await res.json();
     const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't connect. Please try again.";
@@ -767,7 +767,7 @@ function applyPicks(ids, query) {
   aiPicks = ids;
   const banner = document.getElementById('ai-banner');
   banner.classList.add('on');
-  document.getElementById('aib-title').textContent = `✦ ${ids.length} items recommended for you`;
+  document.getElementById('aib-title').textContent = ` ${ids.length} items recommended for you`;
   document.getElementById('aib-desc').textContent = `Based on: "${query.substring(0, 55)}${query.length > 55 ? '...' : ''}"`;
   curCat = 'all';
   document.querySelectorAll('.fb').forEach(b => b.classList.remove('active'));
@@ -990,9 +990,31 @@ function closeAuth() {
 function switchAuthTab(tab) {
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
+  const tb = document.getElementById('tab-' + tab);
+  if (tb) tb.classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
 }
+
+async function doForgotPassword() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) return showAuthMsg('forgot-msg', 'error', 'Please enter your email.');
+  
+  const btn = document.getElementById('forgot-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  
+  try {
+    await waitForFirebase();
+    await window.firebaseFns.sendPasswordResetEmail(window.firebaseAuth, email);
+    showAuthMsg('forgot-msg', 'success', 'Password reset link sent! Check your inbox.');
+  } catch (err) {
+    showAuthMsg('forgot-msg', 'error', 'Error: ' + err.message);
+  }
+  
+  btn.disabled = false;
+  btn.textContent = 'Send Recovery Email';
+}
+window.doForgotPassword = doForgotPassword;
 
 function showAuthMsg(id, type, text) {
   const el = document.getElementById(id);
@@ -1261,36 +1283,20 @@ async function submitReservation() {
       createdAt: new Date().toISOString() 
     });
 
-    // 2. Create PayMongo Checkout Session via our Vercel backend
-    const apiRes = await fetch('/api/paymongo', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        items: [{
-          name: `${type} Reservation - ${fmtDate}`,
-          price: amount || 1  // PayMongo requires > 0; fallback to 1 if amount unknown
-        }],
-        customerInfo: {
-          name: currentUser.displayName || currentUser.name || 'Guest',
-          email: currentUser.email,
-          type
-        },
-        reservationId: resRef.id
-      })
-    });
+    // Reservation saved — payment happens later via the customer dashboard
+    msgEl.className = 'auth-msg success';
+    msgEl.textContent = 'Reservation submitted successfully! Awaiting admin approval.';
+    msgEl.style.display = 'block';
 
-    const apiData = await apiRes.json();
+    cart = [];
+    lastMapCoords = null;
+    renderCart();
+    renderCat();
 
-    if (apiData.checkout_url) {
-      msgEl.className = 'auth-msg success';
-      msgEl.textContent = 'Reservation saved! Redirecting to secure payment...';
-      msgEl.style.display = 'block';
-      cart = []; renderCart(); renderCat();
-      setTimeout(() => { window.location.href = apiData.checkout_url; }, 900);
-    } else {
-      throw new Error(apiData.error || 'Failed to create checkout session');
-    }
-
+    setTimeout(() => {
+      closeCheckout();
+      openProfile();
+    }, 1500);
 
   } catch (e) {
     console.error(e);
@@ -1563,7 +1569,7 @@ async function listenToCustomerChat() {
     box.innerHTML = `
       <div class="chat-welcome">
         <div class="chat-ava">H</div>
-        <p>Hello! How can we help you with your event planning today? ✦</p>
+        <p>Hello! How can we help you with your event planning today? </p>
       </div>
     `;
 
