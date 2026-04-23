@@ -1457,14 +1457,27 @@ async function doLogin() {
   clearAuthMsg('login-msg');
   try {
     await waitForFirebase();
-    const { collection, getDocs } = window.firebaseFns;
-    const snapshot = await getDocs(collection(window.firebaseDB, 'users'));
+    const { collection, getDocs, query, where } = window.firebaseFns;
+    
+    // Use a specific query instead of fetching the entire collection
+    const q = query(collection(window.firebaseDB, 'Users'), where('email', '==', email.toLowerCase()));
+    const snapshot = await getDocs(q);
+    
     let foundUser = null;
     snapshot.forEach(doc => {
       const data = doc.data();
-      if (data.email?.trim().toLowerCase() === email.toLowerCase() && data.password?.trim() === pass) foundUser = data;
+      // Case-insensitive email check and password match
+      if (data.password?.trim() === pass) {
+        foundUser = data;
+      }
     });
-    if (!foundUser) { showAuthMsg('login-msg', 'error', 'Invalid email or password.'); btn.disabled = false; btn.textContent = 'Login to My Account'; return; }
+
+    if (!foundUser) { 
+      showAuthMsg('login-msg', 'error', 'Invalid email or password.'); 
+      btn.disabled = false; 
+      btn.textContent = 'Login to My Account'; 
+      return; 
+    }
     if (foundUser.role === 'admin') { sessionStorage.setItem('halden_admin', JSON.stringify(foundUser)); window.location.href = 'admin.html'; return; }
     if (foundUser.role === 'staff') { sessionStorage.setItem('halden_staff', JSON.stringify(foundUser)); window.location.href = 'staff.html'; return; }
     setLoggedIn({ displayName: foundUser.name, email: foundUser.email, uid: foundUser.uid });
@@ -2750,6 +2763,10 @@ function openDishModal(id) {
     priceEl.innerHTML = `&#8369;${dp.toLocaleString()} <span style="font-size:12px; color:var(--text-dim); font-weight:400;">${batchInfo}</span>`;
   }
   
+  const isDish = ['food','dessert','drink'].includes(item.cat);
+  const disclaimer = document.getElementById('dm-allergy-disclaimer');
+  if (disclaimer) disclaimer.style.display = isDish ? 'flex' : 'none';
+
   const ingGrid = document.getElementById('dm-ingredients');
   if (ingGrid && item.ingredients) {
     ingGrid.innerHTML = item.ingredients.map(ing => `<span class="ingredient-pill">${ing}</span>`).join('');
