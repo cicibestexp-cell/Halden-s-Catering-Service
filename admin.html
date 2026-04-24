@@ -1,0 +1,2772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — Halden's</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="admin.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('halden_theme') || 'dark');</script>
+  <script src="theme.js"></script>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="nav-brand">
+    <div class="nav-brand-icon">H</div>
+    <div>
+      <span class="nav-brand-name">Halden's</span>
+      <span class="nav-brand-badge">Admin</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-admin-info">Logged in as <strong id="admin-name">Administrator</strong></div>
+    <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span class="theme-icon">☀️</span><span class="theme-label">Light</span>
+    </button>
+    <button class="btn-logout" onclick="adminLogout()">Sign Out</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <div class="sidebar">
+
+    <!-- ── RESERVATIONS ── -->
+    <div class="sidebar-section">
+      <div class="sg-toggle open" id="sgt-reservations" onclick="toggleSidebarGroup('reservations')">
+        <span><span class="sg-icon">📊</span> Reservations</span>
+        <span class="sg-arrow">▾</span>
+      </div>
+      <div class="sg-items open" id="sg-reservations">
+        <div class="sidebar-item active" id="nav-dashboard" onclick="showSection('dashboard',this)">
+          <span class="s-icon">🏠</span> Dashboard
+        </div>
+        <div class="sidebar-item" id="nav-reservations" onclick="showSection('reservations',this)">
+          <span class="s-icon">📋</span> All Reservations
+          <span id="res-sidebar-badge" class="sidebar-badge" style="display:none;">0</span>
+        </div>
+        <div class="sidebar-item" id="nav-res-details" onclick="showSection('res-details',this)">
+          <span class="s-icon">🧾</span> Reservation Details Handling
+        </div>
+        <div class="sidebar-item" id="nav-activity-logs" onclick="showSection('activity-logs',this)">
+          <span class="s-icon">📜</span> Activity Logs
+        </div>
+        <div class="sidebar-item" id="nav-meetings" onclick="showSection('meetings',this)">
+          <span class="s-icon">📅</span> Meetings Hub
+          <span id="mt-sidebar-badge" class="sidebar-badge amber" style="display:none;">!</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EVENT HANDLING ── -->
+    <div class="sidebar-section">
+      <div class="sg-toggle" id="sgt-event-handling" onclick="toggleSidebarGroup('event-handling')">
+        <span><span class="sg-icon">🎉</span> Event Handling</span>
+        <span class="sg-arrow">▾</span>
+      </div>
+      <div class="sg-items" id="sg-event-handling">
+        <div class="sidebar-item" id="nav-events" onclick="showSection('events',this)">
+          <span class="s-icon">📅</span> Event Schedule
+        </div>
+        <div class="sidebar-item" id="nav-seating" onclick="showSection('res-details', document.getElementById('nav-res-details'))">
+          <span class="s-icon">🪑</span> Extra Reservation Details
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EQUIPMENT INVENTORY ── -->
+    <div class="sidebar-section">
+      <div class="sg-toggle" id="sgt-equipment-inv" onclick="toggleSidebarGroup('equipment-inv')">
+        <span><span class="sg-icon">🔧</span> Equipment Inventory</span>
+        <span class="sg-arrow">▾</span>
+      </div>
+      <div class="sg-items" id="sg-equipment-inv">
+        <div class="sidebar-item" id="nav-equipment" onclick="showSection('equipment',this)">
+          <span class="s-icon">📦</span> Equipment Assets
+        </div>
+        <div class="sidebar-item" id="nav-rentals" onclick="showSection('rentals',this)">
+          <span class="s-icon">🔄</span> Rented Equipment
+        </div>
+        <div class="sidebar-item" id="nav-availability" onclick="showSection('availability',this)">
+          <span class="s-icon">📡</span> Availability & Status
+        </div>
+        <div class="sidebar-item" id="nav-routine-check" onclick="showSection('routine-check',this)">
+          <span class="s-icon">✅</span> Routine Checks
+          <span id="routine-sidebar-badge" class="sidebar-badge" style="display:none;">!</span>
+        </div>
+        <div class="sidebar-item" id="nav-allocation" onclick="showSection('allocation',this)">
+          <span class="s-icon">🎯</span> Event Allocation
+        </div>
+        <div class="sidebar-item" id="nav-scheduling" onclick="showSection('scheduling',this)">
+          <span class="s-icon">📆</span> Scheduling
+          <span id="sch-sidebar-badge" class="sidebar-badge" style="display:none;">!</span>
+        </div>
+        <div class="sidebar-item" id="nav-lifecycle" onclick="showSection('lifecycle',this)">
+          <span class="s-icon">🚛</span> Equipment Lifecycle
+          <span id="lifecycle-sidebar-badge" class="sidebar-badge" style="display:none;">●</span>
+        </div>
+        <div class="sidebar-item" id="nav-equip-issues" onclick="showSection('equip-issues',this)">
+          <span class="s-icon">🚨</span> Equipment Issues
+          <span id="issues-sidebar-badge" class="sidebar-badge" style="display:none;">!</span>
+        </div>
+        <div class="sidebar-item" id="nav-resupply" onclick="showSection('resupply',this)">
+          <span class="s-icon">📦</span> Equipment Resupply
+          <span id="resupply-sidebar-badge" class="sidebar-badge amber" style="display:none;">!</span>
+        </div>
+        <div class="sidebar-item" id="nav-maintenance" onclick="showSection('maintenance',this)">
+          <span class="s-icon">🛠️</span> Equipment Maintenance
+          <span id="mnt-sidebar-badge" class="sidebar-badge red" style="display:none;">!</span>
+        </div>
+        <div class="sidebar-item" id="nav-disposed" onclick="showSection('disposed',this)">
+          <span class="s-icon">♻️</span> Disposed Records
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USER HANDLING ── -->
+    <div class="sidebar-section">
+      <div class="sg-toggle" id="sgt-users" onclick="toggleSidebarGroup('users')">
+        <span><span class="sg-icon">👥</span> User Handling</span>
+        <span class="sg-arrow">▾</span>
+      </div>
+      <div class="sg-items" id="sg-users">
+        <div class="sidebar-item" id="nav-users" onclick="showSection('users',this)">
+          <span class="s-icon">👥</span> User Management
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ANALYTICS ── -->
+    <div class="sidebar-section">
+      <div class="sg-toggle" id="sgt-analytics" onclick="toggleSidebarGroup('analytics')">
+        <span><span class="sg-icon">📈</span> Analytics</span>
+        <span class="sg-arrow">▾</span>
+      </div>
+      <div class="sg-items" id="sg-analytics">
+        <div class="sidebar-item" id="nav-insights" onclick="showSection('insights',this)">
+          <span class="s-icon">📊</span> Business Insights
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SUPPORT ── -->
+    <div class="sidebar-section">
+      <div class="sg-toggle" id="sgt-support" onclick="toggleSidebarGroup('support')">
+        <span><span class="sg-icon">💬</span> Support</span>
+        <span class="sg-arrow">▾</span>
+      </div>
+      <div class="sg-items" id="sg-support">
+        <div class="sidebar-item" id="nav-chat" onclick="showSection('chat',this)">
+          <span class="s-icon">💬</span> Chat Support
+          <span id="chat-notif" class="sidebar-badge amber" style="display:none;">!</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== MAIN ==================== -->
+  <div class="main">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="section active" id="section-dashboard">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1 id="dash-greeting">Good morning, Admin </h1>
+          <p id="dash-date">Loading date...</p>
+        </div>
+        <button class="btn-primary" onclick="showSection('reservations', document.getElementById('nav-reservations'))">+ New Reservation</button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-label">Upcoming Events</div>
+          <div class="stat-value" id="dash-stat-upcoming">0</div>
+          <div class="stat-change up" id="dash-stat-upcoming-sub">Confirmed bookings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-label">Pending Approval</div>
+          <div class="stat-value" id="dash-stat-pending">0</div>
+          <div class="stat-change neutral">Needs review</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔧</div>
+          <div class="stat-label">Equipment Status</div>
+          <div class="stat-value" id="dash-stat-equip">—</div>
+          <div class="stat-change neutral" id="dash-stat-equip-sub">Assets tracked</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-label">Est. Revenue (Month)</div>
+          <div class="stat-value" id="dash-stat-revenue">₱0</div>
+          <div class="stat-change up">From confirmed events</div>
+        </div>
+      </div>
+
+      <!-- ROUTINE CHECK ALERT — shown when overdue -->
+      <div id="dash-routine-alert" style="display:none; margin-bottom:20px;">
+        <div class="routine-dash-alert" onclick="showSection('routine-check', document.getElementById('nav-routine-check'))">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="font-size:36px; line-height:1;">🚨</div>
+            <div>
+              <div style="font-size:15px; font-weight:700; color:#fff; margin-bottom:3px;">Weekly Equipment Check is Overdue!</div>
+              <div id="routine-alert-sub" style="font-size:12px; color:rgba(255,255,255,0.8);">Last inspection was X days ago — click here to begin the inspection →</div>
+            </div>
+          </div>
+          <div style="font-size:22px; color:rgba(255,255,255,0.7); flex-shrink:0;">→</div>
+        </div>
+      </div>
+
+      <!-- CALENDAR — Primary dashboard view -->
+      <div class="panel" style="margin-bottom:24px;">
+        <div class="panel-hdr">
+          <div>
+            <div class="panel-title">Approved Event Calendar</div>
+            <div class="panel-sub">All confirmed reservations — click an event for full details</div>
+          </div>
+          <span class="badge confirmed" style="font-size:11px; padding:4px 12px;">● Live</span>
+        </div>
+        <div class="panel-body" style="padding:20px;">
+          <div id="dash-calendar"></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-hdr">
+            <div><div class="panel-title">Upcoming Reservations</div><div class="panel-sub">Next confirmed events</div></div>
+            <span class="panel-action" onclick="showSection('reservations', document.getElementById('nav-reservations'))">View all →</span>
+          </div>
+          <div class="panel-body" id="dash-reservations"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div><div class="panel-title">Recent Activity</div></div></div>
+          <div class="panel-body" style="padding-top:12px;" id="activity-log"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RESERVATIONS ===== -->
+    <div class="section" id="section-reservations">
+      <div class="page-hdr">
+        <div class="page-hdr-left"><h1>All Reservations</h1><p>Manage all incoming and confirmed bookings</p></div>
+        <button class="btn-primary">+ New Reservation</button>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="filterRes('all',this)">All</button>
+            <button class="tab-btn" onclick="filterRes('pending',this)">Pending</button>
+            <button class="tab-btn" onclick="filterRes('confirmed',this)">Confirmed</button>
+            <button class="tab-btn" onclick="filterRes('cancelled',this)">Cancelled</button>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0;overflow-x:auto;">
+          <table class="inv-table">
+            <thead><tr><th>Client</th><th>Event Type</th><th>Date</th><th>Pax</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="res-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== RESERVATION DETAILS HANDLING ===== -->
+    <div class="section" id="section-res-details">
+      <div class="page-hdr">
+        <div class="page-hdr-left"><h1>Reservation Details Handling</h1><p>Review approved reservations, modify details, and manage operational status</p></div>
+      </div>
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="tab-bar">
+          <button class="tab-btn active" id="resd-tab-details" onclick="switchResDetailsTab('details',this)">Reservation Details Handling</button>
+          <button class="tab-btn" id="resd-tab-extra" onclick="switchResDetailsTab('extra',this)">Add Extra Reservation Details</button>
+          <button class="tab-btn" id="resd-tab-timeline" onclick="switchResDetailsTab('timeline',this)">View Timeline</button>
+        </div>
+      </div>
+
+      <div class="panel" id="resd-pane-details">
+        <div class="panel-hdr">
+          <div>
+            <div class="panel-title">Reservation Details Handling</div>
+            <div class="panel-sub">Approved reservations, requirements review, detail edits, and status updates</div>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:20px;">
+          <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;">
+            <div class="panel" style="margin:0;">
+              <div class="panel-hdr">
+                <div>
+                  <div class="panel-title">Approved Reservations</div>
+                  <div class="panel-sub">Select one to manage</div>
+                </div>
+              </div>
+              <div class="panel-body" id="resd-approved-list" style="padding:0;max-height:460px;overflow:auto;">
+                <div style="padding:18px;color:var(--text-dim);font-size:12px;">Loading approved reservations...</div>
+              </div>
+            </div>
+
+            <div class="panel" style="margin:0;">
+              <div class="panel-hdr">
+                <div>
+                  <div class="panel-title" id="resd-title">Reservation Details</div>
+                  <div class="panel-sub" id="resd-subtitle">Select a reservation from the left panel.</div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button class="btn-outline" id="resd-btn-view" onclick="setReservationDetailMode('view')" disabled>View</button>
+                  <button class="btn-outline" id="resd-btn-edit" onclick="setReservationDetailMode('edit')" disabled>Modify Details</button>
+                  <button class="btn-outline" id="resd-btn-status" onclick="setReservationDetailMode('status')" disabled>Modify Status</button>
+                </div>
+              </div>
+              <div class="panel-body" id="resd-content">
+                <div style="text-align:center;padding:60px 20px;color:var(--text-dim);font-size:13px;">
+                  Choose an approved reservation to display all details and requirements.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="resd-pane-extra" style="display:none;">
+        <div class="panel-hdr">
+          <div>
+            <div class="panel-title">Add Extra Reservation Details</div>
+            <div class="panel-sub">Customer guest list submission and venue seating layout workflow</div>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:20px;">
+          <div class="two-col" style="align-items:start; gap:20px;">
+            <div class="panel" style="margin:0;">
+              <div class="panel-hdr">
+                <div>
+                  <div class="panel-title">List of Guests</div>
+                  <div class="panel-sub">Provided by customer</div>
+                </div>
+                <button class="btn-outline" style="font-size:12px;" onclick="addGuestRow()">+ Add Guest</button>
+              </div>
+              <div class="panel-body">
+                <div id="resd-guest-list">
+                  <div style="font-size:12px;color:var(--text-dim);">Select a reservation to manage guest list.</div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+                  <button class="btn-primary" style="font-size:12px;" onclick="saveGuestList()">Save Guest List</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel" style="margin:0;">
+              <div class="panel-hdr">
+                <div>
+                  <div class="panel-title">Venue Layout</div>
+                  <div class="panel-sub">Layout sends to customer for seating, then receive with names</div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button class="btn-outline" style="font-size:11px;" onclick="markLayoutSentToCustomer()">Layout Sent</button>
+                  <button class="btn-outline" style="font-size:11px;" onclick="markLayoutReceived()">Named Layout Received</button>
+                  <button class="btn-primary" style="font-size:11px;" onclick="saveSeatingLayout()">Save</button>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                  <button class="btn-view" style="font-size:11px;" onclick="addSeatingElement('table-round')">⭕ Add Round Table</button>
+                  <button class="btn-view" style="font-size:11px;" onclick="addSeatingElement('table-rect')">▭ Add Rect Table</button>
+                  <button class="btn-view" style="font-size:11px;" onclick="addSeatingElement('chair')">🪑 Add Chair</button>
+                  <button class="btn-outline" style="font-size:11px;" id="resdSeatingModeBtn" onclick="toggleSeatingMode()">Switch to Customer View</button>
+                </div>
+                <div style="display:flex;gap:12px;margin-bottom:10px;">
+                  <span class="badge pending" id="resdSeatingModeTag">ADMIN MODE</span>
+                  <span style="font-size:11px;color:var(--text-dim);">Tables: <strong id="resd-seat-sum-tables">0</strong></span>
+                  <span style="font-size:11px;color:var(--text-dim);">Chairs: <strong id="resd-seat-sum-chairs">0</strong></span>
+                  <span style="font-size:11px;color:var(--text-dim);">PAX: <strong id="resd-seat-sum-pax">0</strong></span>
+                </div>
+                <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;" id="resd-layout-status">Layout workflow status: Not yet sent to customer.</div>
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:auto;min-height:420px;display:flex;justify-content:center;align-items:center;">
+                  <svg id="resd-seating-canvas" width="900" height="700" style="background:var(--bg2);touch-action:none;"></svg>
+                </div>
+                <div style="margin-top:8px;font-size:11px;color:var(--text-dim);" id="resd-seating-selection-info">Select a table to unlock chairs.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="resd-pane-timeline" style="display:none;">
+        <div class="panel-hdr">
+          <div>
+            <div class="panel-title">View Reservation Timeline</div>
+            <div class="panel-sub">Calendar coverage, per-day activities, and payment milestones</div>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:20px;">
+          <div id="resd-timeline-summary" style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">Select a reservation to load timeline view.</div>
+          <div class="panel" style="margin:0 0 16px 0;">
+            <div class="panel-body" style="padding:18px;">
+              <div id="resd-timeline-calendar"></div>
+            </div>
+          </div>
+          <div class="two-col" style="align-items:start;gap:20px;">
+            <div class="panel" style="margin:0;">
+              <div class="panel-hdr">
+                <div><div class="panel-title">Assign Activities Per Day</div><div class="panel-sub">Placeholder workflow for procurement/preparation/etc.</div></div>
+              </div>
+              <div class="panel-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <input id="resd-task-date" type="date" class="input-field" />
+                  <select id="resd-task-status" class="input-field">
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="done">Done</option>
+                  </select>
+                </div>
+                <input id="resd-task-title" class="input-field" style="margin-top:8px;" placeholder="Task title (e.g. Procurement of linens)" />
+                <textarea id="resd-task-note" class="input-field" rows="2" style="margin-top:8px;" placeholder="Notes..."></textarea>
+                <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+                  <button class="btn-primary" style="font-size:12px;" onclick="addTimelineTask()">Add Activity</button>
+                </div>
+                <div id="resd-task-list" style="margin-top:10px;"></div>
+              </div>
+            </div>
+            <div class="panel" style="margin:0;">
+              <div class="panel-hdr">
+                <div><div class="panel-title">Payments & Pending Payments</div><div class="panel-sub">Auto-dated after contract finalization</div></div>
+                <button class="btn-outline" style="font-size:11px;" onclick="runReservationPaymentAutomation()">Run Auto Check</button>
+              </div>
+              <div class="panel-body">
+                <div id="resd-payment-list" style="font-size:12px;color:var(--text-dim);">No payment timeline generated yet.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" id="res-exec-panel" style="margin-top:16px;">
+            <div class="panel-hdr">
+              <div>
+                <div class="panel-title">Reservation Execution — Live GPS Tracker</div>
+                <div class="panel-sub">Auto-reads admin location and selected reservation venue route</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn-primary" style="font-size:11px;" onclick="startExecutionTrackerAuto()">▶ Start Tracker</button>
+                <button class="btn-outline" style="font-size:11px;" onclick="stopExecutionTracker()">⏹ Stop</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div id="res-exec-status" style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">Tracker idle.</div>
+              <div style="display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap;">
+                <div style="font-size:12px;color:var(--text-dim);">ETA: <strong id="res-exec-eta" style="color:var(--cream);">—</strong></div>
+                <div style="font-size:12px;color:var(--text-dim);">Distance: <strong id="res-exec-distance" style="color:var(--cream);">—</strong></div>
+                <div style="font-size:12px;color:var(--text-dim);">Speed: <strong id="res-exec-speed" style="color:var(--cream);">—</strong></div>
+                <div style="font-size:12px;color:var(--text-dim);">Execution Status: <strong id="res-exec-live-status" style="color:var(--cream);">idle</strong></div>
+              </div>
+              <div id="res-exec-map" style="height:340px;border:1px solid var(--border);border-radius:10px;overflow:hidden;"></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                <button class="btn-outline" style="font-size:11px;" onclick="setExecutionLiveStatus('on-the-way')">On The Way</button>
+                <button class="btn-outline" style="font-size:11px;" onclick="setExecutionLiveStatus('arriving')">Arriving</button>
+                <button class="btn-outline" style="font-size:11px;" onclick="setExecutionLiveStatus('delayed')">Delayed</button>
+                <button class="btn-outline" style="font-size:11px;" onclick="setExecutionLiveStatus('arrived')">Arrived</button>
+              </div>
+              <div id="res-exec-delay-wrap" style="display:none;margin-top:8px;">
+                <textarea id="res-exec-delay-reason" class="input-field" rows="2" placeholder="Required: reason for delay..."></textarea>
+                <div style="display:flex;justify-content:flex-end;margin-top:6px;">
+                  <button class="btn-primary" style="font-size:11px;" onclick="saveExecutionDelayReason()">Save Delay Reason</button>
+                </div>
+              </div>
+              <div id="res-exec-phases-wrap" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+                <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Execution day phases &amp; tasks</div>
+                <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.5;">Each phase has a fixed time window. Select a phase to view all tasks for that period (placeholders for now).</div>
+                <div id="res-exec-phases" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                <div id="res-exec-phase-header" style="margin-top:14px;"></div>
+                <div id="res-exec-phase-tasks" style="margin-top:8px;max-height:420px;overflow-y:auto;"></div>
+              </div>
+              <div style="margin-top:14px;">
+                <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Execution Day Activities Log</div>
+                <div style="display:grid;grid-template-columns:1fr auto;gap:8px;">
+                  <input id="res-exec-activity-title" class="input-field" placeholder="Activity (e.g. Deployment started, GPS check-in)" />
+                  <button class="btn-primary" style="font-size:11px;" onclick="addExecutionActivityLog()">+ Log Activity</button>
+                </div>
+                <textarea id="res-exec-activity-note" class="input-field" rows="2" style="margin-top:8px;" placeholder="Optional note for customer dashboard..."></textarea>
+                <div id="res-exec-activity-list" style="margin-top:10px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ACTIVITY LOGS (approved & completed reservations) ===== -->
+    <div class="section" id="section-activity-logs">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Activity Logs</h1>
+          <p>Browse lifecycle activity for approved and completed reservations — select one to view all logged events</p>
+        </div>
+      </div>
+      <div class="panel"><div class="panel-body" style="padding:20px;">
+        <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;">
+          <div class="panel" style="margin:0;">
+            <div class="panel-hdr">
+              <div>
+                <div class="panel-title">Approved &amp; completed</div>
+                <div class="panel-sub">Reservations eligible for audit trail</div>
+              </div>
+            </div>
+            <div class="panel-body" id="activity-logs-res-list" style="padding:0;max-height:560px;overflow:auto;">
+              <div style="padding:18px;color:var(--text-dim);font-size:12px;">Loading reservations…</div>
+            </div>
+          </div>
+          <div class="panel" style="margin:0;">
+            <div class="panel-hdr">
+              <div>
+                <div class="panel-title" id="activity-logs-title">Reservation activity</div>
+                <div class="panel-sub" id="activity-logs-subtitle">Select a reservation from the list.</div>
+              </div>
+            </div>
+            <div class="panel-body" id="activity-logs-detail" style="padding:14px 18px;max-height:560px;overflow:auto;">
+              <div style="text-align:center;padding:48px 16px;color:var(--text-dim);font-size:13px;">
+                Choose an approved or completed reservation to load its full activity history.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ===== EVENT SCHEDULE ===== -->
+    <div class="section" id="section-events">
+      <div class="page-hdr">
+        <div class="page-hdr-left"><h1>Event Schedule</h1><p>Full calendar view — click an event for details and status control</p></div>
+      </div>
+      <div class="panel"><div class="panel-body" style="padding:20px;"><div id="calendar"></div></div></div>
+    </div>
+
+    <div class="modal-overlay" id="ed-overlay" onclick="closeEventDetails()"></div>
+    <div class="modal ed-modal" id="section-event-details" style="max-width:800px; padding:0; overflow:hidden;">
+      <div class="modal-hdr" style="padding:20px 30px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:var(--bg2);">
+         <div class="panel-title" id="ed-title" style="margin:0;">Event Details</div>
+         <button class="btn-outline" style="padding:6px 12px; font-size:11px;" onclick="closeEventDetails()">Close Window</button>
+      </div>
+      
+      <div class="modal-body" style="padding:30px; max-height:85vh; overflow-y:auto;">
+        <div class="two-col" style="gap:30px; align-items:start;">
+          <!-- Left side: Core Stats -->
+          <div style="flex:1;">
+            <div style="background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:20px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Event Date</div>
+                <div style="font-size:14px; font-weight:600; color:var(--gold);" id="ed-date">—</div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Total Revenue</div>
+                <div style="font-size:18px; font-weight:700; color:var(--cream);" id="ed-amount">—</div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Guest Count (Pax)</div>
+                <div style="font-size:14px; font-weight:600; color:var(--text);" id="ed-pax">—</div>
+              </div>
+              <div style="margin-top:20px;">
+                <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Operational Status</div>
+                <select class="input-field" id="ed-status" onchange="changeEventStatus()">
+                  <option value="pending">Pending Review</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="preparing">Preparing</option>
+                  <option value="on-going">On-going</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Asset Requirements -->
+            <div style="margin-bottom:24px;">
+              <h3 style="font-size:13px; color:var(--gold); margin-bottom:12px; display:flex; align-items:center; gap:8px; text-transform:uppercase; letter-spacing:1px;">
+                📦 Required Inventory Items
+              </h3>
+              <div id="ed-requirements-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+            </div>
+          </div>
+
+          <!-- Right side: Mapped items -->
+          <div style="flex:1;">
+            <div class="panel" style="padding:24px; background:var(--bg3);">
+              <h3 style="font-size:13px; color:var(--gold); margin-bottom:15px; text-transform:uppercase; letter-spacing:1px;">Selected Package Items</h3>
+              <div id="ed-stocks-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== MEETINGS HUB ===== -->
+    <div class="section" id="section-meetings">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Meetings Hub</h1>
+          <p>Schedule and manage customer consultations & contract signings</p>
+        </div>
+        <div class="page-hdr-right">
+          <button class="btn-outline" onclick="forceMeetingMode()" style="border-color:var(--gold); color:var(--gold);">⚡ Force Meeting Mode (Demo)</button>
+        </div>
+      </div>
+      
+      <div class="three-col">
+        <!-- Left: Approved Reservations -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div>
+              <div class="panel-title">Pending Meetings</div>
+              <div class="panel-sub">Approved reservations awaiting a meeting date</div>
+            </div>
+          </div>
+          <div class="panel-body" style="padding:0; max-height:600px; overflow-y:auto;">
+            <div id="mt-pending-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right: Calendar -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div>
+              <div class="panel-title">Meeting Schedule</div>
+              <div class="panel-sub">Scheduled consultations and walkthroughs</div>
+            </div>
+          </div>
+          <div class="panel-body" style="padding:20px;">
+            <div id="mt-calendar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SEATING LAYOUT ===== -->
+    <div class="section" id="section-seating">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Seating Layout </h1>
+          <p>Design and manage floor plans for upcoming events</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-outline" onclick="toggleSeatingMode()" id="seatingModeBtn">Switch to Customer View</button>
+          <button class="btn-primary" onclick="saveSeatingLayout()">Save Layout</button>
+        </div>
+      </div>
+      <div class="layout-editor-grid">
+        <div class="panel seating-controls">
+          <div class="panel-hdr"><div class="panel-title">Elements</div></div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label>Add to Floor</label>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="btn-view" style="width:100%; justify-content:flex-start;" onclick="addSeatingElement('table-round')">⭕ Add Round Table</button>
+                <button class="btn-view" style="width:100%; justify-content:flex-start;" onclick="addSeatingElement('table-rect')">▭ Add Rect Table</button>
+                <button class="btn-view" style="width:100%; justify-content:flex-start;" onclick="addSeatingElement('chair')">🪑 Add Single Chair</button>
+              </div>
+            </div>
+            <hr style="border:0; border-top:1px solid var(--border); margin:16px 0;">
+            <div class="form-group">
+              <label>Event Summary</label>
+              <div class="stats-mini">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                  <span style="font-size:12px; color:var(--text-dim);">Tables:</span>
+                  <span id="seat-sum-tables" style="font-weight:700; color:var(--gold);">0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                  <span style="font-size:12px; color:var(--text-dim);">Chairs:</span>
+                  <span id="seat-sum-chairs" style="font-weight:700; color:var(--gold);">0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="font-size:12px; color:var(--text-dim);">Total PAX:</span>
+                  <span id="seat-sum-pax" style="font-weight:700; color:var(--gold);">0</span>
+                </div>
+              </div>
+            </div>
+            <div id="seating-inspector" style="margin-top:16px;">
+              <label>Inspector</label>
+              <p id="seating-selection-info" style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">Select a table to see options.</p>
+              <button id="seatUnlockBtn" class="btn-reject" style="width:100%; display:none;" onclick="unlockAttachedChairs()">Unlock All Attached Chairs</button>
+            </div>
+            <div style="margin-top:20px; padding:12px; background:rgba(196,154,60,0.05); border-radius:8px; border:1px solid var(--border);">
+              <p style="font-size:11px; color:var(--text-mid); line-height:1.4;">
+                <strong>Pro Tip:</strong> Right-click an element or chair to remove it from the layout.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="panel canvas-panel">
+          <div class="panel-hdr">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div id="seatingModeTag" class="badge pending">ADMIN MODE</div>
+              <span style="font-size:11px; color:var(--text-dim);">900 x 700 Canvas</span>
+            </div>
+          </div>
+          <div class="panel-body" style="padding:0; background:#0a0908; position:relative; overflow:auto; display:flex; justify-content:center; align-items:center; min-height:600px;">
+            <svg id="seating-canvas" width="900" height="700" style="background:var(--bg2); box-shadow:0 0 40px rgba(0,0,0,0.3); border-radius:4px; touch-action:none;"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== EQUIPMENT ASSETS (EIM – Owned) ===== -->
+    <div class="section" id="section-equipment">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Equipment Assets </h1>
+          <p>Owned catering equipment — tables, chairs, tableware, linens, AV gear</p>
+        </div>
+        <button class="btn-primary" onclick="openAddEquipmentModal()">+ Add Equipment</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon">🔧</div><div class="stat-label">Total Asset Types</div><div class="stat-value" id="eim-stat-total">0</div><div class="stat-change neutral">Unique items</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-label">Active &amp; Available</div><div class="stat-value" id="eim-stat-active">0</div><div class="stat-change up">Ready to deploy</div></div>
+        <div class="stat-card"><div class="stat-icon">🚧</div><div class="stat-label">Under Repair</div><div class="stat-value" id="eim-stat-repair">0</div><div class="stat-change down">Needs attention</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Total Asset Value</div><div class="stat-value" id="eim-stat-value">₱0</div><div class="stat-change neutral">At cost price</div></div>
+      </div>
+
+      <!-- EIM Tabbed Container -->
+      <div class="panel" style="margin-bottom:20px;">
+        <!-- Tab Headers -->
+        <div class="panel-hdr" style="flex-wrap:wrap; gap:12px; border-bottom:none; padding-bottom:0px;">
+           <div style="display:flex; gap:20px;">
+             <div class="resupply-tab active" id="tab-eim-list" onclick="switchEIMPnl('list')" style="font-size:16px;">🧰 Equipment List</div>
+             <div class="resupply-tab" id="tab-eim-logs" onclick="switchEIMPnl('logs')" style="font-size:16px;">📝 Activity Logs</div>
+           </div>
+        </div>
+        
+        <!-- Tab: LIST -->
+        <div id="eim-pnl-list">
+          <div class="panel-hdr" style="flex-wrap:wrap; gap:12px; border-top:1px solid var(--border);">
+            <div class="eim-cat-filter" id="eim-cat-filter">
+              <button class="eim-cat-btn active" onclick="filterEIMCat('All',this)">All</button>
+              <button class="eim-cat-btn" onclick="filterEIMCat('Furniture',this)">🪑 Furniture</button>
+              <button class="eim-cat-btn" onclick="filterEIMCat('Tableware',this)">🍽️ Tableware</button>
+              <button class="eim-cat-btn" onclick="filterEIMCat('Glassware',this)">🥂 Glassware</button>
+              <button class="eim-cat-btn" onclick="filterEIMCat('Linens',this)">🎀 Linens</button>
+              <button class="eim-cat-btn" onclick="filterEIMCat('Catering Equipment',this)">🍲 Catering</button>
+              <button class="eim-cat-btn" onclick="filterEIMCat('AV & Lighting',this)">💡 AV & Lighting</button>
+            </div>
+            <input type="text" class="eim-search" id="eim-search" placeholder="🔍 Search equipment..." oninput="renderEIMTable()"/>
+          </div>
+          <div class="panel-body" style="padding:0; overflow-x:auto;">
+            <table class="inv-table eim-table">
+              <thead>
+                <tr>
+                  <th>Asset ID</th>
+                  <th>Equipment</th>
+                  <th>Category / Type</th>
+                  <th>Qty</th>
+                  <th>Condition</th>
+                  <th>Status</th>
+                  <th>Unit Cost</th>
+                  <th>Supplier / Source</th>
+                  <th>Tracking</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="eim-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: LOGS -->
+        <div id="eim-pnl-logs" style="display:none;">
+          <div class="panel-body" style="padding:0; overflow-x:auto; border-top:1px solid var(--border);">
+            <table class="inv-table eim-table">
+              <thead>
+                <tr>
+                  <th style="width:160px;">Date & Time</th>
+                  <th style="width:120px;">User</th>
+                  <th>Action Details</th>
+                </tr>
+              </thead>
+              <tbody id="eim-logs-tbody">
+                <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text-dim);">No activity logs available.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RENTED EQUIPMENT (EIM – Rentals) ===== -->
+    <div class="section" id="section-rentals">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Rented Equipment </h1>
+          <p>System-generated rental orders from scheduling shortages, grouped by rental supplier</p>
+        </div>
+        <button class="btn-outline" onclick="renderRentalCards()">↻ Refresh Rental Pipeline</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-label">Rental Orders</div><div class="stat-value" id="rnt-stat-total">0</div><div class="stat-change neutral">Generated from shortages</div></div>
+        <div class="stat-card"><div class="stat-icon">📨</div><div class="stat-label">Pending Orders</div><div class="stat-value" id="rnt-stat-deployed">0</div><div class="stat-change amber">Sent, awaiting supplier</div></div>
+        <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-label">Needs Review</div><div class="stat-value" id="rnt-stat-due">0</div><div class="stat-change down">Unresolved shortages</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-label">Arrived Orders</div><div class="stat-value" id="rnt-stat-returned">0</div><div class="stat-change up">Tracked in inventory</div></div>
+      </div>
+
+      <!-- Insufficient Equipment Needs Panel (sourced from Scheduling module) -->
+      <div id="rnt-needs-container" style="display:none; margin-bottom:20px;"></div>
+
+      <div id="rnt-review-container" style="display:none; margin-bottom:20px;"></div>
+
+      <!-- Rental Orders -->
+      <div id="rnt-orders-container"></div>
+
+      <!-- Arrived Rental Assets -->
+      <div id="rnt-cards-container" style="margin-top:20px;"></div>
+    </div>
+
+    <!-- ===== AVAILABILITY & STATUS (EIM 3) ===== -->
+    <div class="section" id="section-availability">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Equipment Availability </h1>
+          <p>Real-time status, condition tracking, and equipment flags</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-outline" onclick="openFlagModal()">🚩 Report Issue</button>
+          <button class="btn-primary" onclick="forceRoutineCheck()">📋 Force Routine Check</button>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-label">Available</div><div class="stat-value" id="avail-stat-avail">0</div><div class="stat-change up">Ready to deploy</div></div>
+        <div class="stat-card"><div class="stat-icon">🚀</div><div class="stat-label">In Use</div><div class="stat-value" id="avail-stat-inuse">0</div><div class="stat-change neutral">Currently deployed</div></div>
+        <div class="stat-card"><div class="stat-icon">🔧</div><div class="stat-label">Under Repair</div><div class="stat-value" id="avail-stat-repair">0</div><div class="stat-change down">Unavailable</div></div>
+        <div class="stat-card"><div class="stat-icon">🚩</div><div class="stat-label">Active Flags</div><div class="stat-value" id="avail-stat-flags">0</div><div class="stat-change down">Needs attention</div></div>
+      </div>
+
+      <!-- Active Flags Panel -->
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-hdr">
+          <div><div class="panel-title">⚠️ Active Equipment Flags</div><div class="panel-sub">Items flagged for repair, replacement, or resupply</div></div>
+          <button class="btn-outline" style="padding:6px 14px; font-size:12px;" onclick="openFlagModal()">+ Report New Issue</button>
+        </div>
+        <div class="panel-body" id="avail-flags-container">
+          <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:13px;">No active flags. All equipment accounted for. ✓</div>
+        </div>
+      </div>
+
+      <!-- Equipment Status Table -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div><div class="panel-title">All Equipment — Live Status</div><div class="panel-sub">Click status to update · Report issues instantly</div></div>
+          <input type="text" class="eim-search" id="avail-search" placeholder="🔍 Filter equipment..." oninput="renderAvailabilitySection()" style="width:190px;"/>
+        </div>
+        <div class="panel-body" style="padding:0; overflow-x:auto;">
+          <table class="inv-table eim-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Equipment</th>
+                <th>Category</th>
+                <th>Qty</th>
+                <th>Availability</th>
+                <th>Condition</th>
+                <th style="text-align:right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="avail-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ROUTINE CHECK (EIM 3.5) ===== -->
+    <div class="section" id="section-routine-check">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Routine Equipment Check </h1>
+          <p>Weekly physical inspection log — assigned to Admin / Staff</p>
+        </div>
+        <button class="btn-primary" id="btn-start-check" onclick="startNewRoutineCheck()">+ Start New Check</button>
+      </div>
+
+      <!-- Status Banner -->
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-body" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; padding:20px 24px;">
+          <div>
+            <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:4px;">Last Check</div>
+            <div style="font-size:20px; font-family:'Playfair Display',serif; font-weight:700; color:var(--cream);" id="routine-last-date">Never</div>
+          </div>
+          <div>
+            <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:4px;">Days Since</div>
+            <div style="font-size:20px; font-family:'Playfair Display',serif; font-weight:700;" id="routine-days-since">—</div>
+          </div>
+          <div>
+            <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;">Status</div>
+            <div id="routine-due-badge"></div>
+          </div>
+          <div>
+            <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:4px;">Schedule</div>
+            <div style="font-size:14px; font-weight:600; color:var(--text);">Every 7 days</div>
+          </div>
+          <div>
+            <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:4px;">Items to Inspect</div>
+            <div style="font-size:20px; font-family:'Playfair Display',serif; font-weight:700; color:var(--cream);" id="routine-item-count">44</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Checklist (hidden until started) -->
+      <div id="routine-checklist-container" style="display:none; margin-bottom:20px;">
+        <div class="panel">
+          <div class="panel-hdr">
+            <div>
+              <div class="panel-title">📋 Active Inspection</div>
+              <div class="panel-sub" id="routine-check-progress">0 / 0 items marked</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-outline" style="padding:7px 16px; font-size:12px;" onclick="cancelRoutineCheck()">✕ Cancel</button>
+              <button class="btn-primary" onclick="submitRoutineCheck()">✅ Submit & Log Check</button>
+            </div>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <div id="routine-checklist-items"></div>
+          </div>
+          <div style="padding:14px 22px; border-top:1px solid var(--border);">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Overall Notes for this Check</label>
+              <textarea id="routine-overall-notes" class="input-field" rows="2" placeholder="General observations for this inspection session..." style="resize:vertical;"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Log -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div><div class="panel-title">Inspection History</div><div class="panel-sub">All logged routine checks</div></div>
+        </div>
+        <div class="panel-body" id="routine-history-container">
+          <div style="text-align:center; padding:24px; color:var(--text-dim); font-size:13px;">No inspection history yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== EVENT-BASED ALLOCATION (EIM 4) ===== -->
+    <div class="section" id="section-allocation">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Event-Based Allocation </h1>
+          <p>Auto-compute equipment deployment manifest for approved events — based on pax, venue stock, and buffer standards</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-outline" id="btn-alloc-refresh" onclick="renderAllocationSection()">↻ Refresh</button>
+          <button class="btn-primary" id="btn-alloc-generate" onclick="generateAllocationManifest()">⚡ Generate Manifest</button>
+        </div>
+      </div>
+
+      <!-- Event Selector + Config -->
+      <div class="two-col" style="align-items:start;">
+
+        <!-- LEFT: Event config panel -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div><div class="panel-title">📋 Select Approved Event</div><div class="panel-sub">Only confirmed reservations appear here</div></div>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label>Event / Reservation</label>
+              <select id="alloc-event-select" class="input-field" onchange="onAllocEventChange()">
+                <option value="">Choose an approved event...</option>
+              </select>
+            </div>
+            <div id="alloc-event-summary" style="display:none; margin-top:14px; padding:14px 18px; background:rgba(196,154,60,0.07); border:1px solid var(--border); border-radius:12px;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 20px;">
+                <div>
+                  <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Client</div>
+                  <div style="font-size:14px; font-weight:700; color:var(--cream);" id="alloc-ev-client">—</div>
+                </div>
+                <div>
+                  <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Event Type</div>
+                  <div style="font-size:14px; font-weight:700; color:var(--gold);" id="alloc-ev-type">—</div>
+                </div>
+                <div>
+                  <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Date</div>
+                  <div style="font-size:13px; font-weight:600; color:var(--text);" id="alloc-ev-date">—</div>
+                </div>
+                <div>
+                  <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Pax</div>
+                  <div style="font-size:22px; font-family:'Playfair Display',serif; font-weight:700; color:var(--cream);" id="alloc-ev-pax">—</div>
+                </div>
+              </div>
+              <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
+                <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Package</div>
+                <div style="font-size:12px; color:var(--text-mid);" id="alloc-ev-pkg">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: venue & buffer config -->
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="panel">
+            <div class="panel-hdr">
+              <div><div class="panel-title">🏛️ Venue Equipment (Already On-Site)</div><div class="panel-sub">Items the venue already provides — will be deducted from required totals automatically</div></div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span id="venue-autofill-status" style="display:none;font-size:11px;color:var(--green);"></span>
+                <button class="btn-outline" style="padding:6px 14px;font-size:12px;" onclick="saveVenueEquipmentOnly()">💾 Save Venue Data</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">Furniture</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Tables available</label>
+                  <input type="number" id="venue-tables" class="input-field" value="0" min="0" placeholder="0" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Chairs available</label>
+                  <input type="number" id="venue-chairs" class="input-field" value="0" min="0" placeholder="0" />
+                </div>
+              </div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">Tableware &amp; Cutlery</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:14px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Dinner Plates</label>
+                  <input type="number" id="venue-plates" class="input-field" value="0" min="0" placeholder="0" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Forks</label>
+                  <input type="number" id="venue-forks" class="input-field" value="0" min="0" placeholder="0" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Spoons (all)</label>
+                  <input type="number" id="venue-spoons" class="input-field" value="0" min="0" placeholder="0" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Knives</label>
+                  <input type="number" id="venue-knives" class="input-field" value="0" min="0" placeholder="0" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Glasses / Goblets</label>
+                  <input type="number" id="venue-glasses" class="input-field" value="0" min="0" placeholder="0" />
+                </div>
+              </div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">Catering Equipment</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Chafing Dishes</label>
+                  <input type="number" id="venue-chafing" class="input-field" value="0" min="0" placeholder="0" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Dispensers / Urns</label>
+                  <input type="number" id="venue-dispensers" class="input-field" value="0" min="0" placeholder="0" />
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Other venue items <span style="color:var(--text-dim); font-weight:400;">(describe, optional)</span></label>
+                <input type="text" id="venue-other" class="input-field" placeholder="e.g. backdrop stand, 2 portable fans..." />
+              </div>
+              <div style="margin-top:10px;font-size:11px;color:var(--text-dim);line-height:1.5;">
+                💡 Venue quantities are deducted from the required total <strong style="color:var(--text-mid);">before</strong> the safety buffer is applied. Saved data auto-fills when you re-select this event.
+              </div>
+              <div style="margin-top:8px;"><span id="venue-save-status" style="display:none;font-size:12px;"></span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr"><div><div class="panel-title">⚙️ Deployment Standards</div><div class="panel-sub">Excess buffer to account for breakage / transit loss</div></div></div>
+            <div class="panel-body">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Fragile items buffer %</label>
+                  <input type="number" id="alloc-buffer-fragile" class="input-field" value="15" min="5" max="50" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Non-fragile buffer %</label>
+                  <input type="number" id="alloc-buffer-sturdy" class="input-field" value="10" min="3" max="30" />
+                </div>
+              </div>
+              <div style="margin-top:12px; padding:10px 14px; background:rgba(196,154,60,0.05); border-radius:8px; font-size:11px; color:var(--text-dim); line-height:1.5;">
+                💡 <strong style="color:var(--text-mid);">Fragile items</strong> (plates, glasses, bowls) carry a higher buffer. <strong style="color:var(--text-mid);">Sturdy items</strong> (tables, chairs, chafing dishes) carry a lower buffer. All deployed quantities are rounded up to the nearest whole number.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Allocation Status Banner -->
+      <div id="alloc-status-banner" style="display:none; margin-top:4px;"></div>
+
+      <!-- SHORTAGE PANEL — shown if stock insufficient -->
+      <div id="alloc-shortage-panel" style="display:none; margin-top:4px;">
+        <div class="panel" style="border:1px solid var(--red);">
+          <div class="panel-hdr" style="background:rgba(220,38,38,0.08);">
+            <div><div class="panel-title" style="color:var(--red);">⚠️ Equipment Shortages Detected</div><div class="panel-sub">Your current stock cannot fully cover this event's requirements (with buffer). Rent the missing items.</div></div>
+            <button class="btn-reject" style="white-space:nowrap;" onclick="showSection('rentals', document.getElementById('nav-rentals')); openAddRentalModal();">+ Rent Missing Items →</button>
+          </div>
+          <div class="panel-body" style="padding:0; overflow-x:auto;">
+            <table class="inv-table">
+              <thead>
+                <tr>
+                  <th>Equipment</th>
+                  <th>Category</th>
+                  <th>Required (w/ buffer)</th>
+                  <th>In Stock</th>
+                  <th>Shortfall</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="alloc-shortage-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEPLOYMENT MANIFEST -->
+      <div id="alloc-manifest-panel" style="display:none; margin-top:4px;">
+        <div class="panel">
+          <div class="panel-hdr">
+            <div>
+              <div class="panel-title">📦 Deployment Manifest</div>
+              <div class="panel-sub" id="alloc-manifest-sub">Full equipment list to be deployed for this event</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="badge confirmed" style="font-size:11px; padding:4px 12px;" id="alloc-manifest-badge">● Ready</span>
+              <button class="btn-outline" style="padding:6px 14px; font-size:12px;" onclick="printAllocationManifest()">🖨️ Print / Export</button>
+            </div>
+          </div>
+          <div class="panel-body" style="padding:0; overflow-x:auto;">
+            <table class="inv-table" id="alloc-manifest-table">
+              <thead>
+                <tr>
+                  <th>Asset ID</th>
+                  <th>Equipment</th>
+                  <th>Category</th>
+                  <th>Exact Required</th>
+                  <th>Buffer Added</th>
+                  <th>Deploy Qty</th>
+                  <th>In Stock</th>
+                  <th>Venue Provides</th>
+                  <th>To Deploy from Storage</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="alloc-manifest-tbody"></tbody>
+            </table>
+          </div>
+          <!-- Summary footer -->
+          <div style="padding:16px 22px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:24px; align-items:center;">
+            <div><div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Total Line Items</div><div style="font-size:18px; font-family:'Playfair Display',serif; font-weight:700;" id="alloc-sum-items">—</div></div>
+            <div><div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Fully Covered</div><div style="font-size:18px; font-family:'Playfair Display',serif; font-weight:700; color:var(--green);" id="alloc-sum-ok">—</div></div>
+            <div><div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Shortages</div><div style="font-size:18px; font-family:'Playfair Display',serif; font-weight:700; color:var(--red);" id="alloc-sum-short">—</div></div>
+            <div><div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Venue Covers</div><div style="font-size:18px; font-family:'Playfair Display',serif; font-weight:700; color:var(--amber);" id="alloc-sum-venue">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="alloc-empty-state" style="margin-top:20px;">
+        <div class="panel"><div class="panel-body" style="text-align:center; padding:60px 20px;">
+          <div style="font-size:52px; margin-bottom:16px;">🎯</div>
+          <div style="font-size:18px; font-family:'Playfair Display',serif; font-weight:700; color:var(--cream); margin-bottom:8px;">Select an Event to Begin</div>
+          <div style="font-size:13px; color:var(--text-dim); max-width:400px; margin:0 auto; line-height:1.6;">Choose a confirmed reservation above, adjust venue equipment and buffer settings, then click <strong>Generate Manifest</strong> to see the full deployment checklist.</div>
+        </div></div>
+      </div>
+
+    </div>
+
+    <!-- ===== SCHEDULING & CONFLICT HANDLING (EIM 5) ===== -->
+    <div class="section" id="section-scheduling">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Scheduling &amp; Conflicts </h1>
+          <p>Assign equipment to events by time period — conflict detection, daily usage, and staff group planning</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-outline" onclick="renderSchedulingSection()">↻ Refresh</button>
+        </div>
+      </div>
+
+      <!-- Conflict Alert Banner -->
+      <div id="sched-conflict-alert" style="display:none; margin-bottom:20px;"></div>
+
+      <!-- Tab Navigation -->
+      <div style="display:flex; flex-wrap:wrap; margin-bottom:20px; border-bottom:1px solid var(--border); overflow-x:auto;">
+        <button class="sched-tab active" id="sched-tab-calendar" onclick="switchSchedTab('calendar',this)">🗓️ Scheduling Calendar</button>
+        <button class="sched-tab" id="sched-tab-assign" onclick="switchSchedTab('assign',this)">📋 Assignment</button>
+        <button class="sched-tab" id="sched-tab-daily" onclick="switchSchedTab('daily',this)">📅 Daily View</button>
+        <button class="sched-tab" id="sched-tab-conflicts" onclick="switchSchedTab('conflicts',this)">⚠️ Conflicts <span id="sched-conflict-count" class="sidebar-badge" style="display:none; position:relative; top:-1px;">0</span></button>
+        <button class="sched-tab" id="sched-tab-staff" onclick="switchSchedTab('staff',this)">👥 Staff Groups</button>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PANE: Assignment
+      ══════════════════════════════════════════════════ -->
+      <div class="sched-pane" id="sched-pane-assign" style="display:none;">
+
+        <!-- Stats -->
+        <div class="stats-row" style="grid-template-columns:repeat(4,1fr); margin-bottom:20px;">
+          <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-label">Scheduled Events</div><div class="stat-value" id="sch-stat-total">0</div><div class="stat-change neutral">With assignments</div></div>
+          <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-label">Fully Assigned</div><div class="stat-value" id="sch-stat-full">0</div><div class="stat-change up">Ready to deploy</div></div>
+          <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-label">Partial / Pending</div><div class="stat-value" id="sch-stat-partial">0</div><div class="stat-change neutral">Needs attention</div></div>
+          <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-label">Conflicts Detected</div><div class="stat-value" id="sch-stat-conflicts">0</div><div class="stat-change down">Requires review</div></div>
+        </div>
+
+        <!-- Event + Time Period Selector -->
+        <div class="two-col" style="align-items:start; margin-bottom:20px;">
+
+          <!-- LEFT: Event Selector -->
+          <div class="panel">
+            <div class="panel-hdr"><div><div class="panel-title">📅 Select Event to Schedule</div><div class="panel-sub">Only confirmed / approved reservations appear here</div></div></div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label>Event / Reservation</label>
+                <select id="sch-event-select" class="input-field" onchange="onSchEventChange()">
+                  <option value="">Choose an approved event...</option>
+                </select>
+              </div>
+              <div id="sch-event-summary" style="display:none; margin-top:14px; padding:14px 18px; background:rgba(196,154,60,0.07); border:1px solid var(--border); border-radius:12px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 20px;">
+                  <div>
+                    <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Client</div>
+                    <div style="font-size:14px; font-weight:700; color:var(--cream);" id="sch-ev-client">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Date</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--text);" id="sch-ev-date">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Guest Count</div>
+                    <div style="font-size:22px; font-family:'Playfair Display',serif; font-weight:700; color:var(--cream);" id="sch-ev-pax">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Event Type</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--gold);" id="sch-ev-type">—</div>
+                  </div>
+                </div>
+                <div id="sch-existing-schedule" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Time Period + Sufficiency -->
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div class="panel">
+              <div class="panel-hdr"><div><div class="panel-title">⏰ Deployment Time Period</div><div class="panel-sub">Equipment locked per day — cannot be double-assigned across events on the same date</div></div></div>
+              <div class="panel-body">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Select Time Slot</label>
+                  <select id="sch-time-period" class="input-field" onchange="onSchTimePeriodChange()">
+                    <option value="">Choose a time period...</option>
+                    <option value="early-setup|05:00|07:00">🌅 Early Setup (5AM–7AM)</option>
+                    <option value="morning|07:00|11:00">☀️ Morning (7AM–11AM)</option>
+                    <option value="lunch|11:00|14:00">🌤️ Lunch / Midday (11AM–2PM)</option>
+                    <option value="afternoon|14:00|18:00">🌇 Afternoon (2PM–6PM)</option>
+                    <option value="evening|18:00|22:00">🌃 Evening (6PM–10PM)</option>
+                    <option value="fullday|07:00|22:00">📆 Full Day (7AM–10PM)</option>
+                    <option value="custom|custom|custom">✏️ Custom Time...</option>
+                  </select>
+                </div>
+                <div id="sch-custom-time" style="display:none; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+                  <div class="form-group" style="margin-bottom:0;"><label>Start</label><input type="time" id="sch-custom-start" class="input-field" value="07:00" /></div>
+                  <div class="form-group" style="margin-bottom:0;"><label>End</label><input type="time" id="sch-custom-end" class="input-field" value="22:00" /></div>
+                  <button class="btn-primary" style="grid-column:1/-1; justify-content:center;" onclick="applyCustomTime()">✅ Apply Custom Time</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sufficiency Check Panel -->
+            <div class="panel" id="sch-sufficiency-panel" style="display:none;">
+              <div class="panel-hdr">
+                <div><div class="panel-title" id="sch-suff-title">🔍 Inventory Check</div><div class="panel-sub" id="sch-suff-sub">Comparing required vs effective available quantities</div></div>
+                <span class="badge pending" id="sch-suff-badge">Pending</span>
+              </div>
+              <div class="panel-body" style="padding-top:12px;" id="sch-suff-body"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Assignment Controls -->
+        <div class="panel" id="sch-assign-controls" style="display:none; margin-bottom:20px;">
+          <div class="panel-hdr">
+            <div><div class="panel-title">🎯 Assign Equipment</div><div class="panel-sub">Auto fills all available quantities in one click · Manual lets you specify each item</div></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-outline" style="padding:7px 14px; font-size:12px;" onclick="checkSufficiency()">🔍 Re-check</button>
+              <button class="btn-view" onclick="switchAssignMode('manual')">✏️ Manual Assign</button>
+              <button class="btn-primary" onclick="autoAssignEquipment()">⚡ Auto Assign All</button>
+            </div>
+          </div>
+          <!-- Manual Assign Table (hidden until activated) -->
+          <div id="sch-manual-assign-section" style="display:none;">
+            <div style="overflow-x:auto;">
+              <table class="inv-table">
+                <thead><tr><th>Equipment</th><th>Category</th><th>Required (w/ buffer)</th><th>Available Today</th><th>Assign Qty</th><th>Status</th></tr></thead>
+                <tbody id="sch-manual-tbody"></tbody>
+              </table>
+            </div>
+            <div style="padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px;">
+              <button class="btn-outline" onclick="cancelManualAssign()">✕ Cancel</button>
+              <button class="btn-primary" onclick="submitManualAssign()">✅ Confirm Manual Assignment</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schedule Registry -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div><div class="panel-title">📋 All Equipment Assignments</div><div class="panel-sub">Deployment registry — complete scheduled equipment per confirmed event</div></div>
+            <input type="text" class="eim-search" id="sch-search" placeholder="🔍 Search events..." oninput="renderScheduleList()" style="width:200px;" />
+          </div>
+          <div id="sch-list-container" style="padding:16px 20px;"></div>
+          <div id="sch-schedule-detail"></div>
+        </div>
+
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PANE: Daily View
+      ══════════════════════════════════════════════════ -->
+      <div class="sched-pane" id="sched-pane-daily" style="display:none;">
+        <div class="panel" style="margin-bottom:20px;">
+          <div class="panel-hdr">
+            <div><div class="panel-title">📅 Daily Equipment Overview</div><div class="panel-sub">All equipment deployed for a selected date — grouped by time period with conflict detection</div></div>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="date" id="sch-daily-date" class="input-field" style="width:185px;" />
+              <button class="btn-primary" onclick="renderDailyOverview()">View Day →</button>
+            </div>
+          </div>
+        </div>
+        <div id="sch-daily-container">
+          <div style="text-align:center; padding:60px; color:var(--text-dim);">
+            <div style="font-size:48px; margin-bottom:16px;">📅</div>
+            <div style="font-size:16px; font-family:'Playfair Display',serif; font-weight:700; color:var(--cream); margin-bottom:8px;">Select a Date Above</div>
+            <div style="font-size:13px; max-width:400px; margin:0 auto; line-height:1.6;">Choose a date to see all scheduled equipment, grouped by time block (e.g., 7AM–11AM, 2PM–6PM).</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PANE: Usage Calendar
+      ══════════════════════════════════════════════════ -->
+      <div class="sched-pane" id="sched-pane-calendar">
+        <div class="panel">
+          <div class="panel-hdr">
+            <div><div class="panel-title">🗓️ Scheduling Calendar</div><div class="panel-sub">All approved reservations — gold = not yet assigned, green = fully assigned, orange = partial, red = insufficient. Click any event to assign equipment.</div></div>
+            <span class="badge confirmed" style="font-size:11px; padding:4px 12px;">● Live</span>
+          </div>
+          <div class="panel-body" style="padding:20px;">
+            <!-- Color legend -->
+            <div style="display:flex; flex-wrap:wrap; gap:14px; margin-bottom:16px; padding:10px 14px; background:var(--bg3); border-radius:10px; border:1px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(196,154,60,0.65);border:1px solid #c49a3c;"></span> Not yet assigned</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#2d8a4e;"></span> Fully assigned</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#d97706;"></span> Partially assigned</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#c0392b;"></span> Insufficient</div>
+              <div style="margin-left:auto;font-size:11px;color:var(--text-dim);align-self:center;">&#x1F4CC; Click any event to open its assignment sheet</div>
+            </div>
+            <div id="sched-calendar"></div>
+          </div>
+        </div>
+        <!-- Inline event detail panel -->
+        <div id="sched-cal-detail" style="display:none; margin-top:20px;">
+          <div class="panel" style="border:1px solid var(--gold);">
+            <div class="panel-hdr">
+              <div><div class="panel-title" id="sched-cal-detail-title">Event Details</div><div class="panel-sub" id="sched-cal-detail-sub">—</div></div>
+              <button class="btn-outline" style="padding:5px 12px; font-size:12px;" onclick="document.getElementById('sched-cal-detail').style.display='none'">✕ Close</button>
+            </div>
+            <div class="panel-body" id="sched-cal-detail-body"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PANE: Conflicts
+      ══════════════════════════════════════════════════ -->
+      <div class="sched-pane" id="sched-pane-conflicts" style="display:none;">
+        <div class="panel">
+          <div class="panel-hdr">
+            <div><div class="panel-title">⚠️ Conflict &amp; Shortage Flags</div><div class="panel-sub">Multi-event days where combined demand exceeds inventory — rental action required for each flagged item</div></div>
+            <button class="btn-reject" style="white-space:nowrap;" onclick="showSection('rentals', document.getElementById('nav-rentals'))">📋 View Rental Needs →</button>
+          </div>
+          <div class="panel-body" id="sch-conflicts-container">
+            <div style="text-align:center; padding:40px; color:var(--text-dim); font-size:13px;">No assignments to evaluate yet. Assign equipment to events first.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           PANE: Staff Groups
+      ══════════════════════════════════════════════════ -->
+      <div class="sched-pane" id="sched-pane-staff" style="display:none;">
+        <div class="panel" style="margin-bottom:20px;">
+          <div class="panel-hdr">
+            <div><div class="panel-title">👥 Staff Group Allocation</div><div class="panel-sub">Recommended staffing groups per event — computed from pax count, event scope, and labor intensity</div></div>
+            <div style="padding:8px 16px; background:rgba(196,154,60,0.07); border:1px solid var(--border); border-radius:10px; font-size:11px; color:var(--text-dim); max-width:320px; line-height:1.5;">
+              Groups are auto-computed from event scale. Final staffing is at supervisor discretion on-site.
+            </div>
+          </div>
+        </div>
+        <div id="sch-staff-container"></div>
+      </div>
+
+    </div>
+
+    <!-- ===== EQUIPMENT LIFECYCLE (EIM 6) ===== -->
+    <div class="section" id="section-lifecycle">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Equipment Lifecycle</h1>
+          <p>Departure &middot; Deployment &middot; Execution &middot; Bash-Out &middot; Restorage &mdash; execution day tracking</p>
+        </div>
+        <div style="font-size:12px;color:var(--text-dim);" id="lifecycle-today-badge"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;">
+        <!-- LEFT: Today's Events -->
+        <div>
+          <div class="panel">
+            <div class="panel-hdr">
+              <div><div class="panel-title">📅 Today's Events</div><div class="panel-sub" id="lifecycle-date-sub"></div></div>
+              <button class="btn-outline" style="padding:5px 12px;font-size:12px;" onclick="renderLifecycleSection()">&#8635; Refresh</button>
+            </div>
+            <div class="panel-body" id="lifecycle-today-events">
+              <div style="text-align:center;padding:30px;color:var(--text-dim);font-size:12px;">Loading...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Lifecycle Detail -->
+        <div>
+          <div id="lifecycle-no-event" style="text-align:center;padding:60px 20px;color:var(--text-dim);">
+            <div style="font-size:48px;margin-bottom:14px;">🚛</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text-mid);margin-bottom:6px;">Select an event to begin</div>
+            <div style="font-size:12px;">Lifecycle tracking only activates on execution day</div>
+          </div>
+
+          <div id="lifecycle-detail-panel" style="display:none;">
+            <!-- Event header -->
+            <div class="panel" style="margin-bottom:16px;">
+              <div class="panel-body" style="padding:16px 20px;" id="lifecycle-event-info"></div>
+            </div>
+
+            <!-- Stage buttons -->
+            <div class="panel" style="margin-bottom:16px;">
+              <div class="panel-hdr">
+                <div><div class="panel-title">&#128678; Stage Progression</div><div class="panel-sub">Complete stages in order &mdash; each generates a timestamped equipment checklist saved to Firebase</div></div>
+              </div>
+              <div class="panel-body">
+                <div id="lifecycle-stage-btns" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+              </div>
+            </div>
+
+            <!-- Stage Logs -->
+            <div class="panel" style="margin-bottom:16px;">
+              <div class="panel-hdr">
+                <div><div class="panel-title">&#128196; Stage Logs</div><div class="panel-sub">Timestamped records of each completed stage checklist</div></div>
+              </div>
+              <div class="panel-body" id="lifecycle-logs-panel">
+                <div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px;">No stages completed yet.</div>
+              </div>
+            </div>
+
+            <!-- Equipment list -->
+            <div class="panel">
+              <div class="panel-hdr">
+                <div><div class="panel-title">📦 Assigned Equipment</div><div class="panel-sub">All items for this event &mdash; inventory, rented, and venue-provided</div></div>
+              </div>
+              <div class="panel-body" id="lifecycle-equip-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== EQUIPMENT ISSUES (EIM 7) ===== -->
+    <div class="section" id="section-equip-issues">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Equipment Issues</h1>
+          <p>Damage assessment, liability handling &amp; resolution — sourced from lifecycle checklists</p>
+        </div>
+        <button class="btn-outline" onclick="renderEquipIssuesSection()">&#8635; Refresh</button>
+      </div>
+      <div style="display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start;">
+        <!-- LEFT: Flagged events list -->
+        <div>
+          <div class="panel">
+            <div class="panel-hdr">
+              <div><div class="panel-title">&#128680; Flagged Events</div><div class="panel-sub" id="issues-event-count">Loading...</div></div>
+            </div>
+            <div class="panel-body" id="issues-event-list">
+              <div style="text-align:center;padding:30px;color:var(--text-dim);font-size:12px;">Loading lifecycle logs...</div>
+            </div>
+          </div>
+        </div>
+        <!-- RIGHT: Issue detail -->
+        <div>
+          <div id="issues-no-event" style="text-align:center;padding:60px 20px;color:var(--text-dim);">
+            <div style="font-size:48px;margin-bottom:14px;">&#128269;</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text-mid);margin-bottom:6px;">Select an event to view issues</div>
+            <div style="font-size:12px;">Events with missing or damaged equipment are highlighted in red</div>
+          </div>
+          <div id="issues-detail-panel" style="display:none;">
+            <div class="panel" style="margin-bottom:16px;">
+              <div class="panel-body" id="issues-event-header" style="padding:16px 20px;"></div>
+            </div>
+            <div class="panel" style="margin-bottom:16px;">
+              <div class="panel-hdr">
+                <div><div class="panel-title">&#128203; Damage Assessment</div><div class="panel-sub">All flagged equipment organized by lifecycle stage</div></div>
+              </div>
+              <div class="panel-body" id="issues-assessment"></div>
+            </div>
+            <div class="panel" style="margin-bottom:16px;">
+              <div class="panel-hdr">
+                <div><div class="panel-title">&#9878;&#65039; Liability &amp; Financial Impact</div><div class="panel-sub">Cost breakdown per liable party &mdash; formulas pending contract implementation</div></div>
+              </div>
+              <div class="panel-body" id="issues-liability"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-hdr">
+                <div><div class="panel-title">&#9989; Resolution Tracking</div><div class="panel-sub">Mark issues resolved and log negligence type</div></div>
+              </div>
+              <div class="panel-body" id="issues-resolution-log"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== EQUIPMENT RESUPPLY (EIM 8) ===== -->
+    <div class="section" id="section-resupply">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Equipment Resupply</h1>
+          <p>Post-event restocking — owned equipment replacement &amp; rental damage repayment</p>
+        </div>
+        <button class="btn-outline" onclick="renderResupplySection()">&#8635; Refresh</button>
+      </div>
+
+      <!-- Sub-tabs -->
+      <div style="display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid var(--border);">
+        <button class="resupply-tab active" id="rst-owned" onclick="switchResupplyTab('owned',this)">🔧 Owned Equipment Resupply</button>
+        <button class="resupply-tab" id="rst-rental" onclick="switchResupplyTab('rental',this)">🔄 Rented Equipment Damage</button>
+      </div>
+
+      <!-- ══════ TAB: OWNED EQUIPMENT ══════ -->
+      <div id="resupply-pane-owned">
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-label">Pending Orders</div><div class="stat-value" id="rs-stat-po">0</div><div class="stat-change neutral">Purchase orders</div></div>
+          <div class="stat-card"><div class="stat-icon">🛒</div><div class="stat-label">Active Shopping Lists</div><div class="stat-value" id="rs-stat-sl">0</div><div class="stat-change neutral">Manual purchases</div></div>
+          <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-label">Awaiting Arrival</div><div class="stat-value" id="rs-stat-arrive">0</div><div class="stat-change amber">En route</div></div>
+          <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-label">Completed (Month)</div><div class="stat-value" id="rs-stat-done">0</div><div class="stat-change up">Restocked</div></div>
+        </div>
+
+        <!-- Needs Panel: Items requiring resupply -->
+        <div class="panel" style="margin-bottom:20px;">
+          <div class="panel-hdr">
+            <div><div class="panel-title">⚠️ Items Requiring Resupply</div><div class="panel-sub">Broken or missing owned equipment from resolved lifecycle issues — ready for restocking</div></div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-outline" style="padding:6px 14px;font-size:12px;" onclick="refreshResupplyNeeds()">&#8635; Re-scan Issues</button>
+            </div>
+          </div>
+          <div class="panel-body" id="rs-needs-container">
+            <div style="text-align:center;padding:30px;color:var(--text-dim);font-size:13px;">Loading resupply requirements...</div>
+          </div>
+        </div>
+
+        <!-- Active Purchase Orders -->
+        <div class="panel" style="margin-bottom:20px;">
+          <div class="panel-hdr">
+            <div><div class="panel-title">📋 Purchase Orders</div><div class="panel-sub">Orders sent to suppliers — track payment and delivery</div></div>
+            <span class="badge pending" style="font-size:11px;" id="rs-po-count-badge">0 Active</span>
+          </div>
+          <div class="panel-body" id="rs-po-container">
+            <div style="text-align:center;padding:24px;color:var(--text-dim);font-size:13px;">No purchase orders yet.</div>
+          </div>
+        </div>
+
+        <!-- Active Shopping Lists -->
+        <div class="panel" style="margin-bottom:20px;">
+          <div class="panel-hdr">
+            <div><div class="panel-title">🛒 Shopping Lists</div><div class="panel-sub">Items to purchase manually — mark each item as bought and log where it was purchased</div></div>
+            <span class="badge pending" style="font-size:11px;" id="rs-sl-count-badge">0 Active</span>
+          </div>
+          <div class="panel-body" id="rs-sl-container">
+            <div style="text-align:center;padding:24px;color:var(--text-dim);font-size:13px;">No shopping lists yet.</div>
+          </div>
+        </div>
+
+      </div><!-- /owned pane -->
+
+      <!-- ══════ TAB: RENTED EQUIPMENT DAMAGE ══════ -->
+      <div id="resupply-pane-rental" style="display:none;">
+
+        <!-- Info banner -->
+        <div style="padding:14px 18px;background:rgba(196,154,60,0.06);border:1px solid var(--border);border-radius:12px;margin-bottom:20px;font-size:13px;color:var(--text-mid);line-height:1.6;">
+          ℹ️ This view shows <strong style="color:var(--cream);">rental items that were damaged or went missing</strong> during an event, sourced from Equipment Lifecycle logs. Track payment to the rental company for each damaged item.
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card"><div class="stat-icon">🔴</div><div class="stat-label">Broken Rentals</div><div class="stat-value" id="rs-rent-broken">0</div><div class="stat-change down">Needs repayment</div></div>
+          <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-label">Pending Payment</div><div class="stat-value" id="rs-rent-pending">0</div><div class="stat-change amber">Awaiting action</div></div>
+          <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-label">Paid</div><div class="stat-value" id="rs-rent-paid">0</div><div class="stat-change up">Settled</div></div>
+        </div>
+
+        <!-- Rental damage list -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div><div class="panel-title">🔄 Rental Damage Log</div><div class="panel-sub">All broken or missing rental items — grouped by event</div></div>
+            <button class="btn-outline" style="padding:6px 14px;font-size:12px;" onclick="renderRentalDamageTab()">&#8635; Refresh</button>
+          </div>
+          <div class="panel-body" id="rs-rental-container">
+            <div style="text-align:center;padding:30px;color:var(--text-dim);font-size:13px;">Loading rental damage records...</div>
+          </div>
+        </div>
+
+      </div><!-- /rental pane -->
+
+    </div><!-- /section-resupply -->
+
+    <!-- ===== EQUIPMENT MAINTENANCE PIPELINE (EIM 9) ===== -->
+    <div class="section" id="section-maintenance">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Equipment Maintenance Pipeline</h1>
+          <p>Review flagged items, track ongoing repairs, and manage retired assets</p>
+        </div>
+        <button class="btn-outline" onclick="renderMaintenanceSection()">&#8635; Refresh Pipeline</button>
+      </div>
+
+      <!-- Pipeline Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">🔍</div>
+          <div class="stat-label">Review Pending</div>
+          <div class="stat-value" id="mnt-stat-review">0</div>
+          <div class="stat-change amber">Needs assessment</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔧</div>
+          <div class="stat-label">In Maintenance</div>
+          <div class="stat-value" id="mnt-stat-repair">0</div>
+          <div class="stat-change up">Being fixed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚙️</div>
+          <div class="stat-label">Fixed (Month)</div>
+          <div class="stat-value" id="mnt-stat-fixed">0</div>
+          <div class="stat-change up">Returned to Good</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">♻️</div>
+          <div class="stat-label">Retired</div>
+          <div class="stat-value" id="mnt-stat-retired">0</div>
+          <div class="stat-change neutral">Flagged for resupply</div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:24px;">
+        <div class="tab-bar">
+          <button class="tab-btn active" id="mnt-tab-active" onclick="switchMaintenanceTab('active',this)">🧰 Active Pipeline</button>
+          <button class="tab-btn" id="mnt-tab-history" onclick="switchMaintenanceTab('history',this)">📝 History Logs</button>
+        </div>
+        
+        <div id="mnt-pane-active" class="panel-body">
+          <div id="mnt-pipeline-grid" class="mnt-grid">
+            <!-- Pipeline cards injected here -->
+            <div style="text-align:center;padding:40px;color:var(--text-dim);">No items currently in the maintenance pipeline.</div>
+          </div>
+        </div>
+
+        <div id="mnt-pane-history" class="panel-body" style="display:none;">
+          <div class="panel-body" style="padding:0; overflow-x:auto;">
+            <table class="inv-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Equipment</th>
+                  <th>Resolution</th>
+                  <th>Notes</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody id="mnt-history-tbody">
+                <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-dim);">No maintenance history logs found.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== EQUIPMENT DISPOSED RECORDS (EIM 10) ===== -->
+    <div class="section" id="section-disposed">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Disposed Records</h1>
+          <p>Track retired equipment, failure trends, and financial loss impact</p>
+        </div>
+        <button class="btn-outline" onclick="renderDisposedSection()">&#8635; Refresh Records</button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">💸</div>
+          <div class="stat-label">Total Value Loss</div>
+          <div class="stat-value" id="dsp-stat-total">₱0</div>
+          <div class="stat-change down">All-time disposed value</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-label">Monthly Loss</div>
+          <div class="stat-value" id="dsp-stat-month">₱0</div>
+          <div class="stat-change amber" id="dsp-stat-month-lbl">Loss this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📉</div>
+          <div class="stat-label">Disposal Rate</div>
+          <div class="stat-value" id="dsp-stat-rate">0%</div>
+          <div class="stat-change neutral">Retired vs active assets</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-label">Most Failed Asset</div>
+          <div class="stat-value" id="dsp-stat-bad-asset" style="font-size:16px;">None</div>
+          <div class="stat-change neutral">Highest incident count</div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="tab-bar">
+          <button class="tab-btn active" id="dsp-tab-analytics" onclick="switchDisposedTab('analytics',this)">📊 Analytics</button>
+          <button class="tab-btn" id="dsp-tab-history" onclick="switchDisposedTab('history',this)">🗃️ Disposal History</button>
+        </div>
+
+        <div id="dsp-pane-analytics" class="panel-body">
+          <div class="two-col" style="margin-bottom:0;">
+            <div class="panel" style="margin-bottom:0;">
+              <div class="panel-hdr">
+                <div>
+                  <div class="panel-title">🔁 Most Frequently Broken</div>
+                  <div class="panel-sub">Top assets by maintenance incident count</div>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div style="height:260px; position:relative;">
+                  <canvas id="dsp-chart-broken"></canvas>
+                </div>
+                <div id="dsp-chart-broken-empty" style="display:none;text-align:center;padding:20px;color:var(--text-dim);">No failure data yet.</div>
+              </div>
+            </div>
+
+            <div class="panel" style="margin-bottom:0;">
+              <div class="panel-hdr">
+                <div>
+                  <div class="panel-title">📈 Monthly Loss Trend</div>
+                  <div class="panel-sub">Recent disposal value by month</div>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div style="height:260px; position:relative;">
+                  <canvas id="dsp-chart-monthly"></canvas>
+                </div>
+                <div id="dsp-chart-monthly-empty" style="display:none;text-align:center;padding:20px;color:var(--text-dim);">No financial records found.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dsp-pane-history" class="panel-body" style="display:none; padding:0; overflow-x:auto;">
+          <table class="inv-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Equipment</th>
+                <th>Reason</th>
+                <th style="text-align:right;">Value Loss</th>
+              </tr>
+            </thead>
+            <tbody id="dsp-history-tbody">
+              <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-dim);">No disposal history recorded.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== USER MANAGEMENT ===== -->
+    <div class="section" id="section-users">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>User Management</h1>
+          <p>Manage system accounts and personnel access</p>
+        </div>
+        <button class="btn-primary" onclick="openAddUserModal()">👤+ Add New User</button>
+      </div>
+
+      <div class="stats-row" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-label">Total Accounts</div>
+          <div class="stat-value" id="user-stat-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Active Users</div>
+          <div class="stat-value" id="user-stat-active" style="color: var(--green);">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🚫</div>
+          <div class="stat-label">Inactive Users</div>
+          <div class="stat-value" id="user-stat-inactive" style="color: var(--red);">0</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hdr">
+          <div>
+            <div class="panel-title">System Accounts</div>
+            <div class="panel-sub">Select a user to edit or toggle status</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-outline" id="user-edit-btn" onclick="openEditUserModal()" disabled>✏️ Edit User</button>
+            <button class="btn-outline" id="user-status-btn" onclick="toggleUserStatus()" disabled>🔘 Toggle Status</button>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0; overflow-x:auto;">
+          <table class="inv-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== BUSINESS INSIGHTS ===== -->
+    <div class="section" id="section-insights">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Business Insights</h1>
+          <p>Real-time analytics, demand forecasting, and seasonal readiness</p>
+        </div>
+        <button class="btn-primary" onclick="generateAIReport()" id="btn-ai-report"> Generate Intelligence Report</button>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-body" style="padding:12px 18px;">
+          <div class="tab-bar" id="insights-tab-bar">
+            <button type="button" class="tab-btn active" id="insights-tab-core" onclick="switchInsightsPane('core',this)">Core analytics</button>
+            <button type="button" class="tab-btn" id="insights-tab-forecast" onclick="switchInsightsPane('forecast',this)">Booking demand forecast</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="ai-insights-container" style="display:none; margin-bottom: 24px;">
+        <div class="panel" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid var(--gold);">
+          <div class="panel-hdr">
+            <div style="color:var(--gold); font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase;">Halden's Intelligence Engine v1.0</div>
+          </div>
+          <div class="panel-body" id="ai-insights-body" style="color:var(--cream); line-height:1.6; font-size:14px;"></div>
+        </div>
+      </div>
+
+      <div id="insights-pane-core">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">Total Events (2026)</div><div class="stat-value">42</div><div class="stat-change up">↑ 28% vs 2025</div></div>
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Guests Served</div><div class="stat-value">3.8k</div><div class="stat-change up">↑ 15% vs last year</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Revenue YTD</div><div class="stat-value">₱1.2M</div><div class="stat-change up">↑ 22% vs last year</div></div>
+        <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-label">Top Package</div><div class="stat-value" style="font-size:18px;">Kiddie B</div><div class="stat-change neutral">18 bookings</div></div>
+      </div>
+      <div class="two-col">
+        <div class="panel"><div class="panel-hdr"><div class="panel-title">Top Menu Items</div></div><div class="panel-body"><div style="height:220px; position:relative;"><canvas id="top-items-chart"></canvas></div></div></div>
+        <div class="panel"><div class="panel-hdr"><div class="panel-title">Event Types Breakdown</div></div><div class="panel-body"><div style="height:220px; position:relative;"><canvas id="event-types-chart"></canvas></div></div></div>
+      </div>
+      </div>
+
+      <div id="insights-pane-forecast" style="display:none;">
+        <div id="forecast-season-banner" class="panel" style="margin-bottom:16px;border:1px solid var(--border);">
+          <div class="panel-body" style="padding:18px 20px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+              <div>
+                <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Season outlook</div>
+                <div id="forecast-season-title" style="font-size:18px;font-weight:700;color:var(--cream);">—</div>
+                <div id="forecast-season-copy" style="font-size:12px;color:var(--text-dim);margin-top:8px;line-height:1.55;max-width:720px;">—</div>
+              </div>
+              <span class="badge pending" id="forecast-season-badge" style="font-size:11px;align-self:center;">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="forecast-anticipation-flags" style="display:none;margin-bottom:16px;">
+          <div class="two-col" style="gap:16px;">
+            <div class="panel" style="margin:0;border:1px solid rgba(217,119,6,0.45);background:rgba(217,119,6,0.08);">
+              <div class="panel-hdr"><div class="panel-title" style="font-size:14px;">⚙️ Equipment readiness flag</div></div>
+              <div class="panel-body" style="font-size:12px;color:var(--text-dim);line-height:1.5;" id="forecast-flag-equipment">
+                Peak demand window — run full routine checks, rental buffer review, and cold-chain crate counts before the surge.
+              </div>
+            </div>
+            <div class="panel" style="margin:0;border:1px solid rgba(91,155,213,0.45);background:rgba(91,155,213,0.08);">
+              <div class="panel-hdr"><div class="panel-title" style="font-size:14px;">👥 Staff availability flag</div></div>
+              <div class="panel-body" style="font-size:12px;color:var(--text-dim);line-height:1.5;" id="forecast-flag-staff">
+                Align roster templates with projected covers; open overtime pools and confirm lead captains for Sat/Sun peaks.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-row" id="forecast-stats-row">
+          <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-label">Forecast confidence</div><div class="stat-value" id="fc-stat-confidence">—</div><div class="stat-change neutral" id="fc-stat-confidence-sub">—</div></div>
+          <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-label">Peak months (Aug–Dec)</div><div class="stat-value" id="fc-stat-peak-share">—</div><div class="stat-change up" id="fc-stat-peak-sub">—</div></div>
+          <div class="stat-card"><div class="stat-icon">📆</div><div class="stat-label">Proj. bookings next 90d</div><div class="stat-value" id="fc-stat-n90">—</div><div class="stat-change neutral" id="fc-stat-n90-sub">YoY placeholder</div></div>
+          <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-label">Demand uplift vs calm</div><div class="stat-value" id="fc-stat-uplift">—</div><div class="stat-change up" id="fc-stat-uplift-sub">—</div></div>
+        </div>
+
+        <div class="two-col" style="margin-bottom:16px;">
+          <div class="panel"><div class="panel-hdr"><div class="panel-title">12‑month demand index (placeholder)</div><div class="panel-sub">Normalized — 100 = historical monthly average</div></div><div class="panel-body"><div style="height:260px;position:relative;"><canvas id="forecast-demand-chart"></canvas></div></div></div>
+          <div class="panel"><div class="panel-hdr"><div class="panel-title">Busy vs calm season split</div><div class="panel-sub">Aug–Dec vs Jan–Jul (model assumption)</div></div><div class="panel-body"><div style="height:260px;position:relative;"><canvas id="forecast-season-split-chart"></canvas></div></div></div>
+        </div>
+
+        <div class="two-col" style="margin-bottom:16px;">
+          <div class="panel"><div class="panel-hdr"><div class="panel-title">Weekly booking pace (snapshot)</div></div><div class="panel-body"><div style="height:220px;position:relative;"><canvas id="forecast-weekly-pace-chart"></canvas></div></div></div>
+          <div class="panel"><div class="panel-hdr"><div class="panel-title">Lead-time distribution</div><div class="panel-sub">Days from inquiry → event (placeholder)</div></div><div class="panel-body"><div style="height:220px;position:relative;"><canvas id="forecast-leadtime-chart"></canvas></div></div></div>
+        </div>
+
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="panel-hdr"><div class="panel-title">Monthly projected events &amp; revenue (placeholder)</div></div>
+          <div class="panel-body" style="padding:0;overflow:auto;">
+            <table class="data-table" style="font-size:12px;">
+              <thead><tr><th>Month</th><th>Demand index</th><th>Proj. events</th><th>Proj. revenue</th><th>Capacity risk</th><th>Note</th></tr></thead>
+              <tbody id="forecast-monthly-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Forecast narrative &amp; signals</div></div>
+          <div class="panel-body" style="font-size:12px;color:var(--text-dim);line-height:1.65;" id="forecast-narrative-block"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CHAT SUPPORT ===== -->
+    <div class="section" id="section-chat">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Chat Support Inbox </h1>
+          <p>Respond to customer inquiries in real-time</p>
+        </div>
+      </div>
+      <div class="chat-manager-layout">
+        <div class="chat-inbox">
+          <div class="inbox-hdr">Active Conversations</div>
+          <div id="chat-inbox-list" class="inbox-list">
+            <div style="padding:20px; text-align:center; color:var(--text-dim); font-size:12px;">No active chats yet.</div>
+          </div>
+        </div>
+        <div class="chat-viewport">
+          <div id="active-chat-hdr" class="active-chat-hdr">
+            <div class="ach-info">
+              <div class="ach-name">Select a conversation</div>
+              <div class="ach-status">to start messaging</div>
+            </div>
+          </div>
+          <div id="admin-chat-box" class="chat-messages">
+            <div class="chat-empty-state">
+              <div class="ces-icon">📬</div>
+              <p>Select a customer from the inbox to view their message history.</p>
+            </div>
+          </div>
+          <div class="chat-input-area" id="admin-chat-input-row" style="display:none;">
+            <input type="text" id="admin-chat-input" placeholder="Type your response..." onkeydown="if(event.key==='Enter') sendAdminMsg()"/>
+            <button onclick="sendAdminMsg()">Reply </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+
+<!-- ==================== LIFECYCLE CHECKLIST MODAL ==================== -->
+<div id="lifecycle-modal-overlay" class="modal-overlay" onclick="closeLifecycleModal()"></div>
+<div id="lifecycle-modal" class="modal eim-modal" style="max-width:700px;">
+  <div class="modal-hdr">
+    <div>
+      <div class="modal-title" id="lifecycle-modal-title">Stage Checklist</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-top:3px;" id="lifecycle-modal-sub"></div>
+    </div>
+    <button class="modal-close" onclick="closeLifecycleModal()">&#x2715;</button>
+  </div>
+  <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
+    <!-- Timestamp -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:rgba(196,154,60,0.07);border-radius:8px;border:1px solid rgba(196,154,60,0.2);">
+      <span style="font-size:16px;">&#128336;</span>
+      <div>
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">Time Logged</div>
+        <div style="font-size:13px;font-weight:700;color:var(--cream);" id="lifecycle-modal-timestamp"></div>
+      </div>
+    </div>
+    <!-- Checklist table -->
+    <div id="lifecycle-modal-list"></div>
+    <!-- Summary bar -->
+    <div id="lifecycle-modal-summary" style="display:none;margin-top:16px;padding:12px 16px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);display:flex;flex-wrap:wrap;gap:24px;"></div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid var(--border);flex-shrink:0;">
+    <button class="btn-outline" onclick="closeLifecycleModal()">Cancel</button>
+    <button class="btn-primary" id="lifecycle-finalize-btn" onclick="finalizeLifecycleChecklist()">Finalize &amp; Log</button>
+  </div>
+</div>
+
+<!-- ==================== ADD EQUIPMENT MODAL ==================== -->
+<div id="eim-add-overlay" class="modal-overlay"></div>
+<div id="eim-add-modal" class="modal eim-modal">
+  <div class="modal-hdr">
+    <div class="modal-title">Add Equipment Asset</div>
+    <button class="modal-close" onclick="closeAddEquipmentModal()">✕</button>
+  </div>
+  <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+
+    <div class="eim-modal-section-label">Basic Information</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Asset ID <span style="color:var(--text-dim); font-weight:400;">(auto)</span></label>
+        <input type="text" id="eim-add-id" class="input-field" placeholder="e.g. EQ-F001" />
+      </div>
+      <div class="form-group">
+        <label>Equipment Name *</label>
+        <input type="text" id="eim-add-name" class="input-field" placeholder="e.g. Round Banquet Table 5ft" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category *</label>
+        <select id="eim-add-category" class="input-field" onchange="updateEIMAddId()">
+          <option value="">Select category...</option>
+          <option value="Furniture">Furniture</option>
+          <option value="Tableware">Tableware</option>
+          <option value="Glassware">Glassware</option>
+          <option value="Linens">Linens</option>
+          <option value="Catering Equipment">Catering Equipment</option>
+          <option value="AV & Lighting">AV & Lighting</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Type / Sub-category *</label>
+        <input type="text" id="eim-add-type" class="input-field" placeholder="e.g. Table, Chair, Plate..." />
+      </div>
+    </div>
+
+    <div class="eim-modal-section-label" style="margin-top:4px;">Quantity & Specs</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Quantity *</label>
+        <input type="number" id="eim-add-qty" class="input-field" placeholder="0" min="1" />
+      </div>
+      <div class="form-group">
+        <label>Unit Type</label>
+        <select id="eim-add-unit" class="input-field">
+          <option value="pcs">pcs</option>
+          <option value="sets">sets</option>
+          <option value="units">units</option>
+          <option value="pairs">pairs</option>
+          <option value="rolls">rolls</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Condition</label>
+        <select id="eim-add-condition" class="input-field">
+          <option value="Excellent">Excellent</option>
+          <option value="Good">Good</option>
+          <option value="Fair">Fair</option>
+          <option value="Poor">Poor</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="eim-add-status" class="input-field">
+          <option value="Active">Active</option>
+          <option value="In Use">In Use</option>
+          <option value="Under Repair">Under Repair</option>
+          <option value="Retired">Retired</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="eim-modal-section-label" style="margin-top:4px;">Financials & Source</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Unit Cost (₱)</label>
+        <input type="number" id="eim-add-cost" class="input-field" placeholder="0.00" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Supplier</label>
+        <input type="text" id="eim-add-supplier" class="input-field" placeholder="e.g. Manila Event Supply Co." />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Source Location <span style="color:var(--text-dim); font-weight:400;">(if no supplier)</span></label>
+      <input type="text" id="eim-add-source" class="input-field" placeholder="e.g. Divisoria Market, Manila" />
+    </div>
+
+    <div class="eim-modal-section-label" style="margin-top:4px;">Tracking Mode</div>
+    <div class="eim-tracking-toggle">
+      <label class="eim-track-opt" id="track-opt-individual">
+        <input type="radio" name="eim-tracking" value="individual" checked onchange="toggleBatchField()"/>
+        <div class="eim-track-card">
+          <div class="eim-track-icon">🏷️</div>
+          <div class="eim-track-title">Individual ID</div>
+          <div class="eim-track-desc">For expensive items — tables, AV, dispensers</div>
+        </div>
+      </label>
+      <label class="eim-track-opt" id="track-opt-batch">
+        <input type="radio" name="eim-tracking" value="batch" onchange="toggleBatchField()"/>
+        <div class="eim-track-card">
+          <div class="eim-track-icon">📦</div>
+          <div class="eim-track-title">Batch Tracking</div>
+          <div class="eim-track-desc">For bulk items — plates, cutlery, linens, chairs</div>
+        </div>
+      </label>
+    </div>
+    <div class="form-group" id="batch-id-field" style="display:none; margin-top:12px;">
+      <label>Batch Tracking ID</label>
+      <input type="text" id="eim-add-batch-id" class="input-field" placeholder="e.g. BATCH-PLT-003" />
+    </div>
+
+    <div class="form-group" style="margin-top:12px;">
+      <label>Notes</label>
+      <textarea id="eim-add-notes" class="input-field" rows="2" placeholder="e.g. 5ft diameter, seats 8–10 adults. Foldable legs." style="resize:vertical;"></textarea>
+    </div>
+
+    <button class="btn-primary" style="width:100%; justify-content:center; margin-top:4px;" onclick="submitAddEquipment()" id="btn-submit-eim">Add Equipment</button>
+  </div>
+</div>
+
+<!-- ==================== EDIT EQUIPMENT MODAL ==================== -->
+<div id="eim-edit-overlay" class="modal-overlay"></div>
+<div id="eim-edit-modal" class="modal eim-modal">
+  <div class="modal-hdr">
+    <div class="modal-title">Edit Equipment Asset</div>
+    <button class="modal-close" onclick="closeEditEquipmentModal()">✕</button>
+  </div>
+  <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+    <input type="hidden" id="eim-edit-idx"/>
+
+    <div class="eim-modal-section-label">Basic Information</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Asset ID</label>
+        <input type="text" id="eim-edit-id" class="input-field" disabled style="opacity:0.6;"/>
+      </div>
+      <div class="form-group">
+        <label>Equipment Name *</label>
+        <input type="text" id="eim-edit-name" class="input-field"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="eim-edit-category" class="input-field">
+          <option value="Furniture">Furniture</option>
+          <option value="Tableware">Tableware</option>
+          <option value="Glassware">Glassware</option>
+          <option value="Linens">Linens</option>
+          <option value="Catering Equipment">Catering Equipment</option>
+          <option value="AV & Lighting">AV & Lighting</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <input type="text" id="eim-edit-type" class="input-field"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="number" id="eim-edit-qty" class="input-field"/>
+      </div>
+      <div class="form-group">
+        <label>Unit Type</label>
+        <select id="eim-edit-unit" class="input-field">
+          <option value="pcs">pcs</option>
+          <option value="sets">sets</option>
+          <option value="units">units</option>
+          <option value="pairs">pairs</option>
+          <option value="rolls">rolls</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Condition</label>
+        <select id="eim-edit-condition" class="input-field">
+          <option value="Excellent">Excellent</option>
+          <option value="Good">Good</option>
+          <option value="Fair">Fair</option>
+          <option value="Poor">Poor</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="eim-edit-status" class="input-field">
+          <option value="Active">Active</option>
+          <option value="In Use">In Use</option>
+          <option value="Under Repair">Under Repair</option>
+          <option value="Retired">Retired</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Unit Cost (₱)</label>
+        <input type="number" id="eim-edit-cost" class="input-field"/>
+      </div>
+      <div class="form-group">
+        <label>Supplier</label>
+        <input type="text" id="eim-edit-supplier" class="input-field"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Source Location</label>
+      <input type="text" id="eim-edit-source" class="input-field"/>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="eim-edit-notes" class="input-field" rows="2" style="resize:vertical;"></textarea>
+    </div>
+    <button class="btn-primary" style="width:100%; justify-content:center; margin-top:4px;" onclick="submitEditEquipment()" id="btn-submit-eim-edit">Save Changes</button>
+  </div>
+</div>
+
+<!-- ==================== EDIT INDIVIDUAL ITEM MODAL ==================== -->
+<div id="eim-edit-indiv-overlay" class="modal-overlay"></div>
+<div id="eim-edit-indiv-modal" class="modal eim-modal" style="max-width:380px;">
+  <div class="modal-hdr">
+    <div class="modal-title">Edit Individual Item</div>
+    <button class="modal-close" onclick="closeEditIndividualModal()">✕</button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="eim-edit-indiv-batch-idx"/>
+    <input type="hidden" id="eim-edit-indiv-item-idx"/>
+    <div class="form-group">
+      <label>Item ID</label>
+      <input type="text" id="eim-edit-indiv-id" class="input-field" disabled style="opacity:0.6;"/>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label>Condition</label>
+        <select id="eim-edit-indiv-condition" class="input-field">
+          <option value="Excellent">Excellent</option>
+          <option value="Good">Good</option>
+          <option value="Fair">Fair</option>
+          <option value="Poor">Poor</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="eim-edit-indiv-status" class="input-field">
+          <option value="Active">Active</option>
+          <option value="In Use">In Use</option>
+          <option value="Under Repair">Under Repair</option>
+          <option value="Retired">Retired</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-primary" style="width:100%; justify-content:center; margin-top:4px;" onclick="submitEditIndividual()">Save Changes</button>
+  </div>
+</div>
+
+<!-- ==================== ADD RENTAL MODAL ==================== -->
+<div id="rnt-add-overlay" class="modal-overlay"></div>
+<div id="rnt-add-modal" class="modal eim-modal">
+  <div class="modal-hdr">
+    <div class="modal-title">Add Rental Equipment</div>
+    <button class="modal-close" onclick="closeAddRentalModal()">✕</button>
+  </div>
+  <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+
+    <div class="eim-modal-section-label">Item Details</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Item Name *</label>
+        <input type="text" id="rnt-add-name" class="input-field" placeholder="e.g. Crystal Chandelier" />
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <input type="text" id="rnt-add-type" class="input-field" placeholder="e.g. Lighting / Decor" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Quantity *</label>
+        <input type="number" id="rnt-add-qty" class="input-field" placeholder="0" min="1" />
+      </div>
+      <div class="form-group">
+        <label>Unit Type</label>
+        <select id="rnt-add-unit" class="input-field">
+          <option value="pcs">pcs</option>
+          <option value="sets">sets</option>
+          <option value="units">units</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Condition (on arrival)</label>
+        <select id="rnt-add-condition" class="input-field">
+          <option value="Excellent">Excellent</option>
+          <option value="Good">Good</option>
+          <option value="Fair">Fair</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="rnt-add-status" class="input-field">
+          <option value="Awaiting">Awaiting Arrival</option>
+          <option value="In Transit">In Transit</option>
+          <option value="Deployed">Deployed</option>
+          <option value="Returned">Returned</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="eim-modal-section-label" style="margin-top:4px;">Financials & Source</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Initial / Rental Price (₱)</label>
+        <input type="number" id="rnt-add-ip" class="input-field" placeholder="0.00" />
+      </div>
+      <div class="form-group">
+        <label>Supplier / Rental Company *</label>
+        <input type="text" id="rnt-add-supplier" class="input-field" placeholder="e.g. Lumina Events Rental" />
+      </div>
+    </div>
+
+    <div class="eim-modal-section-label" style="margin-top:4px;">Lifecycle Dates</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>📦 Arrival Date</label>
+        <input type="date" id="rnt-add-arrival" class="input-field" />
+      </div>
+      <div class="form-group">
+        <label>🚀 Deployment Date</label>
+        <input type="date" id="rnt-add-deploy" class="input-field" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>✅ Return Date</label>
+        <input type="date" id="rnt-add-return" class="input-field" />
+      </div>
+      <div class="form-group">
+        <label>Linked Event <span style="color:var(--text-dim); font-weight:400;">(optional)</span></label>
+        <input type="text" id="rnt-add-event" class="input-field" placeholder="e.g. Reyes Wedding — Apr 12" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="rnt-add-notes" class="input-field" rows="2" placeholder="Special handling instructions, fragile items, etc." style="resize:vertical;"></textarea>
+    </div>
+
+    <button class="btn-primary" style="width:100%; justify-content:center; margin-top:4px;" onclick="submitAddRental()" id="btn-submit-rnt">Add Rental</button>
+  </div>
+</div>
+
+<!-- EDIT RENTAL MODAL -->
+<div id="rnt-edit-overlay" class="modal-overlay"></div>
+<div id="rnt-edit-modal" class="modal eim-modal">
+  <div class="modal-hdr">
+    <div class="modal-title">Edit Rental Equipment</div>
+    <button class="modal-close" onclick="closeEditRentalModal()">✕</button>
+  </div>
+  <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+    <input type="hidden" id="rnt-edit-idx"/>
+    <div class="form-row">
+      <div class="form-group"><label>Item Name</label><input type="text" id="rnt-edit-name" class="input-field"/></div>
+      <div class="form-group"><label>Type</label><input type="text" id="rnt-edit-type" class="input-field"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Quantity</label><input type="number" id="rnt-edit-qty" class="input-field"/></div>
+      <div class="form-group"><label>Unit Type</label>
+        <select id="rnt-edit-unit" class="input-field"><option value="pcs">pcs</option><option value="sets">sets</option><option value="units">units</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Condition</label>
+        <select id="rnt-edit-condition" class="input-field"><option value="Excellent">Excellent</option><option value="Good">Good</option><option value="Fair">Fair</option></select>
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select id="rnt-edit-status" class="input-field">
+          <option value="Awaiting">Awaiting Arrival</option>
+          <option value="In Transit">In Transit</option>
+          <option value="Deployed">Deployed</option>
+          <option value="Returned">Returned</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Rental Price (₱)</label><input type="number" id="rnt-edit-ip" class="input-field"/></div>
+      <div class="form-group"><label>Supplier</label><input type="text" id="rnt-edit-supplier" class="input-field"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>📦 Arrival Date</label><input type="date" id="rnt-edit-arrival" class="input-field"/></div>
+      <div class="form-group"><label>🚀 Deployment Date</label><input type="date" id="rnt-edit-deploy" class="input-field"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>✅ Return Date</label><input type="date" id="rnt-edit-return" class="input-field"/></div>
+      <div class="form-group"><label>Linked Event</label><input type="text" id="rnt-edit-event" class="input-field"/></div>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea id="rnt-edit-notes" class="input-field" rows="2" style="resize:vertical;"></textarea></div>
+    <button class="btn-primary" style="width:100%; justify-content:center; margin-top:4px;" onclick="submitEditRental()">Save Changes</button>
+  </div>
+</div>
+
+<!-- ==================== DELETE CONFIRM MODAL ==================== -->
+<div id="del-overlay" class="modal-overlay"></div>
+<div id="del-modal" class="modal" style="max-width:380px;">
+  <div class="modal-hdr">
+    <div class="modal-title" style="color:var(--red);">⚠ Confirm Deletion</div>
+    <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+  </div>
+  <div class="modal-body">
+    <p id="del-message" style="font-size:14px; color:var(--text); margin-bottom:20px; line-height:1.5;"></p>
+    <div style="display:flex; gap:10px;">
+      <button class="btn-outline" style="flex:1; justify-content:center; padding:10px;" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-reject" style="flex:1; padding:10px; border-radius:9px; font-size:13px; font-weight:700;" id="del-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FLAG EQUIPMENT MODAL ==================== -->
+<div id="flag-overlay" class="modal-overlay" onclick="closeFlagModal()"></div>
+<div id="flag-modal" class="modal" style="max-width:500px;">
+  <div class="modal-hdr">
+    <div class="modal-title">🚩 Report Equipment Issue</div>
+    <button class="modal-close" onclick="closeFlagModal()">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label>Equipment Asset *</label>
+      <select id="flag-asset-select" class="input-field"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Issue Type</label>
+        <select id="flag-type" class="input-field">
+          <option value="damage">🔨 Damaged / Broken</option>
+          <option value="missing">❌ Missing Units</option>
+          <option value="resupply">📦 Needs Resupply</option>
+          <option value="maintenance">🔧 Maintenance Required</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Severity</label>
+        <select id="flag-severity" class="input-field">
+          <option value="Low">🟡 Low</option>
+          <option value="Medium">🟠 Medium</option>
+          <option value="High">🔴 High — Immediate Action</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Description *</label>
+      <textarea id="flag-description" class="input-field" rows="3" placeholder="Describe the issue in detail..." style="resize:vertical;"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Reported By</label>
+      <input type="text" id="flag-reporter" class="input-field" placeholder="Your name or role" />
+    </div>
+    <button class="btn-primary" style="width:100%; justify-content:center; margin-top:4px;" onclick="submitFlag()">Submit Flag</button>
+  </div>
+</div>
+
+<!-- ==================== MAINTENANCE ACTION MODAL ==================== -->
+<div id="mnt-action-overlay" class="modal-overlay" onclick="closeMaintenanceModal()"></div>
+<div id="mnt-action-modal" class="modal" style="max-width:500px;">
+  <div class="modal-hdr">
+    <div>
+      <div class="modal-title" id="mnt-modal-title">Maintenance Action</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-top:2px;" id="mnt-modal-asset">Asset Name (ID)</div>
+    </div>
+    <button class="modal-close" onclick="closeMaintenanceModal()">✕</button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="mnt-modal-task-id"/>
+    
+    <div id="mnt-review-actions" style="display:none; margin-bottom:20px;">
+      <div class="eim-modal-section-label">Pipeline Review</div>
+      <p style="font-size:12px; color:var(--text-mid); margin-bottom:12px;">Equipment has been flagged as damaged. Determine if it can be repaired.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <button class="btn-primary" style="background:#55d475; color:#0e2a14; justify-content:center;" onclick="decideMaintenance('repair')">Yes, Fixable</button>
+        <button class="btn-reject" style="justify-content:center; padding:10px; font-weight:700;" onclick="decideMaintenance('retire')">No, Retire Item</button>
+      </div>
+    </div>
+
+    <div id="mnt-log-form" style="display:none;">
+      <div class="eim-modal-section-label">Repair Tracking</div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>Priority</label>
+        <select id="mnt-priority" class="input-field">
+          <option value="low">🟢 Low</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="high">🔴 High</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Action Taken / Status Note</label>
+        <textarea id="mnt-action-note" class="input-field" rows="3" placeholder="e.g. Replaced broken hinge, awaiting parts..."></textarea>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:10px; padding-top:16px; border-top:1px solid var(--border);">
+        <button class="btn-outline" style="flex:1; justify-content:center;" onclick="submitMaintenanceLog('update')">Log Progress</button>
+        <button class="btn-primary" style="flex:1.5; justify-content:center;" onclick="submitMaintenanceLog('fixed')">✅ Fixed - Return to Good</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REJECT REASON MODAL ===== -->
+<div class="modal-overlay" id="reject-overlay"></div>
+<div class="modal" id="reject-modal" style="max-width:450px;">
+  <div class="modal-hdr">
+    <div class="modal-title">Reject Reservation</div>
+    <button class="modal-close" onclick="closeRejectModal()">&times;</button>
+  </div>
+  <div class="modal-body">
+    <p style="font-size:13px; color:var(--text-mid); margin-bottom:15px;">Please provide a reason for rejecting this reservation. This will be visible in the history logs.</p>
+    <textarea id="reject-reason-text" class="input-field" style="min-height:120px; resize:none;" placeholder="E.g., Date already fully booked, invalid client details, etc."></textarea>
+  </div>
+  <div class="modal-ftr" style="display:flex; gap:10px; padding:15px 24px; border-top:1px solid var(--border);">
+    <button class="btn-outline" onclick="closeRejectModal()" style="flex:1; justify-content:center;">Cancel</button>
+    <button class="btn-primary" onclick="confirmRejection()" style="flex:2; background:var(--red); color:#fff; justify-content:center;">Confirm Rejection</button>
+  </div>
+</div>
+
+<!-- ##### APPROVAL WARNING MODAL ##### -->
+<div class="modal-overlay" id="approve-warn-overlay" onclick="closeApproveModal()"></div>
+<div class="modal" id="approve-warn-modal" style="max-width:400px; text-align:center;">
+    <div style="font-size:48px; margin-bottom:15px;">⚠️</div>
+    <h2 style="color:var(--gold); margin-bottom:12px;">Overbooking Warning</h2>
+    <p id="approve-warn-msg" style="color:var(--text-mid); line-height:1.6; margin-bottom:24px; font-size:14px;">Warning: This date already has 3 reservations. Do you still want to approve this?</p>
+    <div style="display:flex; gap:12px;">
+      <button class="btn-outline" style="flex:1; justify-content:center;" onclick="closeApproveModal()">Cancel</button>
+      <button class="btn-primary" style="flex:1; justify-content:center; background:var(--red);" onclick="confirmApproval()">Yes, Approve</button>
+    </div>
+</div>
+
+<!-- ##### USER MODAL ##### -->
+<div class="modal-overlay" id="user-modal-overlay" onclick="closeUserModal()"></div>
+<div class="modal" id="user-modal" style="max-width:500px;">
+  <div class="modal-hdr">
+    <div class="modal-title" id="user-modal-title">Add User</div>
+    <button class="modal-close" onclick="closeUserModal()">✕</button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="user-modal-id"/>
+    <div class="form-group">
+      <label>Full Name *</label>
+      <input type="text" id="user-name" class="input-field" placeholder="e.g. John Doe">
+    </div>
+    <div class="form-group">
+      <label>Gmail / Email *</label>
+      <input type="email" id="user-email" class="input-field" placeholder="e.g. john@gmail.com">
+    </div>
+    <div class="form-group" style="margin-bottom: 20px;">
+      <label>System Role</label>
+      <select id="user-role" class="input-field">
+        <option value="Staff">Staff</option>
+        <option value="Admin">Admin</option>
+        <option value="Manager">Manager</option>
+      </select>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button class="btn-outline" style="flex:1; justify-content:center;" onclick="closeUserModal()">Cancel</button>
+      <button class="btn-primary" style="flex:2; justify-content:center;" onclick="saveUser()">Save User Details</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="mt-overlay" onclick="closeMtModal()"></div>
+<div class="modal mt-modal" id="mt-modal">
+  <!-- Left Side: Mini Chat -->
+  <div class="mt-modal-chat">
+    <div class="panel-hdr">
+      <div class="panel-title" id="mt-chat-title">Chat with Client</div>
+    </div>
+    <div class="chat-messages" id="mt-chat-box" style="flex:1; padding:15px; overflow-y:auto; font-size:12px;"></div>
+    <div class="chat-input-area" style="padding:10px; border-top:1px solid var(--border);">
+      <input type="text" id="mt-chat-input" placeholder="Type a message..." style="width:100%; padding:8px; border-radius:6px; background:var(--bg); color:var(--text); border:1px solid var(--border);" onkeydown="if(event.key==='Enter') sendMtChatMsg()"/>
+    </div>
+  </div>
+  
+  <!-- Right Side: Scheduling Form -->
+  <div class="mt-modal-content">
+    <div class="modal-hdr" style="padding:0; padding-bottom:15px; margin-bottom:20px;">
+      <div class="modal-title">Schedule Meeting</div>
+      <button class="modal-close" onclick="closeMtModal()">&times;</button>
+    </div>
+    
+    <div class="form-group">
+      <label>Meeting Date</label>
+      <input type="date" id="mt-input-date" class="input-field" />
+    </div>
+    <div class="form-group">
+      <label>Time</label>
+      <input type="time" id="mt-input-time" class="input-field" />
+    </div>
+    <div class="form-group">
+      <label>Meeting Agenda</label>
+      <select id="mt-input-agenda" class="input-field">
+        <option value="Initial Consultation">Initial Consultation</option>
+        <option value="INITIAL RESERVATION">Initial Reservation & Deposit</option>
+        <option value="Food Tasting">Food Tasting</option>
+        <option value="Contract Finalization">Contract Finalization</option>
+        <option value="Final Walkthrough">Final Walkthrough</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    
+    <div style="margin-top:auto; padding-top:20px; display:flex; gap:10px;">
+      <button class="btn-outline" style="flex:1; justify-content:center;" onclick="closeMtModal()">Cancel</button>
+      <button class="btn-primary" style="flex:2; justify-content:center;" onclick="saveMeeting()">Save Meeting Details</button>
+    </div>
+  </div>
+</div>
+
+<!-- ##### MEETING MODE OVERLAY (FULL SCREEN) ##### -->
+<div class="mt-mode-overlay" id="mt-mode-overlay">
+  <div class="mt-mode-hdr">
+    <div style="display:flex; align-items:center; gap:15px;">
+      <div class="nav-brand-icon">H</div>
+      <div>
+        <div style="font-size:16px; font-weight:700; color:var(--cream);">Meeting in Progress</div>
+        <div id="mt-mode-subtitle" style="font-size:12px; color:var(--text-mid);">Contract Finalization with Juan Dela Cruz</div>
+      </div>
+      <div class="mt-mode-badge" id="mt-live-indicator">● LIVE MEETING</div>
+    </div>
+    
+    <div style="display:flex; gap:12px;">
+      <button class="btn-outline" onclick="exitMeetingMode()" style="color:var(--red); border-color:var(--red-bg);">Exit Meeting Mode</button>
+      <button class="btn-primary" style="background:var(--green); color:#fff;" onclick="completeMeeting()">Mark as Completed & Sign</button>
+    </div>
+  </div>
+  
+  <div class="mt-mode-main">
+    <!-- Left: Reservation Details Editor -->
+    <div class="mt-mode-left">
+      <div style="margin-bottom:32px;">
+        <h2 style="font-family:'Playfair Display'; color:var(--gold); margin-bottom:20px;">Reservation Review</h2>
+        <div class="panel" style="background:rgba(255,255,255,0.02);">
+          <div class="panel-body" id="mt-mode-res-details">
+            <!-- Dynamic Content for Live Editing -->
+          </div>
+        </div>
+      </div>
+      
+      <div id="mt-mode-initial-res-payment" style="display:none; padding:24px; background:var(--amber-bg); border:1px solid rgba(217,119,6,0.2); border-radius:16px; margin-top:24px;">
+        <div style="display:flex; gap:15px;">
+          <div style="font-size:24px;">💰</div>
+          <div>
+            <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:5px;">Initial Reservation Payment</div>
+            <p style="font-size:13px; color:var(--text-mid); margin-bottom:15px;">Ask the client if they are able to settle the reservation deposit now.</p>
+            <div style="display:flex; gap:10px;">
+              <button class="btn-primary" onclick="requestPaymongoPayment()">Request Online Payment (Paymongo)</button>
+              <button class="btn-outline" onclick="markAsPendingPayment()">Client Can't Pay Yet (Flag)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right: Contract / Notes / Agenda -->
+    <div class="mt-mode-right">
+       <div class="panel-hdr" style="background:var(--bg3);">
+          <div class="panel-title">Meeting Agenda & Notes</div>
+       </div>
+       <div style="flex:1; padding:24px; overflow-y:auto;">
+          <div style="margin-bottom:24px;">
+            <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Current Agenda</div>
+            <div id="mt-mode-agenda" style="font-size:18px; font-weight:700; color:var(--cream);">Contract Finalization</div>
+          </div>
+          
+          <div id="mt-mode-contract-preview" style="display:none; margin-bottom:24px;">
+            <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Uploaded Contract</div>
+            <div class="panel" style="padding:15px; background:var(--bg3); display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span id="mt-mode-contract-icon">📄</span>
+                <span id="mt-mode-contract-name" style="font-size:13px; font-weight:600;">contract.pdf</span>
+              </div>
+              <button class="btn-outline" style="font-size:11px; padding:4px 10px;" onclick="viewCurrentContract()">View</button>
+            </div>
+          </div>
+
+          <!-- Cloudinary Uploader Part (Meeting Mode) -->
+          <div class="form-group" style="margin-top:20px;">
+            <label style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Finalize Contract / Document</label>
+            <div class="cl-uploader-wrap" id="mt-mode-cl-uploader" onclick="document.getElementById('mt-mode-file-input').click()" style="padding:20px;">
+              <input type="file" id="mt-mode-file-input" style="display:none;" onchange="handleMtFileUpload(event)"/>
+              <div style="font-size:20px; margin-bottom:4px;">📄</div>
+              <div style="font-size:12px; font-weight:600; color:var(--cream);">Upload Signed Document</div>
+            </div>
+            <div id="mt-mode-file-status" class="cl-file-preview" style="display:none; margin-top:10px;">
+               <span id="mt-mode-file-icon">📎</span>
+               <div style="flex:1;">
+                 <div id="mt-mode-file-name" style="font-size:12px; font-weight:600; color:var(--cream);">filename.pdf</div>
+                 <div id="mt-mode-file-size" style="font-size:10px; color:var(--text-dim);">0 KB</div>
+               </div>
+               <button style="background:none; border:none; color:var(--red); font-size:16px; cursor:pointer;" onclick="clearMtFile(event)">&times;</button>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;">
+            <label style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:10px;">Internal Meeting Notes</label>
+            <textarea id="mt-mode-notes" class="input-field" style="min-height:150px; background:var(--bg); border:1px solid var(--border);" placeholder="Type any specific requests or notes from the client here..."></textarea>
+          </div>
+       </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAc9hHRGErQ8R2tByoqMJ04SMvJed5FDro",
+      authDomain: "smartserve-e3856.firebaseapp.com",
+      projectId: "smartserve-e3856",
+      storageBucket: "smartserve-e3856.firebasestorage.app",
+      messagingSenderId: "255403568863",
+      appId: "1:255403568863:web:7187560f64c8730ecec36a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app, "default");
+
+    window.firebaseAuth = auth;
+    window.firebaseDB = db;
+    window.firebaseFns = {
+      signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut,
+      onAuthStateChanged, updateProfile, GoogleAuthProvider, signInWithPopup,
+      collection, getDocs, addDoc, updateDoc, doc, query, where, onSnapshot, orderBy
+    };
+  </script>
+  <script src="admin.js"></script>
+</body>
+</html>
