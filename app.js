@@ -1502,7 +1502,9 @@ async function sendMsg(panel) {
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'HTTP-Referer': location.href, 'X-Title': "Halden's AI Planner" },
+      headers: {
+  'Content-Type': 'application/json'
+},
       body: JSON.stringify({ model: 'openai/gpt-oss-120b:free', messages: hist, max_tokens: 900 })
     });
     const data = await res.json();
