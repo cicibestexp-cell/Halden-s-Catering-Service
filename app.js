@@ -1502,6 +1502,7 @@ async function sendMsg(panel) {
   try {
     const models = ['openai/gpt-oss-120b:free', 'poolside/laguna-m.1:free'];
     let reply = null;
+    let lastError = null;
 
     for (let model of models) {
       try {
@@ -1513,17 +1514,24 @@ async function sendMsg(panel) {
           body: JSON.stringify({ model: model, messages: hist, max_tokens: 900 })
         });
         const data = await res.json();
+        
         if (data.choices?.[0]?.message?.content) {
           reply = data.choices[0].message.content;
           break; // Success, stop trying other models
         }
+        
+        if (data.error) {
+          console.warn(`Model ${model} failed:`, data.error);
+          lastError = data.error;
+        }
       } catch (e) {
-        console.warn(`Model ${model} failed, trying next...`, e);
+        console.warn(`Model ${model} failed due to a network error, trying next...`, e);
+        lastError = { message: "Network connection failed" };
       }
     }
 
     if (!reply) {
-      reply = "Sorry, I couldn't connect to any AI models. Please try again.";
+      reply = lastError?.metadata?.raw || lastError?.message || "Sorry, I couldn't connect to any AI models. Please try again.";
     }
 
     hist.push({ role: 'assistant', content: reply });
