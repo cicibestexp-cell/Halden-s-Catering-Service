@@ -1,4 +1,4 @@
-window.toggleOther = function(id) { const select = document.getElementById(id); const otherInput = document.getElementById(id + '-other'); if (select && otherInput) { if (select.value === 'Others') { otherInput.style.display = 'block'; otherInput.focus(); } else { otherInput.style.display = 'none'; otherInput.value = ''; } } }; window.getSmartV = function(id) { if (id === 'cpkg-timeframe') { const start = document.getElementById('cpkg-timeframe-start')?.value || ''; const end = document.getElementById('cpkg-timeframe-end')?.value || ''; if (start && end) return start + ' - ' + end; return ''; } const el = document.getElementById(id); if (!el) return ''; if (el.tagName === 'SELECT') { if (el.value === 'Others') { const otherEl = document.getElementById(id + '-other'); return (otherEl?.value || '').trim(); } } return (el.value || '').trim(); }; window.smartAssign = function(id, val) { if (id === 'cpkg-timeframe') { if (val && val.includes('-')) { const parts = val.split('-'); const sEl = document.getElementById('cpkg-timeframe-start'); const eEl = document.getElementById('cpkg-timeframe-end'); if(sEl) sEl.value = parts[0].trim(); if(eEl) eEl.value = parts[1].trim(); } return; } const el = document.getElementById(id); if (!el) return; if (el.tagName === 'SELECT' && document.getElementById(id + '-other')) { const opts = Array.from(el.options).map(o => o.value); if (val && !opts.includes(val)) { el.value = 'Others'; const otherEl = document.getElementById(id + '-other'); if (otherEl) { otherEl.style.display = 'block'; otherEl.value = val; } } else { el.value = val || ''; const otherEl = document.getElementById(id + '-other'); if (otherEl) { otherEl.style.display = 'none'; otherEl.value = ''; } } return; } el.value = val || ''; };
+window.toggleOther = function (id) { const select = document.getElementById(id); const otherInput = document.getElementById(id + '-other'); if (select && otherInput) { if (select.value === 'Others') { otherInput.style.display = 'block'; otherInput.focus(); } else { otherInput.style.display = 'none'; otherInput.value = ''; } } }; window.getSmartV = function (id) { if (id === 'cpkg-timeframe') { const start = document.getElementById('cpkg-timeframe-start')?.value || ''; const end = document.getElementById('cpkg-timeframe-end')?.value || ''; if (start && end) return start + ' - ' + end; return ''; } const el = document.getElementById(id); if (!el) return ''; if (el.tagName === 'SELECT') { if (el.value === 'Others') { const otherEl = document.getElementById(id + '-other'); return (otherEl?.value || '').trim(); } } return (el.value || '').trim(); }; window.smartAssign = function (id, val) { if (id === 'cpkg-timeframe') { if (val && val.includes('-')) { const parts = val.split('-'); const sEl = document.getElementById('cpkg-timeframe-start'); const eEl = document.getElementById('cpkg-timeframe-end'); if (sEl) sEl.value = parts[0].trim(); if (eEl) eEl.value = parts[1].trim(); } return; } const el = document.getElementById(id); if (!el) return; if (el.tagName === 'SELECT' && document.getElementById(id + '-other')) { const opts = Array.from(el.options).map(o => o.value); if (val && !opts.includes(val)) { el.value = 'Others'; const otherEl = document.getElementById(id + '-other'); if (otherEl) { otherEl.style.display = 'block'; otherEl.value = val; } } else { el.value = val || ''; const otherEl = document.getElementById(id + '-other'); if (otherEl) { otherEl.style.display = 'none'; otherEl.value = ''; } } return; } el.value = val || ''; };
 // ===== GLOBAL EXPOSURE (Early) =====
 window.openErrorModal = function (msg) {
   console.log('Opening Error Modal:', msg);
@@ -175,17 +175,17 @@ let PKGS = [
     name: "Halden's Grand Fiesta",
     pricingMode: 'tiered',
     priceTiers: [
-      { pax: 50,  label: '50 Guests',  price: 50000  },
-      { pax: 80,  label: '80 Guests',  price: 72000  },
-      { pax: 100, label: '100 Guests', price: 88000  },
+      { pax: 50, label: '50 Guests', price: 50000 },
+      { pax: 80, label: '80 Guests', price: 72000 },
+      { pax: 100, label: '100 Guests', price: 88000 },
       { pax: 150, label: '150 Guests', price: 120000 },
       { pax: 200, label: '200 Guests', price: 150000 }
     ],
     desc: "A curated all-in Fiesta package — choose your pax tier for a fixed, all-inclusive price with no surprises. Ideal for birthdays and family celebrations.",
     theme: 'Festive / Filipino',
     occasion: 'Birthday',
-    itemIds: ['f1','f4','f7','f10','f12','d1','d7','dr1','dr3','dc1','dc2','eq1','eq7','eq10','eq2','en3','en1'],
-    items: ["Pork Belly Lechon","Lumpia Shanghai","Chicken Adobo","Pancit Bihon","Crispy Fried Chicken","Mango Bravo Cake","Halo-Halo Station","Soft Drinks Bar","Sago't Gulaman","Entrance Stylist Setup","Balloon Setup","Tiffany Chairs","Round Banquet Tables","Premium Utensils Set","Lights and Sound System","Party Host / Emcee","Photo Booth Setup"],
+    itemIds: ['f1', 'f4', 'f7', 'f10', 'f12', 'd1', 'd7', 'dr1', 'dr3', 'dc1', 'dc2', 'eq1', 'eq7', 'eq10', 'eq2', 'en3', 'en1'],
+    items: ["Pork Belly Lechon", "Lumpia Shanghai", "Chicken Adobo", "Pancit Bihon", "Crispy Fried Chicken", "Mango Bravo Cake", "Halo-Halo Station", "Soft Drinks Bar", "Sago't Gulaman", "Entrance Stylist Setup", "Balloon Setup", "Tiffany Chairs", "Round Banquet Tables", "Premium Utensils Set", "Lights and Sound System", "Party Host / Emcee", "Photo Booth Setup"],
     image: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5ac?auto=format&fit=crop&q=80&w=800',
     badge: 'Majorly Set',
     rating: 4.9,
@@ -256,7 +256,7 @@ try {
       localStorage.removeItem('halden_packages');
     }
   }
-} catch(e) {
+} catch (e) {
   console.error("Error loading custom catalog from localStorage", e);
 }
 
@@ -340,7 +340,7 @@ function renderPkgs() {
     } else {
       priceDisplay = `&#8369;${(p.pricePerHead || 0).toLocaleString()} <span style="font-size:12px; font-weight:500; color:var(--text-dim);">/ pax</span>`;
     }
-    
+
     return `
       <div class="cat-card pkg-catalog-card">
         <div class="cat-thumb" style="background:url('${p.image}') center/cover;height:180px;">
@@ -513,7 +513,7 @@ function openPkgModal(id) {
   document.getElementById('pm-occasion').textContent = p.occasion;
   const btn = document.getElementById('pm-select-btn');
   const tierSelector = document.getElementById('pm-tier-selector');
-  
+
   if (p.pricingMode === 'tiered') {
     if (tierSelector) tierSelector.style.display = 'block';
     const select = document.getElementById('pm-tier-select');
@@ -523,7 +523,7 @@ function openPkgModal(id) {
     window.pmSelectedTier = p.priceTiers[0];
     const priceDisp = document.getElementById('pm-tier-price-display');
     if (priceDisp) priceDisp.textContent = '\u20b1' + p.priceTiers[0].price.toLocaleString();
-    document.getElementById('pm-price').textContent = ''; 
+    document.getElementById('pm-price').textContent = '';
     btn.textContent = 'Select Package →';
     btn.onclick = () => { applyPremadePkg(p.id, window.pmSelectedTier); closePkgModal(); };
   } else {
@@ -547,7 +547,7 @@ function closePkgModal() {
 window.openPkgModal = openPkgModal;
 window.closePkgModal = closePkgModal;
 
-window.onPmTierChange = function() {
+window.onPmTierChange = function () {
   const p = PKGS.find(x => x.name === document.getElementById('pm-title').textContent);
   if (!p || p.pricingMode !== 'tiered') return;
   const select = document.getElementById('pm-tier-select');
@@ -618,7 +618,7 @@ function setFullCat(cat, btn) {
 }
 window.setFullCat = setFullCat;
 
-window.jumpFullCat = function(cat) {
+window.jumpFullCat = function (cat) {
   curFullCat = cat;
   document.querySelectorAll('#fbtns-full .fb').forEach(b => {
     const matches = b.getAttribute('onclick')?.includes(`'${cat}'`) || (cat === 'all' && b.textContent.trim() === 'All');
@@ -875,13 +875,13 @@ function finalizePackage() {
         }
         if (tfConflicts >= 2) {
           const dateStr = new Date(date + 'T00:00:00').toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
-          const hr1 = String(tfStartH).padStart(2,'0') + ':00';
-          const hr2 = String(tfEndH).padStart(2,'0') + ':00';
+          const hr1 = String(tfStartH).padStart(2, '0') + ':00';
+          const hr2 = String(tfEndH).padStart(2, '0') + ':00';
           openErrorModal(`Time frame of ${hr1} to ${hr2} for ${dateStr} is already fully booked. Please select a different time frame or date altogether.`);
           return;
         }
       }
-    } catch(e) {
+    } catch (e) {
       console.warn('Could not check reservation conflicts:', e);
       // Allow through if Firestore check fails — don't block user unnecessarily
     }
@@ -918,7 +918,7 @@ function finalizePackageInternal(name) {
   } else {
     total = customPkgItems.reduce((s, i) => s + getDynamicPrice(i, pax), 0);
   }
-  
+
   const summary = {
     id: 'custom_' + Date.now(),
     isCustom: true,
@@ -1125,7 +1125,7 @@ function modifyCartPkg(idx) {
   if (!pkg || !pkg.isCustom) return;
 
   const safeAssign = window.smartAssign;
-  
+
   if (pkg.activePkgId) {
     activePkg = PKGS.find(p => p.id === pkg.activePkgId);
   } else {
@@ -1500,15 +1500,32 @@ async function sendMsg(panel) {
   hist.push({ role: 'user', content: userContent });
 
   try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-  'Content-Type': 'application/json'
-},
-      body: JSON.stringify({ model: 'openai/gpt-oss-120b:free', messages: hist, max_tokens: 900 })
-    });
-    const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't connect. Please try again.";
+    const models = ['openai/gpt-oss-120b:free', 'poolside/laguna-m.1:free'];
+    let reply = null;
+
+    for (let model of models) {
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ model: model, messages: hist, max_tokens: 900 })
+        });
+        const data = await res.json();
+        if (data.choices?.[0]?.message?.content) {
+          reply = data.choices[0].message.content;
+          break; // Success, stop trying other models
+        }
+      } catch (e) {
+        console.warn(`Model ${model} failed, trying next...`, e);
+      }
+    }
+
+    if (!reply) {
+      reply = "Sorry, I couldn't connect to any AI models. Please try again.";
+    }
+
     hist.push({ role: 'assistant', content: reply });
     hideTyping(msgsId);
 
@@ -1764,10 +1781,10 @@ async function openCheckoutMap() {
 window.openCheckoutMap = openCheckoutMap;
 
 // ===== AUTH PROMPT FUNCTIONS =====
-window.checkAuthPrompt = function() {
+window.checkAuthPrompt = function () {
   const userType = localStorage.getItem('halden_user_type');
   const isLoggedIn = localStorage.getItem('halden_logged_in') === 'true';
-  
+
   // Show auth prompt if user hasn't made a choice and isn't logged in
   if (!userType && !isLoggedIn) {
     const authModal = document.getElementById('authPromptModal');
@@ -1780,7 +1797,7 @@ window.checkAuthPrompt = function() {
   }
 };
 
-window.continueAsGuest = function() {
+window.continueAsGuest = function () {
   const authModal = document.getElementById('authPromptModal');
   if (authModal) {
     authModal.classList.add('hidden');
@@ -1792,7 +1809,7 @@ window.continueAsGuest = function() {
   localStorage.setItem('halden_user_type', 'guest');
 };
 
-window.goToLogin = function() {
+window.goToLogin = function () {
   const authModal = document.getElementById('authPromptModal');
   if (authModal) {
     authModal.classList.add('hidden');
@@ -1968,7 +1985,7 @@ async function doLogin() {
       const data = doc.data();
       if (data.password?.trim() === pass) { foundUser = { id: doc.id, ...data }; }
     });
-    if (!foundUser) { showAuthMsg('login-msg','error','Invalid email or password.'); btn.disabled=false; btn.textContent='Login to My Account'; return; }
+    if (!foundUser) { showAuthMsg('login-msg', 'error', 'Invalid email or password.'); btn.disabled = false; btn.textContent = 'Login to My Account'; return; }
     if (foundUser.role === 'admin') { sessionStorage.setItem('halden_admin', JSON.stringify(foundUser)); window.location.href = 'admin.html'; return; }
     if (foundUser.role === 'staff') { sessionStorage.setItem('halden_staff', JSON.stringify(foundUser)); window.location.href = 'staff.html'; return; }
     setLoggedIn({ displayName: foundUser.name, email: foundUser.email, uid: foundUser.uid });
@@ -2005,88 +2022,88 @@ function goToSignupStep(step) {
   signupStep = step;
   document.querySelectorAll('.signup-stage').forEach(s => s.classList.remove('active'));
   document.getElementById('signup-stage-' + step).classList.add('active');
-  document.querySelectorAll('.signup-step').forEach((dot, idx) => { dot.classList.remove('active','done'); if (idx+1<step) dot.classList.add('done'); if (idx+1===step) dot.classList.add('active'); });
+  document.querySelectorAll('.signup-step').forEach((dot, idx) => { dot.classList.remove('active', 'done'); if (idx + 1 < step) dot.classList.add('done'); if (idx + 1 === step) dot.classList.add('active'); });
   if (step === 2) sendOtpEmail();
 }
 window.goToSignupStep = goToSignupStep;
 function validateSignupStep1() {
-  const fname=document.getElementById('signup-fname').value.trim(), lname=document.getElementById('signup-lname').value.trim(), mname=document.getElementById('signup-mname').value.trim();
-  const phone=document.getElementById('signup-phone').value.trim(), email=document.getElementById('signup-email').value.trim();
-  const pass=document.getElementById('signup-password').value, cpass=document.getElementById('signup-confirm-password').value;
-  if (!fname||!lname||!phone||!email||!pass||!cpass){showAuthMsg('signup-msg-1','error','Please fill in all required fields.');return;}
-  if (phone.length<10){showAuthMsg('signup-msg-1','error','Please enter a valid phone number.');return;}
-  if (!email.includes('@')){showAuthMsg('signup-msg-1','error','Please enter a valid email.');return;}
-  if (pass.length<6){showAuthMsg('signup-msg-1','error','Password must be at least 6 characters.');return;}
-  if (pass!==cpass){showAuthMsg('signup-msg-1','error','Passwords do not match.');return;}
-  signupData={fname,lname,mname,phone,email,pass}; clearAuthMsg('signup-msg-1'); goToSignupStep(2);
+  const fname = document.getElementById('signup-fname').value.trim(), lname = document.getElementById('signup-lname').value.trim(), mname = document.getElementById('signup-mname').value.trim();
+  const phone = document.getElementById('signup-phone').value.trim(), email = document.getElementById('signup-email').value.trim();
+  const pass = document.getElementById('signup-password').value, cpass = document.getElementById('signup-confirm-password').value;
+  if (!fname || !lname || !phone || !email || !pass || !cpass) { showAuthMsg('signup-msg-1', 'error', 'Please fill in all required fields.'); return; }
+  if (phone.length < 10) { showAuthMsg('signup-msg-1', 'error', 'Please enter a valid phone number.'); return; }
+  if (!email.includes('@')) { showAuthMsg('signup-msg-1', 'error', 'Please enter a valid email.'); return; }
+  if (pass.length < 6) { showAuthMsg('signup-msg-1', 'error', 'Password must be at least 6 characters.'); return; }
+  if (pass !== cpass) { showAuthMsg('signup-msg-1', 'error', 'Passwords do not match.'); return; }
+  signupData = { fname, lname, mname, phone, email, pass }; clearAuthMsg('signup-msg-1'); goToSignupStep(2);
 }
 window.validateSignupStep1 = validateSignupStep1;
-let currentOtp=null, otpEmail=null;
-function generateOtp(){return Math.floor(100000+Math.random()*900000).toString();}
-async function sendOtpEmail(){
-  otpEmail=signupData.email||document.getElementById('signup-email')?.value?.trim();
-  currentOtp=generateOtp();
-  const desc=document.getElementById('otp-sent-desc');
-  if(desc) desc.textContent=`A 6-digit code has been sent to ${otpEmail}. Check your inbox.`;
-  if(window.emailjs){try{await window.emailjs.send('service_smartserve','template_otp',{to_email:otpEmail,to_name:signupData.fname||'User',otp_code:currentOtp});showAuthMsg('signup-msg-2','success',`Code sent to ${otpEmail}`);}catch(e){showAuthMsg('signup-msg-2','success',`[Demo] Your code is: ${currentOtp}`);}}
-  else{showAuthMsg('signup-msg-2','success',`[Demo] Your code is: ${currentOtp}`);}
+let currentOtp = null, otpEmail = null;
+function generateOtp() { return Math.floor(100000 + Math.random() * 900000).toString(); }
+async function sendOtpEmail() {
+  otpEmail = signupData.email || document.getElementById('signup-email')?.value?.trim();
+  currentOtp = generateOtp();
+  const desc = document.getElementById('otp-sent-desc');
+  if (desc) desc.textContent = `A 6-digit code has been sent to ${otpEmail}. Check your inbox.`;
+  if (window.emailjs) { try { await window.emailjs.send('service_smartserve', 'template_otp', { to_email: otpEmail, to_name: signupData.fname || 'User', otp_code: currentOtp }); showAuthMsg('signup-msg-2', 'success', `Code sent to ${otpEmail}`); } catch (e) { showAuthMsg('signup-msg-2', 'success', `[Demo] Your code is: ${currentOtp}`); } }
+  else { showAuthMsg('signup-msg-2', 'success', `[Demo] Your code is: ${currentOtp}`); }
 }
-window.sendOtpEmail=sendOtpEmail;
-window.resendOtpEmail=async function(){clearAuthMsg('signup-msg-2');await sendOtpEmail();};
-window.sendOtpToPhone=function(){const phone=signupData.phone||document.getElementById('signup-phone')?.value?.trim();if(!phone){showAuthMsg('signup-msg-2','error','No phone number on file.');return;}showAuthMsg('signup-msg-2','success',`[Demo] Code ${currentOtp} would be sent to ${phone} via SMS.`);};
-window.verifyOtp=async function(){
-  const entered=(document.getElementById('otp-input')?.value||'').trim();
-  if(entered.length!==6){showAuthMsg('signup-msg-2','error','Please enter the full 6-digit code.');return;}
-  if(entered!==currentOtp){showAuthMsg('signup-msg-2','error','Incorrect code. Please try again or resend.');return;}
-  clearAuthMsg('signup-msg-2'); showAuthMsg('signup-msg-2','success','Code verified! Creating your account...');
-  try{
+window.sendOtpEmail = sendOtpEmail;
+window.resendOtpEmail = async function () { clearAuthMsg('signup-msg-2'); await sendOtpEmail(); };
+window.sendOtpToPhone = function () { const phone = signupData.phone || document.getElementById('signup-phone')?.value?.trim(); if (!phone) { showAuthMsg('signup-msg-2', 'error', 'No phone number on file.'); return; } showAuthMsg('signup-msg-2', 'success', `[Demo] Code ${currentOtp} would be sent to ${phone} via SMS.`); };
+window.verifyOtp = async function () {
+  const entered = (document.getElementById('otp-input')?.value || '').trim();
+  if (entered.length !== 6) { showAuthMsg('signup-msg-2', 'error', 'Please enter the full 6-digit code.'); return; }
+  if (entered !== currentOtp) { showAuthMsg('signup-msg-2', 'error', 'Incorrect code. Please try again or resend.'); return; }
+  clearAuthMsg('signup-msg-2'); showAuthMsg('signup-msg-2', 'success', 'Code verified! Creating your account...');
+  try {
     await waitForFirebase();
-    const{collection,addDoc}=window.firebaseFns;
-    const{fname,lname,mname,phone,email,pass}=signupData;
-    await addDoc(collection(window.firebaseDB,'users'),{name:`${fname} ${lname}`,fname,lname,mname,phone,email,password:pass,role:'customer',createdAt:new Date().toISOString()});
-    const nameEl=document.getElementById('verified-name-display');if(nameEl)nameEl.textContent=`${fname} ${lname}`;
-    currentOtp=null; goToSignupStep(3);
-  }catch(err){console.error(err);showAuthMsg('signup-msg-2','error','Account creation failed: '+err.message);}
+    const { collection, addDoc } = window.firebaseFns;
+    const { fname, lname, mname, phone, email, pass } = signupData;
+    await addDoc(collection(window.firebaseDB, 'users'), { name: `${fname} ${lname}`, fname, lname, mname, phone, email, password: pass, role: 'customer', createdAt: new Date().toISOString() });
+    const nameEl = document.getElementById('verified-name-display'); if (nameEl) nameEl.textContent = `${fname} ${lname}`;
+    currentOtp = null; goToSignupStep(3);
+  } catch (err) { console.error(err); showAuthMsg('signup-msg-2', 'error', 'Account creation failed: ' + err.message); }
 };
-function startCheckout(src,pkgName='',pkgPrice=''){
-  let itemsList=[];
-  if(src==='pkg'){const p=PKGS.find(x=>x.name===pkgName);if(p&&p.inc)itemsList=p.inc;}
-  const intent={src,pkgName,pkgPrice,itemsList};
-  if(src==='cart'&&cart.length===0){alert("Your cart is empty. Please add items from the catalog first.");return;}
-  if(!currentUser){pendingCheckout=intent;openAuth();showAuthMsg('login-msg','success','Please log in or sign up to continue with your reservation.');if(src==='cart')toggleCart();return;}
-  if(src==='cart')toggleCart();
+function startCheckout(src, pkgName = '', pkgPrice = '') {
+  let itemsList = [];
+  if (src === 'pkg') { const p = PKGS.find(x => x.name === pkgName); if (p && p.inc) itemsList = p.inc; }
+  const intent = { src, pkgName, pkgPrice, itemsList };
+  if (src === 'cart' && cart.length === 0) { alert("Your cart is empty. Please add items from the catalog first."); return; }
+  if (!currentUser) { pendingCheckout = intent; openAuth(); showAuthMsg('login-msg', 'success', 'Please log in or sign up to continue with your reservation.'); if (src === 'cart') toggleCart(); return; }
+  if (src === 'cart') toggleCart();
   openCheckout(intent);
 }
-window.startCheckout=startCheckout;
-function openCheckout(intent){
+window.startCheckout = startCheckout;
+function openCheckout(intent) {
   document.getElementById('checkout-drawer').classList.add('open');
   document.getElementById('checkout-overlay').classList.add('on');
-  document.body.style.overflow='hidden';
-  const msgEl=document.getElementById('chk-msg');
-  msgEl.className='auth-msg';msgEl.textContent='';msgEl.style.display='none';
-  document.getElementById('btn-confirm-res').disabled=false;
-  const sumEl=document.getElementById('chk-summary');
-  let html='',totalNum=0,totalStr='₱0';
-  let allCheckoutItems=[];
-  if(intent.src==='pkg'){
-    html+=`<div class="chk-sum-title">Selected Package</div>`;
-    html+=`<div class="chk-sum-item" style="font-weight:600;color:var(--gold);"><span>${intent.pkgName}</span><span>${intent.pkgPrice}</span></div>`;
-    html+=`<div class="chk-sum-details" style="font-size:12px;color:var(--text-dim);margin-bottom:12px;padding:8px;background:var(--bg3);border-radius:8px;">`;
-    if(intent.itemsList){intent.itemsList.forEach(inc=>{html+=`<div style="margin-bottom:6px;">• ${inc}</div>`;allCheckoutItems.push(inc);});}
-    html+=`</div>`;
-    html+=`<div class="chk-sum-tot" style="margin-top:10px;"><span>Estimated Total</span><span id="chk-final-amt">${intent.pkgPrice}</span></div>`;
-  }else{
-    html+=`<div class="chk-sum-title">Custom Package (Cart)</div>`;
-    cart.forEach(c=>{
-      html+=`<div class="chk-sum-item" style="font-weight:600;color:var(--gold);"><span>${c.name}</span><span>₱${c.price.toLocaleString()}</span></div>`;
-      totalNum+=c.price;
-      if(c.items&&c.items.length){html+=`<div class="chk-sum-details" style="font-size:12px;color:var(--text-dim);margin-bottom:12px;padding:8px;background:var(--bg3);border-radius:8px;">`;c.items.forEach(inc=>{html+=`<div style="margin-bottom:6px;">• ${inc.name}</div>`;allCheckoutItems.push(inc.name);});html+=`</div>`;}
+  document.body.style.overflow = 'hidden';
+  const msgEl = document.getElementById('chk-msg');
+  msgEl.className = 'auth-msg'; msgEl.textContent = ''; msgEl.style.display = 'none';
+  document.getElementById('btn-confirm-res').disabled = false;
+  const sumEl = document.getElementById('chk-summary');
+  let html = '', totalNum = 0, totalStr = '₱0';
+  let allCheckoutItems = [];
+  if (intent.src === 'pkg') {
+    html += `<div class="chk-sum-title">Selected Package</div>`;
+    html += `<div class="chk-sum-item" style="font-weight:600;color:var(--gold);"><span>${intent.pkgName}</span><span>${intent.pkgPrice}</span></div>`;
+    html += `<div class="chk-sum-details" style="font-size:12px;color:var(--text-dim);margin-bottom:12px;padding:8px;background:var(--bg3);border-radius:8px;">`;
+    if (intent.itemsList) { intent.itemsList.forEach(inc => { html += `<div style="margin-bottom:6px;">• ${inc}</div>`; allCheckoutItems.push(inc); }); }
+    html += `</div>`;
+    html += `<div class="chk-sum-tot" style="margin-top:10px;"><span>Estimated Total</span><span id="chk-final-amt">${intent.pkgPrice}</span></div>`;
+  } else {
+    html += `<div class="chk-sum-title">Custom Package (Cart)</div>`;
+    cart.forEach(c => {
+      html += `<div class="chk-sum-item" style="font-weight:600;color:var(--gold);"><span>${c.name}</span><span>₱${c.price.toLocaleString()}</span></div>`;
+      totalNum += c.price;
+      if (c.items && c.items.length) { html += `<div class="chk-sum-details" style="font-size:12px;color:var(--text-dim);margin-bottom:12px;padding:8px;background:var(--bg3);border-radius:8px;">`; c.items.forEach(inc => { html += `<div style="margin-bottom:6px;">• ${inc.name}</div>`; allCheckoutItems.push(inc.name); }); html += `</div>`; }
     });
-    totalStr='₱'+totalNum.toLocaleString();
-    html+=`<div class="chk-sum-tot" style="margin-top:10px;"><span>Estimated Total</span><span id="chk-final-amt">${totalStr}</span></div>`;
+    totalStr = '₱' + totalNum.toLocaleString();
+    html += `<div class="chk-sum-tot" style="margin-top:10px;"><span>Estimated Total</span><span id="chk-final-amt">${totalStr}</span></div>`;
   }
-  let pkgTitle=intent.src==='pkg'?intent.pkgName:cart.map(c=>c.name).join(' & ');
-  window.pendingPackageName=pkgTitle;
+  let pkgTitle = intent.src === 'pkg' ? intent.pkgName : cart.map(c => c.name).join(' & ');
+  window.pendingPackageName = pkgTitle;
   window.pendingPackageItems = allCheckoutItems;
 
   // Capture extra info from cart for the first item (main package)
@@ -2293,7 +2310,7 @@ function openOrderConfirmation() {
   if (nameEl) nameEl.textContent = packageName;
   if (paxEl) paxEl.textContent = pax + ' Pax';
   if (priceEl) priceEl.textContent = totalStr;
-  
+
   if (confirmBtn) {
     confirmBtn.onclick = () => {
       closeOrderConfirmation();
@@ -2438,7 +2455,7 @@ function initCustomerMeetingListener() {
 
   // We query specifically by email to comply with common Firestore Security Rules
   const userEmail = (currentUser.email || "").toLowerCase().trim();
-  const q = query(collection(db, 'meetings'), 
+  const q = query(collection(db, 'meetings'),
     where('status', '==', 'live'),
     where('customerEmail', '==', userEmail)
   );
@@ -2449,10 +2466,10 @@ function initCustomerMeetingListener() {
     console.log("Meeting Snapshot Update - Matches Found:", snap.size);
     const userName = (currentUser.displayName || currentUser.name || "").toLowerCase().trim();
     const myMeetingDoc = snap.docs.find(d => {
-        const data = d.data();
-        const emailMatch = (data.customerEmail || "").toLowerCase().trim() === userEmail;
-        const nameMatch = (data.customerName || "").toLowerCase().trim() === userName;
-        return emailMatch || nameMatch;
+      const data = d.data();
+      const emailMatch = (data.customerEmail || "").toLowerCase().trim() === userEmail;
+      const nameMatch = (data.customerName || "").toLowerCase().trim() === userName;
+      return emailMatch || nameMatch;
     });
 
     if (myMeetingDoc) {
@@ -2460,23 +2477,23 @@ function initCustomerMeetingListener() {
       console.log("Match Found! Opening Hub for Meeting:", mt.id);
       if (!activeCustomerMeeting || activeCustomerMeeting.id !== mt.id) {
         window.pendingActiveMeeting = mt;
-          const notifMsg = 'A meeting is live! Click Join in the Meetings tab to enter.';
-          // Show toast
-          const t = document.createElement('div');
-          t.className = 'toast';
-          t.textContent = notifMsg;
-          document.body.appendChild(t);
-          setTimeout(() => t.classList.add('show'), 10);
-          setTimeout(() => { t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 5000);
+        const notifMsg = 'A meeting is live! Click Join in the Meetings tab to enter.';
+        // Show toast
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.textContent = notifMsg;
+        document.body.appendChild(t);
+        setTimeout(() => t.classList.add('show'), 10);
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 5000);
       } else {
         updateCustomerMeetingUI(mt);
       }
     } else {
       // but only if we don't have a match yet
       if (!activeCustomerMeeting) {
-         checkNameFallback();
+        checkNameFallback();
       } else {
-         closeCustomerMeetingHub();
+        closeCustomerMeetingHub();
       }
     }
   }, (err) => {
@@ -2489,18 +2506,18 @@ async function checkNameFallback() {
   const userName = (currentUser.displayName || currentUser.name || "").toLowerCase().trim();
   if (!userName) return;
 
-  const q = query(collection(window.firebaseDB, 'meetings'), 
+  const q = query(collection(window.firebaseDB, 'meetings'),
     where('status', '==', 'live'),
     where('customerName', '==', userName)
   );
-  
+
   try {
     const snap = await getDocs(q);
     if (!snap.empty) {
       const mt = { id: snap.docs[0].id, ...snap.docs[0].data() };
       openCustomerMeetingHub(mt);
     }
-  } catch(e) {}
+  } catch (e) { }
 }
 
 async function openCustomerMeetingHub(meeting) {
@@ -2508,9 +2525,9 @@ async function openCustomerMeetingHub(meeting) {
   activeCustomerReservation = null;
   const overlay = document.getElementById('c-mt-mode-overlay');
   if (overlay) overlay.style.display = 'flex';
-  
+
   document.getElementById('c-mt-mode-subtitle').textContent = meeting.agenda + ' with Halden Events';
-  
+
   const videoBtn = document.getElementById('c-mt-video-btn');
   const roomIdDisplay = document.getElementById('c-mt-room-id');
   if (meeting.roomId) {
@@ -2546,7 +2563,7 @@ async function openCustomerMeetingHub(meeting) {
       const { doc, getDoc } = window.firebaseFns;
       const rSnap = await getDoc(doc(window.firebaseDB, 'reservations', meeting.reservationId));
       if (rSnap.exists()) activeCustomerReservation = { id: rSnap.id, ...rSnap.data() };
-    } catch(e) { console.warn('Could not fetch reservation for customer hub:', e); }
+    } catch (e) { console.warn('Could not fetch reservation for customer hub:', e); }
   }
 
   updateCustomerMeetingUI(meeting);
@@ -2555,24 +2572,24 @@ async function openCustomerMeetingHub(meeting) {
 
 function updateCustomerMeetingUI(meeting) {
   activeCustomerMeeting = meeting;
-  
+
   // Real-time Notes Sync
   const notesEl = document.getElementById('c-mt-notes');
   if (notesEl) {
     const newNotes = meeting.notes || "The admin is currently updating meeting notes...";
     if (notesEl.textContent !== newNotes) notesEl.textContent = newNotes;
   }
-  
+
   // Real-time Tab Following
   if (meeting.activeTab) {
-     const currentActive = document.querySelector('#c-mt-nav .btn-outline.active');
-     const currentTabId = currentActive ? currentActive.id.replace('btn-c-mt-nav-', '') : 'res';
-     if (currentTabId !== meeting.activeTab) {
-        console.log("Admin switched tab to:", meeting.activeTab);
-        toggleCustomerMtPanel(meeting.activeTab);
-     }
+    const currentActive = document.querySelector('#c-mt-nav .btn-outline.active');
+    const currentTabId = currentActive ? currentActive.id.replace('btn-c-mt-nav-', '') : 'res';
+    if (currentTabId !== meeting.activeTab) {
+      console.log("Admin switched tab to:", meeting.activeTab);
+      toggleCustomerMtPanel(meeting.activeTab);
+    }
   }
-  
+
   // Sync Video Room
   const videoBtn = document.getElementById('c-mt-video-btn');
   const roomIdDisplay = document.getElementById('c-mt-room-id');
@@ -2590,21 +2607,21 @@ function updateCustomerMeetingUI(meeting) {
       docsContainer.innerHTML = `
         <label style="font-size:11px; color:#888; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:10px; margin-top:5px;">Shared Documents</label>
         ${meeting.sharedDocuments.map(d => {
-          const isPDF = d.type === 'application/pdf' || (d.name || '').toLowerCase().endsWith('.pdf');
-          const isImg = d.type && d.type.startsWith('image/');
-          const previewUrl = isPDF ? d.url.replace('/upload/', '/upload/pg_1,f_jpg,w_200,c_limit/') : d.url;
-          return `
+        const isPDF = d.type === 'application/pdf' || (d.name || '').toLowerCase().endsWith('.pdf');
+        const isImg = d.type && d.type.startsWith('image/');
+        const previewUrl = isPDF ? d.url.replace('/upload/', '/upload/pg_1,f_jpg,w_200,c_limit/') : d.url;
+        return `
             <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; background:rgba(255,255,255,0.06); border-radius:8px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.1);">
-              ${ (isImg || isPDF)
-                ? `<img src="${previewUrl}" style="width:38px; height:38px; object-fit:cover; border-radius:4px; flex-shrink:0;" onerror="this.style.display='none'" />`
-                : `<div style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;"></div>` }
+              ${(isImg || isPDF)
+            ? `<img src="${previewUrl}" style="width:38px; height:38px; object-fit:cover; border-radius:4px; flex-shrink:0;" onerror="this.style.display='none'" />`
+            : `<div style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;"></div>`}
               <div style="flex:1; overflow:hidden;">
                 <div style="font-size:12px; font-weight:600; color:#333; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${d.name}</div>
                 <a href="${d.url}" target="_blank" style="font-size:11px; color:#c49a3c; text-decoration:none;">View Document \u2197</a>
               </div>
             </div>
           `;
-        }).join('')}
+      }).join('')}
       `;
     } else {
       docsContainer.style.display = 'none';
@@ -2612,7 +2629,7 @@ function updateCustomerMeetingUI(meeting) {
   }
 }
 
-window.closeCustomerMeetingHub = function() {
+window.closeCustomerMeetingHub = function () {
   activeCustomerMeeting = null;
   activeCustomerReservation = null;
   if (meetingRoomUnsub) { meetingRoomUnsub(); meetingRoomUnsub = null; }
@@ -2622,7 +2639,7 @@ window.closeCustomerMeetingHub = function() {
 
 // ===== MEETING ROOM JOIN (by MTG- ID) =====
 
-window.joinMeetingRoom = async function() {
+window.joinMeetingRoom = async function () {
   const input = document.getElementById('meeting-room-id-input');
   const errorDiv = document.getElementById('meeting-join-error');
   if (!input) return;
@@ -2651,7 +2668,7 @@ window.joinMeetingRoom = async function() {
     if (btn) { btn.disabled = false; btn.textContent = 'Join →'; }
     input.value = '';
     if (errorDiv) errorDiv.style.display = 'none';
-  } catch(e) {
+  } catch (e) {
     console.error('joinMeetingRoom error:', e);
     if (errorDiv) { errorDiv.textContent = ' Could not join meeting. Please try again.'; errorDiv.style.display = 'block'; }
     if (btn) { btn.disabled = false; btn.textContent = 'Join →'; }
@@ -2666,7 +2683,7 @@ function startMeetingRoomListener(meetingId) {
   });
 }
 
-window.toggleCustomerMtPanel = function(panel) {
+window.toggleCustomerMtPanel = function (panel) {
   document.querySelectorAll('#c-mt-nav .btn-outline').forEach(b => b.classList.remove('active'));
   const navBtn = document.getElementById('btn-c-mt-nav-' + panel);
   if (navBtn) navBtn.classList.add('active');
@@ -2712,7 +2729,7 @@ window.toggleCustomerMtPanel = function(panel) {
       </div>
     `;
 
-  // ===== FOOD TASTING PANEL =====
+    // ===== FOOD TASTING PANEL =====
   } else if (panel === 'food') {
     const dishes = res.packageItems || [];
     content.innerHTML = `
@@ -2729,7 +2746,7 @@ window.toggleCustomerMtPanel = function(panel) {
         </div>
       </div>
     `;
-  // ===== DESIGN PANEL =====
+    // ===== DESIGN PANEL =====
   } else if (panel === 'design') {
     content.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:20px;">
@@ -2745,7 +2762,7 @@ window.toggleCustomerMtPanel = function(panel) {
         </div>
       </div>
     `;
-  // ===== RUNDOWN PANEL =====
+    // ===== RUNDOWN PANEL =====
   } else if (panel === 'rundown') {
     content.innerHTML = `
       <div>
@@ -2765,20 +2782,20 @@ window.toggleCustomerMtPanel = function(panel) {
         </div>
       </div>
     `;
-  // ===== PAYMENT ASSESSMENT PANEL =====
+    // ===== PAYMENT ASSESSMENT PANEL =====
   } else if (panel === 'payment') {
     const assess = res.paymentAssessment || {};
     const pkgPrice = res.totalPrice || 0;
     const surcharge = res.logisticsSurcharge || 0;
     const subtotal = pkgPrice + surcharge;
-    
+
     const overtimeHrs = assess.overtimeHrs || 0;
     const overtimeTotal = overtimeHrs * 1000;
     const extraPax = assess.extraPax || 0;
     const extraPaxTotal = extraPax * 450;
     const additionalTotal = overtimeTotal + extraPaxTotal;
     const grandTotal = subtotal + additionalTotal;
-    
+
     const initialPaid = res.initialFeeStatus === 'paid';
     const dpPaid = res.paymentStatus === 'paid' || res.downpaymentStatus === 'paid';
     let paidSoFar = 0;
@@ -2852,7 +2869,7 @@ window.toggleCustomerMtPanel = function(panel) {
     content.innerHTML = `<div style="padding:60px; text-align:center; color:#aaa;">Loading ${panel} details...</div>`;
   }
 }
-window.enterCustomerVideo = function() {
+window.enterCustomerVideo = function () {
   if (activeCustomerMeeting && activeCustomerMeeting.roomId) {
     // For now, assume Jitsi as the default video bridge for customers
     const url = `https://meet.jit.si/${activeCustomerMeeting.roomId}`;
@@ -2874,7 +2891,7 @@ let resdModifyMode = false;
 
 function escHtml(str) { return str ? String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : ''; }
 function escAttr(str) { return str ? String(str).replace(/"/g, '&quot;') : ''; }
-function safeNum(val) { if(!val) return 0; if(typeof val==='number') return val; return parseFloat(String(val).replace(/[^0-9.]/g,'')) || 0; }
+function safeNum(val) { if (!val) return 0; if (typeof val === 'number') return val; return parseFloat(String(val).replace(/[^0-9.]/g, '')) || 0; }
 
 const ALLOC_RULES = [
   { ruleType: 'per_pax', ratio: 1.1, name: 'Glassware' },
@@ -3801,7 +3818,7 @@ function renderCustomerCalendar() {
 async function renderCustomerMeetings() {
   const container = document.getElementById('customer-meetings-list');
   if (!container) return;
-  
+
   // RENDER PLACEHOLDER IMMEDIATELY AS FALLBACK
   const placeholderHTML = `
     <div style="background:var(--bg3); border:1px solid var(--gold); border-radius:16px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.12); margin-bottom:20px;">
@@ -3847,30 +3864,30 @@ async function renderCustomerMeetings() {
       </div>
     </div>
   `;
-  
+
   container.innerHTML = placeholderHTML;
-  
+
   // Initialize static office map immediately
   setTimeout(initOfficeMap, 100);
 
   try {
     const currentUser = window.auth?.currentUser || JSON.parse(localStorage.getItem('halden_user'));
     if (!currentUser) return;
-    
+
     const { collection, getDocs, query, where } = window.firebaseFns;
     const snap = await getDocs(query(collection(window.firebaseDB, 'meetings'), where('clientName', '==', currentUser.displayName || currentUser.name || 'Customer')));
-    
+
     if (snap.empty) return; // Keep placeholder if no real meetings
 
     container.innerHTML = snap.docs.map(doc => {
       const m = doc.data();
       const id = doc.id;
-      const roomId = m.meetingRoomId || `MTG-${id.substring(0,8).toUpperCase()}`;
+      const roomId = m.meetingRoomId || `MTG-${id.substring(0, 8).toUpperCase()}`;
       const dateStr = m.date || 'TBD';
       const time = m.time || 'TBD';
       const status = (m.status || 'scheduled').toLowerCase();
       const isLive = status === 'live';
-      
+
       return `
         <div style="background:var(--bg3); border:1px solid ${isLive ? 'var(--gold)' : 'var(--border)'}; border-radius:16px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.12); margin-bottom:20px;">
           <div style="padding:20px; border-bottom:1px solid rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.02);">
@@ -3924,24 +3941,24 @@ async function renderCustomerMeetings() {
 
 function initOfficeMap() {
   const container = document.getElementById('office-map');
-  if (!container || container._leaflet_id) return; 
-  
+  if (!container || container._leaflet_id) return;
+
   const map = L.map('office-map', { zoomControl: false }).setView([14.6156, 120.9942], 16);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
   L.marker([14.6156, 120.9942]).addTo(map).bindPopup("<b>Halden's Office</b><br>18 Basilio St");
-  
+
   // Force recalculation of container size
   setTimeout(() => map.invalidateSize(), 200);
 }
 
-window.showMeetingDetails = async function(meetingId) {
+window.showMeetingDetails = async function (meetingId) {
   const { doc, getDoc } = window.firebaseFns;
   const mSnap = await getDoc(doc(window.firebaseDB, 'meetings', meetingId));
   if (!mSnap.exists()) return;
   const m = mSnap.data();
-  
+
   const modal = document.createElement('div');
   modal.id = 'meeting-details-modal';
   modal.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(15px); z-index:5000; display:flex; align-items:center; justify-content:center; padding:20px;";
@@ -4007,16 +4024,16 @@ window.showMeetingDetails = async function(meetingId) {
     </div>
   `;
   document.body.appendChild(modal);
-  
+
   setTimeout(() => {
-    const map = L.map('meeting-office-map', { zoomControl: false }).setView([14.6156, 120.9942], 16); 
+    const map = L.map('meeting-office-map', { zoomControl: false }).setView([14.6156, 120.9942], 16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     L.marker([14.6156, 120.9942]).addTo(map).bindPopup("<b>Halden's Office</b><br>18 Basilio St").openPopup();
     setTimeout(() => map.invalidateSize(), 200);
   }, 300);
 }
 
-window.toggleDashChat = function() {
+window.toggleDashChat = function () {
   const panel = document.getElementById('dash-chat-side-panel');
   if (!panel) return;
   if (panel.style.right === '0px') {
@@ -4031,13 +4048,13 @@ async function initDashChat() {
   const container = document.getElementById('dash-chat-messages');
   if (!container) return;
   container.innerHTML = '<div style="color:var(--text-dim); font-size:12px; text-align:center; padding:40px;">Initializing secure connection...</div>';
-  
+
   const currentUser = window.auth?.currentUser || JSON.parse(localStorage.getItem('halden_user'));
   if (!currentUser) return;
-  
+
   const { collection, query, where, orderBy, onSnapshot } = window.firebaseFns;
   const q = query(collection(window.firebaseDB, 'chat_messages'), where('clientId', '==', currentUser.uid), orderBy('timestamp', 'asc'));
-  
+
   onSnapshot(q, (snap) => {
     container.innerHTML = '';
     if (snap.empty) {
@@ -4061,14 +4078,14 @@ async function initDashChat() {
   });
 }
 
-window.sendDashChatMessage = async function() {
+window.sendDashChatMessage = async function () {
   const input = document.getElementById('dash-chat-input');
   const text = input.value.trim();
   if (!text) return;
-  
+
   const currentUser = window.auth?.currentUser || JSON.parse(localStorage.getItem('halden_user'));
   if (!currentUser) return;
-  
+
   const { collection, addDoc, serverTimestamp } = window.firebaseFns;
   try {
     await addDoc(collection(window.firebaseDB, 'chat_messages'), {
@@ -4100,7 +4117,7 @@ async function renderCustomerFlags() {
   });
 
   const badge = document.getElementById('flag-badge');
-    // System notifications
+  // System notifications
   flags.push({ id: 'notif-meeting', type: 'meeting', title: ' Meeting Scheduled', text: 'Your final consultation meeting has been scheduled for November 5, 2025 at 2:00 PM. Please ensure you are available.' });
   flags.push({ id: 'notif-confirm', type: 'info', title: ' ReservationConfirmed', text: 'Your reservation has been approved and confirmed by the admin. Check your Reservation Details tab for the full overview.' });
   flags.push({ id: 'notif-review', type: 'info', title: ' Event Completed – Leave a Review!', text: 'Your event has been marked as fulfilled. Visit the Summary & Feedback tab to rate your experience.' });
@@ -4194,8 +4211,8 @@ async function submitPaymentModal() {
 
     if (window.currentPaymentMethod === 'cash') {
       btn.textContent = 'Notifying Admin...';
-      await updateDoc(resRef, { 
-        paymentMethod: 'cash', 
+      await updateDoc(resRef, {
+        paymentMethod: 'cash',
         cashPaymentStatus: 'waiting_for_admin',
         pendingCashAmount: window.activePaymentAmount || resData.paymentAmount,
         pendingCashLabel: window.activePaymentLabel || 'General Payment'
@@ -4329,7 +4346,7 @@ function closeResWaitModal() {
 window.closeResWaitModal = closeResWaitModal;
 
 // Populate the Reservation Details dropdown when the tab opens
-window.initCustomerResDetails = async function() {
+window.initCustomerResDetails = async function () {
   const selector = document.getElementById('resd-approved-selector');
   if (!selector || !currentUser) return;
 
@@ -4340,18 +4357,18 @@ window.initCustomerResDetails = async function() {
   try {
     // Try 'email' first as it's the standard in createReservation
     const snap = await getDocs(query(collection(window.firebaseDB, 'reservations'), where('email', '==', userEmail)));
-    myRes = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(r => 
-      ['approved','confirmed','procurement','procuring','preparing','on-going','completed'].includes((r.status||'').toLowerCase())
+    myRes = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r =>
+      ['approved', 'confirmed', 'procurement', 'procuring', 'preparing', 'on-going', 'completed'].includes((r.status || '').toLowerCase())
     );
-    
+
     // If no results, try 'customerEmail' as fallback
     if (myRes.length === 0) {
-       const snap2 = await getDocs(query(collection(window.firebaseDB, 'reservations'), where('customerEmail', '==', userEmail)));
-       myRes = snap2.docs.map(d => ({id: d.id, ...d.data()})).filter(r => 
-         ['approved','confirmed','procurement','procuring','preparing','on-going','completed'].includes((r.status||'').toLowerCase())
-       );
+      const snap2 = await getDocs(query(collection(window.firebaseDB, 'reservations'), where('customerEmail', '==', userEmail)));
+      myRes = snap2.docs.map(d => ({ id: d.id, ...d.data() })).filter(r =>
+        ['approved', 'confirmed', 'procurement', 'procuring', 'preparing', 'on-going', 'completed'].includes((r.status || '').toLowerCase())
+      );
     }
-  } catch(e) { console.error('initCustomerResDetails error', e); }
+  } catch (e) { console.error('initCustomerResDetails error', e); }
 
   if (myRes.length === 0) {
     selector.innerHTML = '<option value="">No confirmed reservations found.</option>';
@@ -4377,47 +4394,47 @@ window.initCustomerResDetails = async function() {
 
 
 
-window.customerSelectReservation = function(resId) {
+window.customerSelectReservation = function (resId) {
   if (!resId) return;
   activeResDetailId = resId;
-  
+
   resDetailsActiveTab = 'details';
   const firstTab = document.getElementById('resd-tab-details');
   if (firstTab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     firstTab.classList.add('active');
   }
-  
+
   renderReservationDetailContent();
 };
 
 
-window.renderCustomerPayments = async function() {
+window.renderCustomerPayments = async function () {
   const container = document.getElementById('dash-tab-payments');
   let list = document.getElementById('c-payments-list');
   if (!list) {
     container.innerHTML += '<div id="c-payments-list"></div>';
     list = document.getElementById('c-payments-list');
   }
-  
+
   if (!currentUser) return;
   const userEmail = (currentUser.email || '').trim();
   const { collection, getDocs, query, where } = window.firebaseFns;
-  
+
   list.innerHTML = `
     <div style="padding:40px; text-align:center;">
        <div class="spinner" style="margin:0 auto 20px;"></div>
        <div style="color:var(--text-dim); font-weight:600;">Generating Statements...</div>
     </div>
   `;
-  
+
   try {
     const q = query(collection(window.firebaseDB, 'reservations'), where('email', '==', userEmail));
     const snap = await getDocs(q);
-    let myRes = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(r => 
-      ['approved','confirmed','procuring','preparing','on-going','completed'].includes((r.status||'').toLowerCase())
+    let myRes = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r =>
+      ['approved', 'confirmed', 'procuring', 'preparing', 'on-going', 'completed'].includes((r.status || '').toLowerCase())
     );
-    
+
     if (myRes.length === 0) {
       list.innerHTML = `
         <div style="padding:80px 40px; text-align:center; background:var(--bg2); border-radius:24px; border:1px dashed var(--border);">
@@ -4444,7 +4461,7 @@ window.renderCustomerPayments = async function() {
       const eventDate = new Date(data.date || Date.now());
       const dpDue = new Date(eventDate); dpDue.setDate(dpDue.getDate() - 30);
       const finalDue = new Date(eventDate); finalDue.setDate(finalDue.getDate() - 7);
-      const fmtD = d => d.toLocaleDateString('en-PH', {month:'short', day:'numeric', year:'numeric'});
+      const fmtD = d => d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
       const parts = [
         { label: 'Initial Reservation Fee', amount: resFee, desc: 'Secures your event date and slot', due: 'Upon booking', highlight: false },
         { label: 'Downpayment (50%)', amount: downAmt, desc: 'Enables procurement of supplies and décor', due: fmtD(dpDue), highlight: true },
@@ -4470,7 +4487,7 @@ window.renderCustomerPayments = async function() {
               <div style="font-size:12px; color:var(--text-dim); margin-top:4px;">Amount: ₱${p.amount.toLocaleString()}</div>
               <div style="margin-top:8px; display:inline-flex; align-items:center; gap:6px; ${p.highlight ? 'background:rgba(196,154,60,0.12); border:1px solid rgba(196,154,60,0.4); border-radius:6px; padding:3px 10px;' : ''}">
                 <span style="font-size:10px; color:var(--text-dim);">Due:</span>
-                <span style="font-size:11px; font-weight:${p.highlight?'800':'600'}; color:${p.highlight?'var(--gold)':'var(--text-dim)'};"> ${p.due}</span>
+                <span style="font-size:11px; font-weight:${p.highlight ? '800' : '600'}; color:${p.highlight ? 'var(--gold)' : 'var(--text-dim)'};"> ${p.due}</span>
               </div>
             </div>
             <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
@@ -4516,27 +4533,27 @@ window.renderCustomerPayments = async function() {
              <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dim);">
                <span></span> Secure payments processed via PayMongo Gateway or Verified Cash Collection
              </div>
-             <div style="font-size:12px; font-weight:700; color:var(--gold);">${Math.round((paid/total)*100)}% COMPLETED</div>
+             <div style="font-size:12px; font-weight:700; color:var(--gold);">${Math.round((paid / total) * 100)}% COMPLETED</div>
           </div>
         </div>
       `;
     }).join('');
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     list.innerHTML = '<div style="padding:40px; text-align:center; color:var(--red);">Failed to retrieve billing statements. Please try again later.</div>';
   }
 };
 
-window.payInstallment = function(resId, amount, label) {
+window.payInstallment = function (resId, amount, label) {
   openPaymentModal(resId, amount, label);
 };
 
-window.renderCustomerReviews = async function() {
+window.renderCustomerReviews = async function () {
   const container = document.getElementById('c-reviews-list');
   if (!container) return;
 
   // helper: toggle phase log
-  window.togglePhaseLog = function(id) {
+  window.togglePhaseLog = function (id) {
     const el = document.getElementById(id);
     const arrow = document.getElementById(id + '-arrow');
     if (!el) return;
@@ -4558,7 +4575,7 @@ window.renderCustomerReviews = async function() {
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px;">
-      ${[['Event','Anniversary Gala'],['Date','October 12, 2025'],['Venue','Grand Ballroom, Makati'],['Guests','150 pax'],['Package','Premium Gold Package'],['Theme','Rustic Elegance']].map(([k,v])=>`
+      ${[['Event', 'Anniversary Gala'], ['Date', 'October 12, 2025'], ['Venue', 'Grand Ballroom, Makati'], ['Guests', '150 pax'], ['Package', 'Premium Gold Package'], ['Theme', 'Rustic Elegance']].map(([k, v]) => `
       <div style="background:var(--bg3);border-radius:12px;padding:14px;border:1px solid var(--border);">
         <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">${k}</div>
         <div style="font-size:13px;font-weight:700;color:var(--text);">${v}</div>
@@ -4569,64 +4586,64 @@ window.renderCustomerReviews = async function() {
   // ── PHASES ──
   const phases = [
     {
-      id:'ph1', icon:'', label:'Departure', color:'var(--gold)', time:'07:30 AM – 08:45 AM',
-      summary:'Team departed from HQ with all equipment and staff on time.',
-      logs:[
-        {time:'07:30 AM',text:'Team assembly at HQ. Head chef and 12 staff confirmed present.'},
-        {time:'07:40 AM',text:'3 vehicles loaded: Vehicle A (catering equipment), Vehicle B (décor & linen), Vehicle C (kitchen supplies & perishables).'},
-        {time:'07:55 AM',text:'Inventory checklist signed off by operations lead. All items verified against reservation manifest.'},
-        {time:'08:20 AM',text:'Convoy departed HQ en route to Grand Ballroom, Makati. No traffic delays reported.'},
-        {time:'08:45 AM',text:'Team arrived at venue. Venue coordinator met at loading bay. Unloading commenced.'},
+      id: 'ph1', icon: '', label: 'Departure', color: 'var(--gold)', time: '07:30 AM – 08:45 AM',
+      summary: 'Team departed from HQ with all equipment and staff on time.',
+      logs: [
+        { time: '07:30 AM', text: 'Team assembly at HQ. Head chef and 12 staff confirmed present.' },
+        { time: '07:40 AM', text: '3 vehicles loaded: Vehicle A (catering equipment), Vehicle B (décor & linen), Vehicle C (kitchen supplies & perishables).' },
+        { time: '07:55 AM', text: 'Inventory checklist signed off by operations lead. All items verified against reservation manifest.' },
+        { time: '08:20 AM', text: 'Convoy departed HQ en route to Grand Ballroom, Makati. No traffic delays reported.' },
+        { time: '08:45 AM', text: 'Team arrived at venue. Venue coordinator met at loading bay. Unloading commenced.' },
       ]
     },
     {
-      id:'ph2', icon:'', label:'Deployment', color:'var(--gold)', time:'09:00 AM – 11:30 AM',
-      summary:'Full venue setup completed ahead of schedule.',
-      logs:[
-        {time:'09:00 AM',text:'Kitchen station assembly started. Gas lines connected and burners tested. All units operational.'},
-        {time:'09:20 AM',text:'15 round tables and 150 chairs arranged per the approved floor plan. VIP section (3 tables) dressed with premium linen.'},
-        {time:'09:50 AM',text:'Rustic Elegance décor installed — floral centerpieces, fairy light canopy, and wooden arch backdrop erected.'},
-        {time:'10:15 AM',text:'Audio-visual equipment tested. Background music playlist synced and mic levels checked.'},
-        {time:'10:45 AM',text:'Chafing dishes, buffet stations, and warming equipment set up. Food warmers pre-heated.'},
-        {time:'11:00 AM',text:'Final walkthrough conducted by event coordinator. Minor adjustments made to chair alignment in VIP row.'},
-        {time:'11:30 AM',text:'Setup fully complete. Staff briefed on service sequence, guest flow, and emergency protocols.'},
+      id: 'ph2', icon: '', label: 'Deployment', color: 'var(--gold)', time: '09:00 AM – 11:30 AM',
+      summary: 'Full venue setup completed ahead of schedule.',
+      logs: [
+        { time: '09:00 AM', text: 'Kitchen station assembly started. Gas lines connected and burners tested. All units operational.' },
+        { time: '09:20 AM', text: '15 round tables and 150 chairs arranged per the approved floor plan. VIP section (3 tables) dressed with premium linen.' },
+        { time: '09:50 AM', text: 'Rustic Elegance décor installed — floral centerpieces, fairy light canopy, and wooden arch backdrop erected.' },
+        { time: '10:15 AM', text: 'Audio-visual equipment tested. Background music playlist synced and mic levels checked.' },
+        { time: '10:45 AM', text: 'Chafing dishes, buffet stations, and warming equipment set up. Food warmers pre-heated.' },
+        { time: '11:00 AM', text: 'Final walkthrough conducted by event coordinator. Minor adjustments made to chair alignment in VIP row.' },
+        { time: '11:30 AM', text: 'Setup fully complete. Staff briefed on service sequence, guest flow, and emergency protocols.' },
       ]
     },
     {
-      id:'ph3', icon:'', label:'Execution', color:'#16a34a', time:'12:00 PM – 05:00 PM',
-      summary:'Event executed flawlessly with outstanding guest reception.',
-      logs:[
-        {time:'12:00 PM',text:'Doors opened. Guests began arriving. Welcome drinks and canapés served by roving staff.'},
-        {time:'12:30 PM',text:'Program commenced. Emcee introduced the opening segment. All 150 guests seated.'},
-        {time:'01:00 PM',text:'Buffet line opened. All 8 main courses served at optimal temperature. Cold section maintained at ≤4°C.'},
-        {time:'02:00 PM',text:'Dessert station unveiled. 3-tier anniversary cake presented to applause. Photo opportunity facilitated.'},
-        {time:'02:30 PM',text:'Mid-program check: staff rotation completed. Fresh supplies restocked at buffet stations.'},
-        {time:'03:30 PM',text:'Special program segment: speeches and anniversary tribute. Catering team on standby.'},
-        {time:'04:30 PM',text:'Final service round — coffee and petit fours served. Guest satisfaction: highly positive.'},
-        {time:'05:00 PM',text:'Program concluded. Staff began quiet clearing of main dining area.'},
+      id: 'ph3', icon: '', label: 'Execution', color: '#16a34a', time: '12:00 PM – 05:00 PM',
+      summary: 'Event executed flawlessly with outstanding guest reception.',
+      logs: [
+        { time: '12:00 PM', text: 'Doors opened. Guests began arriving. Welcome drinks and canapés served by roving staff.' },
+        { time: '12:30 PM', text: 'Program commenced. Emcee introduced the opening segment. All 150 guests seated.' },
+        { time: '01:00 PM', text: 'Buffet line opened. All 8 main courses served at optimal temperature. Cold section maintained at ≤4°C.' },
+        { time: '02:00 PM', text: 'Dessert station unveiled. 3-tier anniversary cake presented to applause. Photo opportunity facilitated.' },
+        { time: '02:30 PM', text: 'Mid-program check: staff rotation completed. Fresh supplies restocked at buffet stations.' },
+        { time: '03:30 PM', text: 'Special program segment: speeches and anniversary tribute. Catering team on standby.' },
+        { time: '04:30 PM', text: 'Final service round — coffee and petit fours served. Guest satisfaction: highly positive.' },
+        { time: '05:00 PM', text: 'Program concluded. Staff began quiet clearing of main dining area.' },
       ]
     },
     {
-      id:'ph4', icon:'', label:'Bashout', color:'var(--gold)', time:'05:00 PM – 06:30 PM',
-      summary:'Efficient post-event teardown completed within agreed timeframe.',
-      logs:[
-        {time:'05:00 PM',text:'Bashout initiated. Kitchen team began breaking down cooking stations and sealing leftover food.'},
-        {time:'05:15 PM',text:'Tables cleared. Linen collected, sorted by type, and bagged for laundry return.'},
-        {time:'05:30 PM',text:'Décor dismantled carefully. Floral arrangements donated to venue per client request.'},
-        {time:'05:50 PM',text:'All equipment wiped, disassembled, and packed into transport crates. No damage reported.'},
-        {time:'06:10 PM',text:'Venue floor swept and mopped. Venue coordinator confirmed restoration to pre-event state.'},
-        {time:'06:30 PM',text:'Venue officially handed back. Coordinator signed off on exit checklist.'},
+      id: 'ph4', icon: '', label: 'Bashout', color: 'var(--gold)', time: '05:00 PM – 06:30 PM',
+      summary: 'Efficient post-event teardown completed within agreed timeframe.',
+      logs: [
+        { time: '05:00 PM', text: 'Bashout initiated. Kitchen team began breaking down cooking stations and sealing leftover food.' },
+        { time: '05:15 PM', text: 'Tables cleared. Linen collected, sorted by type, and bagged for laundry return.' },
+        { time: '05:30 PM', text: 'Décor dismantled carefully. Floral arrangements donated to venue per client request.' },
+        { time: '05:50 PM', text: 'All equipment wiped, disassembled, and packed into transport crates. No damage reported.' },
+        { time: '06:10 PM', text: 'Venue floor swept and mopped. Venue coordinator confirmed restoration to pre-event state.' },
+        { time: '06:30 PM', text: 'Venue officially handed back. Coordinator signed off on exit checklist.' },
       ]
     },
     {
-      id:'ph5', icon:'', label:'Restorage', color:'var(--gold)', time:'07:00 PM – 08:00 PM',
-      summary:'All assets inventoried, cleaned, and stored. Event archived.',
-      logs:[
-        {time:'07:00 PM',text:'Convoy arrived back at HQ. All 3 vehicles unloaded and equipment inspected for damage.'},
-        {time:'07:15 PM',text:'Chafing dishes, cookware, and serving equipment washed, dried, and returned to storage racks.'},
-        {time:'07:30 PM',text:'Décor props catalogued and shelved. Reusable items logged back into inventory system.'},
-        {time:'07:45 PM',text:'Post-event report filed by operations lead. Final guest count confirmed: 147 attended.'},
-        {time:'08:00 PM',text:'Event officially closed. Reservation marked as FULFILLED. Staff dismissed with commendation.'},
+      id: 'ph5', icon: '', label: 'Restorage', color: 'var(--gold)', time: '07:00 PM – 08:00 PM',
+      summary: 'All assets inventoried, cleaned, and stored. Event archived.',
+      logs: [
+        { time: '07:00 PM', text: 'Convoy arrived back at HQ. All 3 vehicles unloaded and equipment inspected for damage.' },
+        { time: '07:15 PM', text: 'Chafing dishes, cookware, and serving equipment washed, dried, and returned to storage racks.' },
+        { time: '07:30 PM', text: 'Décor props catalogued and shelved. Reusable items logged back into inventory system.' },
+        { time: '07:45 PM', text: 'Post-event report filed by operations lead. Final guest count confirmed: 147 attended.' },
+        { time: '08:00 PM', text: 'Event officially closed. Reservation marked as FULFILLED. Staff dismissed with commendation.' },
       ]
     }
   ];
@@ -4639,7 +4656,7 @@ window.renderCustomerReviews = async function() {
       <div style="flex:1;height:1px;background:var(--border);"></div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;">
-      ${phases.map(p=>`
+      ${phases.map(p => `
       <div onclick="togglePhaseLog('${p.id}-logs')" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 12px;cursor:pointer;transition:all 0.2s;text-align:center;position:relative;"
         onmouseenter="this.style.borderColor='var(--gold)';this.style.background='var(--bg3)'"
         onmouseleave="this.style.borderColor='var(--border)';this.style.background='var(--bg2)'">
@@ -4649,7 +4666,7 @@ window.renderCustomerReviews = async function() {
         <div id="${p.id}-logs-arrow" style="position:absolute;top:10px;right:10px;font-size:10px;color:var(--text-dim);transition:transform 0.2s;">▼</div>
       </div>`).join('')}
     </div>
-    ${phases.map(p=>`
+    ${phases.map(p => `
     <div id="${p.id}-logs" style="display:none;flex-direction:column;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;">
       <div style="background:rgba(196,154,60,0.08);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:10px;">
         <span style="font-size:20px;">${p.icon}</span>
@@ -4660,11 +4677,11 @@ window.renderCustomerReviews = async function() {
         <span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--gold);">${p.time}</span>
       </div>
       <div style="padding:8px 20px;">
-        ${p.logs.map((log,i)=>`
-        <div style="display:flex;gap:12px;padding:10px 0;${i<p.logs.length-1?'border-bottom:1px solid rgba(0,0,0,0.05);':''}">
+        ${p.logs.map((log, i) => `
+        <div style="display:flex;gap:12px;padding:10px 0;${i < p.logs.length - 1 ? 'border-bottom:1px solid rgba(0,0,0,0.05);' : ''}">
           <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
             <div style="width:7px;height:7px;border-radius:50%;background:${p.color};margin-top:5px;"></div>
-            ${i<p.logs.length-1?'<div style="width:1px;flex:1;background:var(--border);margin-top:3px;"></div>':''}
+            ${i < p.logs.length - 1 ? '<div style="width:1px;flex:1;background:var(--border);margin-top:3px;"></div>' : ''}
           </div>
           <div>
             <span style="font-size:10px;font-weight:800;color:var(--gold);margin-right:8px;">${log.time}</span>
@@ -4699,64 +4716,64 @@ window.renderCustomerReviews = async function() {
   `;
 };
 
-window.setReviewStars = function(n) {
+window.setReviewStars = function (n) {
   const stars = document.getElementById('star-rating').querySelectorAll('span');
   stars.forEach((s, i) => s.style.color = i < n ? '#f1c40f' : '#ddd');
 };
 
-window.submitCustomerReview = function() {
+window.submitCustomerReview = function () {
   alert('Thank you! Your review has been submitted.');
   document.getElementById('review-text').value = '';
   setReviewStars(0);
 };
 
-window.initResdMap = async function(address) {
+window.initResdMap = async function (address) {
   const mapEl = document.getElementById('resd-map');
   if (!mapEl) return;
-  
+
   if (window.resdMapObj) {
     window.resdMapObj.remove();
     window.resdMapObj = null;
   }
-  
+
   try {
     const url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address);
     const resp = await fetch(url);
     const data = await resp.json();
-    
+
     let lat = 14.5995, lon = 120.9842; // Default Manila
     if (data && data.length > 0) {
       lat = parseFloat(data[0].lat);
       lon = parseFloat(data[0].lon);
     }
-    
+
     window.resdMapObj = L.map('resd-map').setView([lat, lon], 15);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window.resdMapObj);
     L.marker([lat, lon]).addTo(window.resdMapObj).bindPopup(address).openPopup();
-    
+
     const etaEl = document.getElementById('resd-map-eta');
     if (etaEl) etaEl.textContent = '35 - 50 mins';
-  } catch(e) {
+  } catch (e) {
     console.error('Map error', e);
   }
 };
 
-window.renderReservationDetailContent = async function() {
+window.renderReservationDetailContent = async function () {
   if (!activeResDetailId) return;
   const res = (window.RESERVATIONS || []).find(r => r.id === activeResDetailId);
   if (!res) return;
 
-  const titleEl    = document.getElementById('resd-title');
+  const titleEl = document.getElementById('resd-title');
   const subtitleEl = document.getElementById('resd-subtitle');
-  const contentEl  = document.getElementById('resd-content');
+  const contentEl = document.getElementById('resd-content');
   if (!contentEl) return;
 
-  if (titleEl)    titleEl.textContent    = (res.client || 'Client') + ' — ' + (res.packageName || res.type || 'Reservation');
+  if (titleEl) titleEl.textContent = (res.client || 'Client') + ' — ' + (res.packageName || res.type || 'Reservation');
   if (subtitleEl) subtitleEl.textContent = (res.date || '—') + ' · ' + (res.pax || '—') + ' pax';
 
-  const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const venueTitle = res.venueName || res.venue || 'Venue Location';
-  const venueAddr  = res.venueAddress || res.venueAddr || res.venueName || res.venue || '';
+  const venueAddr = res.venueAddress || res.venueAddr || res.venueName || res.venue || '';
 
   // ── 1. Media Header: Contract + Map ───────────────────────────────────
   const mediaHeader = `
@@ -4768,8 +4785,8 @@ window.renderReservationDetailContent = async function() {
         </div>
         <div style="flex:1; min-height:320px; padding:15px; display:flex; align-items:center; justify-content:center; background:#111;">
           ${res.contractUrl
-            ? `<img src="${res.contractUrl.toLowerCase().includes('.pdf') ? res.contractUrl.replace('/upload/','/upload/pg_1,f_jpg,w_800,c_limit/') : res.contractUrl}" style="max-width:100%;max-height:300px;border-radius:4px;box-shadow:0 10px 25px rgba(0,0,0,0.5);" />`
-            : '<div style="color:var(--text-dim);font-size:13px;text-align:center;">No signed contract<br/>uploaded yet.</div>'}
+      ? `<img src="${res.contractUrl.toLowerCase().includes('.pdf') ? res.contractUrl.replace('/upload/', '/upload/pg_1,f_jpg,w_800,c_limit/') : res.contractUrl}" style="max-width:100%;max-height:300px;border-radius:4px;box-shadow:0 10px 25px rgba(0,0,0,0.5);" />`
+      : '<div style="color:var(--text-dim);font-size:13px;text-align:center;">No signed contract<br/>uploaded yet.</div>'}
         </div>
       </div>
       <div class="panel" style="margin:0; padding:0; overflow:hidden; border:1px solid var(--border); background:var(--bg3); display:flex; flex-direction:column;">
@@ -4791,7 +4808,7 @@ window.renderReservationDetailContent = async function() {
           ${res.venueSurcharge ? `
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:var(--red);">
             <div style="font-size:11px;">Out-of-Manila Surcharge (5%)</div>
-            <div style="font-size:12px;font-weight:700;">₱${Number(res.venueSurcharge).toLocaleString(undefined,{minimumFractionDigits:2})}</div>
+            <div style="font-size:12px;font-weight:700;">₱${Number(res.venueSurcharge).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
           </div>` : ''}
         </div>
       </div>
@@ -4803,28 +4820,28 @@ window.renderReservationDetailContent = async function() {
       <div class="panel" style="margin:0; background:rgba(255,255,255,0.02);">
         <div class="panel-hdr" style="padding:12px 18px; background:rgba(255,255,255,0.03);"><div class="panel-title" style="font-size:11px;color:var(--gold);">Event Profile</div></div>
         <div style="padding:18px; display:grid; grid-template-columns:120px 1fr; gap:12px; font-size:13px;">
-          <div style="color:var(--text-dim);">Event Type</div><div>${esc(res.type||'—')}</div>
-          <div style="color:var(--text-dim);">Theme</div><div>${esc(res.theme||'—')}</div>
-          <div style="color:var(--text-dim);">Motif / Colors</div><div>${esc(res.motif||'—')}</div>
-          <div style="color:var(--text-dim);">Guest Count</div><div>${esc(String(res.pax||'0'))} pax (VIP: ${esc(String(res.vipCount||'0'))})</div>
+          <div style="color:var(--text-dim);">Event Type</div><div>${esc(res.type || '—')}</div>
+          <div style="color:var(--text-dim);">Theme</div><div>${esc(res.theme || '—')}</div>
+          <div style="color:var(--text-dim);">Motif / Colors</div><div>${esc(res.motif || '—')}</div>
+          <div style="color:var(--text-dim);">Guest Count</div><div>${esc(String(res.pax || '0'))} pax (VIP: ${esc(String(res.vipCount || '0'))})</div>
         </div>
       </div>
       <div class="panel" style="margin:0; background:rgba(255,255,255,0.02);">
         <div class="panel-hdr" style="padding:12px 18px; background:rgba(255,255,255,0.03);"><div class="panel-title" style="font-size:11px;color:var(--gold);">Venue &amp; Timing</div></div>
         <div style="padding:18px; display:grid; grid-template-columns:120px 1fr; gap:12px; font-size:13px;">
-          <div style="color:var(--text-dim);">Venue Name</div><div>${esc(res.venueName||res.venue||'—')}</div>
-          <div style="color:var(--text-dim);">Location</div><div style="font-size:11px;line-height:1.4;">${esc(venueAddr||'—')}</div>
-          <div style="color:var(--text-dim);">Date</div><div>${esc(res.date||'—')}</div>
-          <div style="color:var(--text-dim);">Time Range</div><div>${esc(res.time||'—')}</div>
+          <div style="color:var(--text-dim);">Venue Name</div><div>${esc(res.venueName || res.venue || '—')}</div>
+          <div style="color:var(--text-dim);">Location</div><div style="font-size:11px;line-height:1.4;">${esc(venueAddr || '—')}</div>
+          <div style="color:var(--text-dim);">Date</div><div>${esc(res.date || '—')}</div>
+          <div style="color:var(--text-dim);">Time Range</div><div>${esc(res.time || '—')}</div>
         </div>
       </div>
       <div class="panel" style="margin:0; background:rgba(255,255,255,0.02);">
         <div class="panel-hdr" style="padding:12px 18px; background:rgba(255,255,255,0.03);"><div class="panel-title" style="font-size:11px;color:var(--gold);">Financial Snapshot</div></div>
         <div style="padding:18px; display:grid; grid-template-columns:120px 1fr; gap:12px; font-size:13px;">
           <div style="color:var(--text-dim);">Total Amount</div><div style="font-weight:700;color:var(--cream);">₱${safeNum(res.amount).toLocaleString()}</div>
-          <div style="color:var(--text-dim);">Payment Status</div><div><span class="badge ${esc(res.paymentStatus||'pending')}">${esc(res.paymentStatus||'pending')}</span></div>
+          <div style="color:var(--text-dim);">Payment Status</div><div><span class="badge ${esc(res.paymentStatus || 'pending')}">${esc(res.paymentStatus || 'pending')}</span></div>
           <div style="color:var(--text-dim);">Initial Fee</div><div>₱${safeNum(res.paymentAmount).toLocaleString()}</div>
-          <div style="color:var(--text-dim);">Downpayment</div><div>₱${safeNum(res.downpaymentAmount).toLocaleString()} (Due: ${esc(res.downpaymentDueDate||'—')})</div>
+          <div style="color:var(--text-dim);">Downpayment</div><div>₱${safeNum(res.downpaymentAmount).toLocaleString()} (Due: ${esc(res.downpaymentDueDate || '—')})</div>
         </div>
       </div>
     </div>`;
@@ -4835,14 +4852,14 @@ window.renderReservationDetailContent = async function() {
     <div style="margin-bottom:40px;">
       <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;">
         <span>Included Items by Category</span>
-        <span style="color:var(--gold);font-weight:700;">Package: ${esc(res.packageName||'Custom')}</span>
+        <span style="color:var(--gold);font-weight:700;">Package: ${esc(res.packageName || 'Custom')}</span>
       </div>
       <div class="panel" style="margin:0;">
         <div class="panel-hdr" style="background:var(--bg3);"><div class="panel-title" style="font-size:11px;">Package Contents</div></div>
         <div style="padding:15px; display:flex; flex-wrap:wrap; gap:8px;">
           ${items.length
-            ? items.map(item => `<span style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--cream);">${esc(typeof item==='string'?item:item.name||'')}</span>`).join('')
-            : '<div style="color:var(--text-dim);font-size:12px;">No package items recorded yet.</div>'}
+      ? items.map(item => `<span style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--cream);">${esc(typeof item === 'string' ? item : item.name || '')}</span>`).join('')
+      : '<div style="color:var(--text-dim);font-size:12px;">No package items recorded yet.</div>'}
         </div>
       </div>
     </div>`;
@@ -4904,22 +4921,22 @@ function _applyCustomerReadOnly() {
   });
 
   // Also disable all text inputs and textareas inside panes (except the selector dropdown)
-  ['resd-pane-details','resd-pane-extra','resd-pane-design','resd-pane-food',
-   'resd-pane-staff','resd-pane-personnel','resd-pane-rundown'].forEach(paneId => {
-    const pane = document.getElementById(paneId);
-    if (!pane) return;
-    pane.querySelectorAll('input:not([type=hidden]), textarea, select').forEach(el => {
-      el.disabled = true;
-      el.style.cursor = 'not-allowed';
+  ['resd-pane-details', 'resd-pane-extra', 'resd-pane-design', 'resd-pane-food',
+    'resd-pane-staff', 'resd-pane-personnel', 'resd-pane-rundown'].forEach(paneId => {
+      const pane = document.getElementById(paneId);
+      if (!pane) return;
+      pane.querySelectorAll('input:not([type=hidden]), textarea, select').forEach(el => {
+        el.disabled = true;
+        el.style.cursor = 'not-allowed';
+      });
+      pane.querySelectorAll('button').forEach(btn => {
+        // Don't disable tab navigation buttons
+        if (btn.classList.contains('tab-btn') || btn.classList.contains('chip')) return;
+        btn.disabled = true;
+        btn.style.opacity = '0.35';
+        btn.style.cursor = 'not-allowed';
+      });
     });
-    pane.querySelectorAll('button').forEach(btn => {
-      // Don't disable tab navigation buttons
-      if (btn.classList.contains('tab-btn') || btn.classList.contains('chip')) return;
-      btn.disabled = true;
-      btn.style.opacity = '0.35';
-      btn.style.cursor = 'not-allowed';
-    });
-  });
 }
 window._applyCustomerReadOnly = _applyCustomerReadOnly;
 
@@ -4927,7 +4944,7 @@ window._applyCustomerReadOnly = _applyCustomerReadOnly;
 
 
 
-window.renderDesignTab = async function() {
+window.renderDesignTab = async function () {
   const container = document.getElementById('resd-pane-design');
   if (!container || !activeResDetailId) return;
   container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">Loading design data...</div>';
@@ -4940,27 +4957,27 @@ window.renderDesignTab = async function() {
     let html = `<div class="panel" style="background:var(--bg3);padding:25px;border:1px solid var(--border);border-radius:12px;margin-bottom:25px;">
       <h3 style="color:var(--gold);font-size:14px;margin-bottom:20px;text-transform:uppercase;">Final Design Selection</h3>
       <div style="display:flex;flex-direction:column;gap:20px;">
-        ${(data.items||[]).map(item => `
+        ${(data.items || []).map(item => `
           <div style="display:grid;grid-template-columns:150px 1fr 2fr;gap:20px;align-items:start;padding-bottom:20px;border-bottom:1px solid var(--border);">
             ${item.selectedImg ? `<img src="${item.selectedImg}" style="width:100%;border-radius:8px;" />` : '<div style="width:100%;aspect-ratio:1;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:10px;">No image</div>'}
             <div><div style="font-weight:700;color:var(--cream);">${item.itemName}</div></div>
-            <div style="font-size:13px;color:var(--text-mid);font-style:italic;">"${item.note||'No specific notes.'}"</div>
+            <div style="font-size:13px;color:var(--text-mid);font-style:italic;">"${item.note || 'No specific notes.'}"</div>
           </div>`).join('')}
       </div></div>`;
     if (data.uploadedPhotos && data.uploadedPhotos.length > 0) {
       html += `<div class="panel" style="background:var(--bg3);padding:25px;border:1px solid var(--border);border-radius:12px;">
         <h3 style="color:var(--gold);font-size:14px;margin-bottom:20px;text-transform:uppercase;">Reference Photos & Documents</h3>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;">
-          ${data.uploadedPhotos.map(file => { const isPDF = file.name&&file.name.toLowerCase().endsWith('.pdf'); const dUrl = isPDF ? file.url.replace('/upload/','/upload/pg_1,f_jpg,w_400,c_limit/') : file.url; return `<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--bg);"><a href="${file.url}" target="_blank"><img src="${dUrl}" style="width:100%;height:140px;object-fit:cover;" /></a><div style="padding:8px;font-size:11px;color:var(--text-dim);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${file.name}</div></div>`; }).join('')}
+          ${data.uploadedPhotos.map(file => { const isPDF = file.name && file.name.toLowerCase().endsWith('.pdf'); const dUrl = isPDF ? file.url.replace('/upload/', '/upload/pg_1,f_jpg,w_400,c_limit/') : file.url; return `<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--bg);"><a href="${file.url}" target="_blank"><img src="${dUrl}" style="width:100%;height:140px;object-fit:cover;" /></a><div style="padding:8px;font-size:11px;color:var(--text-dim);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${file.name}</div></div>`; }).join('')}
         </div></div>`;
     }
     container.innerHTML = html;
-  } catch(e) { console.error(e); container.innerHTML = '<div style="color:var(--red);padding:20px;">Error loading design data.</div>'; }
+  } catch (e) { console.error(e); container.innerHTML = '<div style="color:var(--red);padding:20px;">Error loading design data.</div>'; }
 };
 
 
 
-window.renderFoodTastedTab = async function() {
+window.renderFoodTastedTab = async function () {
   const container = document.getElementById('resd-food-content');
   if (!container || !activeResDetailId) return;
   container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">Loading food tasting data...</div>';
@@ -4975,28 +4992,28 @@ window.renderFoodTastedTab = async function() {
       <table class="inv-table">
         <thead><tr><th>Dish Name</th><th>Status</th><th>Decision</th><th>Remarks / Adjustments</th></tr></thead>
         <tbody>
-          ${(data.dishes||[]).map(item => `<tr>
+          ${(data.dishes || []).map(item => `<tr>
             <td style="font-weight:600;color:var(--cream);">${item.dish}</td>
-            <td><span class="badge ${item.tried?'confirmed':'pending'}">${item.tried?'Tried':'Not Tried'}</span></td>
-            <td><span class="badge ${item.decision==='approved'?'confirmed':(item.decision==='rejected'?'red':'warning')}">${item.decision||'—'}</span></td>
-            <td style="font-size:12px;color:var(--text-mid);">${item.remarks||'—'}</td>
+            <td><span class="badge ${item.tried ? 'confirmed' : 'pending'}">${item.tried ? 'Tried' : 'Not Tried'}</span></td>
+            <td><span class="badge ${item.decision === 'approved' ? 'confirmed' : (item.decision === 'rejected' ? 'red' : 'warning')}">${item.decision || '—'}</span></td>
+            <td style="font-size:12px;color:var(--text-mid);">${item.remarks || '—'}</td>
           </tr>`).join('')}
         </tbody>
       </table>
       <div style="margin-top:30px;">
         <h3 style="color:var(--gold);font-size:14px;margin-bottom:15px;text-transform:uppercase;">Tasting Documents</h3>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;">
-          ${(data.documents||[]).map(file => { const isPDF = file.name&&file.name.toLowerCase().endsWith('.pdf'); const dUrl = isPDF ? file.url.replace('/upload/','/upload/pg_1,f_jpg,w_400,c_limit/') : file.url; return `<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg);"><a href="${file.url}" target="_blank"><img src="${dUrl}" style="width:100%;height:120px;object-fit:cover;" /></a><div style="padding:6px;font-size:10px;color:var(--text-dim);text-align:center;">${file.name}</div></div>`; }).join('')||'<div style="color:var(--text-dim);font-size:12px;">No documents uploaded.</div>'}
+          ${(data.documents || []).map(file => { const isPDF = file.name && file.name.toLowerCase().endsWith('.pdf'); const dUrl = isPDF ? file.url.replace('/upload/', '/upload/pg_1,f_jpg,w_400,c_limit/') : file.url; return `<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg);"><a href="${file.url}" target="_blank"><img src="${dUrl}" style="width:100%;height:120px;object-fit:cover;" /></a><div style="padding:6px;font-size:10px;color:var(--text-dim);text-align:center;">${file.name}</div></div>`; }).join('') || '<div style="color:var(--text-dim);font-size:12px;">No documents uploaded.</div>'}
         </div>
       </div>
     </div>`;
-  } catch(e) { console.error(e); container.innerHTML = '<div style="color:var(--red);padding:20px;">Error loading food tasting data.</div>'; }
+  } catch (e) { console.error(e); container.innerHTML = '<div style="color:var(--red);padding:20px;">Error loading food tasting data.</div>'; }
 };
 
-window.renderStaffAllocationTab = async function() {
+window.renderStaffAllocationTab = async function () {
   const container = document.getElementById('resd-staff-content');
   if (!container || !activeResDetailId) return;
-  const res = (window.RESERVATIONS||[]).find(r => r.id === activeResDetailId);
+  const res = (window.RESERVATIONS || []).find(r => r.id === activeResDetailId);
   if (!res) return;
   container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">Loading staff allocation...</div>';
   try {
@@ -5011,12 +5028,12 @@ window.renderStaffAllocationTab = async function() {
     }
     const phases = res.executionPlan.phases;
     const assignedStaffIds = new Set();
-    phases.forEach(p => p.tasks.forEach(t => (t.staffIds||[]).forEach(id => assignedStaffIds.add(id))));
-    const formatTimePart = t => { if(!t||!t.includes(':')) return t; let [h,m]=t.split(':'); const hh=parseInt(h); return `${hh%12||12}:${m} ${hh>=12?'PM':'AM'}`; };
-    const toMins = t => { let [h,m]=t.split(':'); return parseInt(h)*60+parseInt(m); };
-    const startStr = phases[0].start, endStr = phases[phases.length-1].end;
-    let diff = toMins(endStr) - toMins(startStr); if(diff<0) diff+=1440;
-    const totalHours = diff/60;
+    phases.forEach(p => p.tasks.forEach(t => (t.staffIds || []).forEach(id => assignedStaffIds.add(id))));
+    const formatTimePart = t => { if (!t || !t.includes(':')) return t; let [h, m] = t.split(':'); const hh = parseInt(h); return `${hh % 12 || 12}:${m} ${hh >= 12 ? 'PM' : 'AM'}`; };
+    const toMins = t => { let [h, m] = t.split(':'); return parseInt(h) * 60 + parseInt(m); };
+    const startStr = phases[0].start, endStr = phases[phases.length - 1].end;
+    let diff = toMins(endStr) - toMins(startStr); if (diff < 0) diff += 1440;
+    const totalHours = diff / 60;
     container.innerHTML = `
       <div class="talent-analytics-banner" style="margin-bottom:25px;background:rgba(196,154,60,0.02);">
         <div class="t-stat-block"><div class="t-stat-lbl">Deployment Window</div><div class="t-stat-val">${formatTimePart(startStr)} - ${formatTimePart(endStr)}</div></div>
@@ -5034,19 +5051,19 @@ window.renderStaffAllocationTab = async function() {
                 <div>
                   <div style="font-size:12px;font-weight:600;color:var(--cream);margin-bottom:6px;">${t.text}</div>
                   <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                    ${allStaff.filter(s => (t.staffIds||[]).includes(s.id)).map(s => `<span style="padding:4px 12px;border-radius:15px;font-size:11px;background:var(--gold);color:#000;font-weight:700;">${s.name}</span>`).join('')||'<span style="font-size:11px;color:var(--text-dim);">No staff assigned yet</span>'}
+                    ${allStaff.filter(s => (t.staffIds || []).includes(s.id)).map(s => `<span style="padding:4px 12px;border-radius:15px;font-size:11px;background:var(--gold);color:#000;font-weight:700;">${s.name}</span>`).join('') || '<span style="font-size:11px;color:var(--text-dim);">No staff assigned yet</span>'}
                   </div>
                 </div>`).join('')}
             </div>
           </div>`).join('')}
       </div>`;
-  } catch(e) { console.error(e); container.innerHTML = '<div style="color:var(--red);padding:20px;">Error loading staff data.</div>'; }
+  } catch (e) { console.error(e); container.innerHTML = '<div style="color:var(--red);padding:20px;">Error loading staff data.</div>'; }
 };
 
-window.renderPersonnelTab = function() {
+window.renderPersonnelTab = function () {
   const container = document.getElementById('resd-personnel-container');
   if (!container) return;
-  const res = (window.RESERVATIONS||[]).find(r => r.id === activeResDetailId);
+  const res = (window.RESERVATIONS || []).find(r => r.id === activeResDetailId);
   if (!res) { container.innerHTML = '<div style="text-align:center;padding:100px 20px;color:var(--text-dim);">No reservation selected.</div>'; return; }
   const hiredData = res.hiredPersonnel || {};
   const entries = Object.entries(hiredData);
@@ -5060,10 +5077,10 @@ window.renderPersonnelTab = function() {
             <span class="badge confirmed">HIRED</span>
           </div>
           <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:48px;height:48px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#000;">${(p.name||'?')[0]}</div>
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#000;">${(p.name || '?')[0]}</div>
             <div>
-              <div style="font-size:13px;font-weight:700;">${p.name||'—'}</div>
-              <div style="font-size:11px;color:var(--text-dim);">${p.phone||''} ${p.email?'· '+p.email:''}</div>
+              <div style="font-size:13px;font-weight:700;">${p.name || '—'}</div>
+              <div style="font-size:11px;color:var(--text-dim);">${p.phone || ''} ${p.email ? '· ' + p.email : ''}</div>
               ${p.rate ? `<div style="font-size:11px;color:var(--gold);margin-top:2px;">Rate: ₱${p.rate.toLocaleString()}</div>` : ''}
             </div>
           </div>
@@ -5072,10 +5089,10 @@ window.renderPersonnelTab = function() {
     </div>`;
 };
 
-window.renderFinalRundownTab = function() {
+window.renderFinalRundownTab = function () {
   const container = document.getElementById('resd-rundown-content');
   if (!container) return;
-  const res = (window.RESERVATIONS||[]).find(r => r.id === activeResDetailId);
+  const res = (window.RESERVATIONS || []).find(r => r.id === activeResDetailId);
   if (!res || !res.finalRundown) {
     container.innerHTML = '<div style="text-align:center;padding:100px 20px;color:var(--text-dim);"><div style="font-size:40px;margin-bottom:15px;"></div><div style="font-size:14px;font-weight:600;color:var(--cream);">No Final Rundown Generated Yet</div><div style="font-size:12px;margin-top:8px;opacity:0.6;">The admin will generate this after all meeting approvals are complete.</div></div>';
     return;
@@ -5087,22 +5104,22 @@ window.renderFinalRundownTab = function() {
         <div class="panel" style="background:rgba(255,255,255,0.02);padding:25px;border:1px solid var(--border);">
           <h3 style="color:var(--gold);font-size:13px;text-transform:uppercase;margin-bottom:15px;">Venue Details</h3>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;font-size:13px;color:var(--text-mid);">
-            <div><strong>Venue:</strong> ${res.venue||'—'}</div>
-            <div><strong>Type:</strong> ${rundown.venue?.type||'—'}</div>
-            <div><strong>Decision:</strong> ${rundown.venue?.finalDecision||'—'}</div>
-            <div><strong>Capacity:</strong> ${rundown.venue?.capacity||'—'}</div>
+            <div><strong>Venue:</strong> ${res.venue || '—'}</div>
+            <div><strong>Type:</strong> ${rundown.venue?.type || '—'}</div>
+            <div><strong>Decision:</strong> ${rundown.venue?.finalDecision || '—'}</div>
+            <div><strong>Capacity:</strong> ${rundown.venue?.capacity || '—'}</div>
           </div>
         </div>
         <div class="panel" style="background:rgba(255,255,255,0.02);padding:25px;border:1px solid var(--border);">
           <h3 style="color:var(--gold);font-size:13px;text-transform:uppercase;margin-bottom:15px;">Approved Menu</h3>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            ${(rundown.food||[]).map(f => `<div style="padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:12px;color:var(--cream);border:1px solid rgba(255,255,255,0.05);">${f.dish} <span style="color:var(--green);font-size:10px;margin-left:8px;"></span></div>`).join('')||'<div style="color:var(--text-dim);font-size:12px);">No menu data.</div>'}
+            ${(rundown.food || []).map(f => `<div style="padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:12px;color:var(--cream);border:1px solid rgba(255,255,255,0.05);">${f.dish} <span style="color:var(--green);font-size:10px;margin-left:8px;"></span></div>`).join('') || '<div style="color:var(--text-dim);font-size:12px);">No menu data.</div>'}
           </div>
         </div>
         <div class="panel" style="background:rgba(255,255,255,0.02);padding:25px;border:1px solid var(--border);">
           <h3 style="color:var(--gold);font-size:13px;text-transform:uppercase;margin-bottom:15px;">Talent & Personnel</h3>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-            ${Object.entries(rundown.personnel||{}).map(([role,p]) => `<div style="padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);"><div style="font-size:10px;color:var(--gold);font-weight:700;">${role}</div><div style="font-size:13px;font-weight:600;color:var(--cream);">${p.name}</div></div>`).join('')||'<div style="color:var(--text-dim);font-size:12px;">No personnel assigned.</div>'}
+            ${Object.entries(rundown.personnel || {}).map(([role, p]) => `<div style="padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);"><div style="font-size:10px;color:var(--gold);font-weight:700;">${role}</div><div style="font-size:13px;font-weight:600;color:var(--cream);">${p.name}</div></div>`).join('') || '<div style="color:var(--text-dim);font-size:12px;">No personnel assigned.</div>'}
           </div>
         </div>
       </div>
@@ -5110,13 +5127,13 @@ window.renderFinalRundownTab = function() {
         <div class="panel" style="background:rgba(255,255,255,0.02);padding:25px;border:1px solid var(--border);">
           <h3 style="color:var(--gold);font-size:13px;text-transform:uppercase;margin-bottom:15px;">Program Rundown</h3>
           <div style="display:flex;flex-direction:column;gap:8px;">
-            ${(rundown.timeline||[]).map(p => `<div style="display:flex;gap:12px;font-size:12px;padding:10px;background:rgba(255,255,255,0.01);border-radius:6px;"><div style="width:85px;color:var(--gold);font-weight:700;">${p.start}</div><div style="flex:1;color:var(--cream);font-weight:600;">${p.name}</div></div>`).join('')||'<div style="color:var(--text-dim);font-size:12px;">No timeline data.</div>'}
+            ${(rundown.timeline || []).map(p => `<div style="display:flex;gap:12px;font-size:12px;padding:10px;background:rgba(255,255,255,0.01);border-radius:6px;"><div style="width:85px;color:var(--gold);font-weight:700;">${p.start}</div><div style="flex:1;color:var(--cream);font-weight:600;">${p.name}</div></div>`).join('') || '<div style="color:var(--text-dim);font-size:12px;">No timeline data.</div>'}
           </div>
         </div>
         <div class="panel" style="background:rgba(255,255,255,0.02);padding:25px;border:1px solid var(--border);">
           <h3 style="color:var(--gold);font-size:13px;text-transform:uppercase;margin-bottom:15px;">Final Design Aesthetic</h3>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">
-            ${(rundown.designs||[]).map(item => `<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg2);"><img src="${item.selectedImg||''}" style="width:100%;height:100px;object-fit:cover;" /><div style="padding:8px;font-size:10px;color:var(--text-dim);">${item.itemName||''}</div></div>`).join('')||'<div style="color:var(--text-dim);font-size:12px;">No design selections recorded.</div>'}
+            ${(rundown.designs || []).map(item => `<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg2);"><img src="${item.selectedImg || ''}" style="width:100%;height:100px;object-fit:cover;" /><div style="padding:8px;font-size:10px;color:var(--text-dim);">${item.itemName || ''}</div></div>`).join('') || '<div style="color:var(--text-dim);font-size:12px;">No design selections recorded.</div>'}
           </div>
         </div>
       </div>
@@ -5124,14 +5141,14 @@ window.renderFinalRundownTab = function() {
 };
 
 // Final touch: Update switchResDetailsTab to handle all tabs
-window.switchResDetailsTab = function(tabId, btn) {
+window.switchResDetailsTab = function (tabId, btn) {
   resDetailsActiveTab = tabId || 'details';
-  
+
   // Hide all panes
   const panes = [
-    'resd-pane-details', 'resd-pane-timeline', 'resd-pane-procurement', 
+    'resd-pane-details', 'resd-pane-timeline', 'resd-pane-procurement',
     'resd-pane-extra', 'resd-pane-design', 'resd-pane-venue',
-    'resd-pane-food', 'resd-pane-staff', 'resd-pane-personnel', 
+    'resd-pane-food', 'resd-pane-staff', 'resd-pane-personnel',
     'resd-pane-rundown', 'resd-pane-summary'
   ];
   panes.forEach(id => {
@@ -5151,15 +5168,15 @@ window.switchResDetailsTab = function(tabId, btn) {
     if (fallbackBtn) fallbackBtn.classList.add('active');
   }
 
-  if (resDetailsActiveTab === 'details')     renderReservationDetailContent();
-  if (resDetailsActiveTab === 'timeline')    renderReservationTimelineView();
+  if (resDetailsActiveTab === 'details') renderReservationDetailContent();
+  if (resDetailsActiveTab === 'timeline') renderReservationTimelineView();
   if (resDetailsActiveTab === 'procurement') renderProcurementTab();
-  if (resDetailsActiveTab === 'extra')       renderExtraReservationDetails();
-  if (resDetailsActiveTab === 'design')      renderDesignTab();
-  if (resDetailsActiveTab === 'food')        renderFoodTastedTab();
-  if (resDetailsActiveTab === 'staff')       renderStaffAllocationTab();
-  if (resDetailsActiveTab === 'personnel')   renderPersonnelTab();
-  if (resDetailsActiveTab === 'rundown')     renderFinalRundownTab();
+  if (resDetailsActiveTab === 'extra') renderExtraReservationDetails();
+  if (resDetailsActiveTab === 'design') renderDesignTab();
+  if (resDetailsActiveTab === 'food') renderFoodTastedTab();
+  if (resDetailsActiveTab === 'staff') renderStaffAllocationTab();
+  if (resDetailsActiveTab === 'personnel') renderPersonnelTab();
+  if (resDetailsActiveTab === 'rundown') renderFinalRundownTab();
   if (resDetailsActiveTab === 'venue') {
     // Venue tab: re-use the map from the main detail pane logic
     if (typeof renderReservationDetailContent === 'function') {
@@ -5198,7 +5215,7 @@ window.switchResDetailsTab = function(tabId, btn) {
 
 // Fallback if admin.js not loaded — prevents crash in customer detail view
 // Always override with the correct admin-mirrored version
-window.fetchResdMeetingsHistory = async function(resId) {
+window.fetchResdMeetingsHistory = async function (resId) {
   const historyEl = document.getElementById('resd-meetings-history');
   if (!historyEl) return;
   try {
@@ -5232,13 +5249,13 @@ window.fetchResdMeetingsHistory = async function(resId) {
         </div>
       `;
     }).join('');
-  } catch(e) {
+  } catch (e) {
     console.error('fetchResdMeetingsHistory error', e);
     historyEl.innerHTML = '<div style="color:var(--red);">Error loading meeting history.</div>';
   }
 };
 
-window.renderBookingSummary = function(data) {
+window.renderBookingSummary = function (data) {
   const ov = document.getElementById('res-wait-overlay');
   const md = document.getElementById('res-wait-modal');
   if (!ov || !md) return;
@@ -5252,13 +5269,13 @@ window.renderBookingSummary = function(data) {
   document.getElementById('bs-pax').textContent = data.pax + ' Guests';
   document.getElementById('bs-vip').textContent = (data.vipCount || 0) + ' VIPs';
   document.getElementById('bs-address').textContent = data.venue;
-  
+
   // Extract city from venue if possible
   const cityMatch = data.venue.match(/(Quezon City|Manila|Makati|Pasig|Taguig|Caloocan|Valenzuela|Las Pinas|Muntinlupa|Paranaque|Pasay|San Juan|Mandaluyong|Malabon|Navotas|Marikina)/i);
   document.getElementById('bs-city').textContent = cityMatch ? cityMatch[0] : 'Metro Manila';
 
   // Meeting Hub (First proposed time)
-  const meeting = Array.isArray(data.proposedMeetingTimes) && data.proposedMeetingTimes[0] 
+  const meeting = Array.isArray(data.proposedMeetingTimes) && data.proposedMeetingTimes[0]
     ? `${data.proposedMeetingTimes[0].date} | ${data.proposedMeetingTimes[0].time}`
     : 'TBD';
   document.getElementById('bs-meeting').textContent = meeting;
@@ -5266,7 +5283,7 @@ window.renderBookingSummary = function(data) {
   // Items List
   const list = document.getElementById('bs-items-list');
   if (list) {
-    list.innerHTML = (data.packageItems || []).map(item => 
+    list.innerHTML = (data.packageItems || []).map(item =>
       `<span class="item-tag">${typeof item === 'string' ? item : item.name}</span>`
     ).join('');
   }
@@ -5278,10 +5295,10 @@ window.renderBookingSummary = function(data) {
   }, 50);
 };
 
-window.renderExtraReservationDetails = async function() {
+window.renderExtraReservationDetails = async function () {
   const res = (window.RESERVATIONS || []).find(r => r.id === activeResDetailId);
   if (!res) return;
-  
+
   const guestContainer = document.getElementById('resd-guest-list');
   if (guestContainer) {
     const guests = res.guestList || [];
@@ -5310,14 +5327,14 @@ window.renderExtraReservationDetails = async function() {
       `;
     }
   }
-  
+
   const layoutContainer = document.getElementById('resd-seating-container');
   if (layoutContainer) {
     // High-fidelity visual seating layout
     // We'll generate a few tables based on guest count or random for prototype feel
     const pax = res.pax || 50;
     const tableCount = Math.ceil(pax / 10);
-    
+
     let tablesHtml = '';
     const positions = [
       { t: 50, l: 50 }, { t: 50, l: 200 }, { t: 50, l: 350 },
@@ -5399,17 +5416,17 @@ window.RECIPE_DATA = {
   ]
 };
 
-window.getIngredientsForDish = function(dishName, pax) {
+window.getIngredientsForDish = function (dishName, pax) {
   const recipe = RECIPE_DATA[dishName] || [{ name: 'Standard Ingredients (Generic)', qty20: 1, unit: 'set', cost: 500, supplier: '' }];
   const ratio = (parseInt(pax) || 20) / 20;
   return recipe.map(ing => ({ ...ing, totalQty: (ing.qty20 * ratio).toFixed(2), totalCost: (ing.cost * ratio) }));
 };
 
-window.renderProcurementTab = async function() {
+window.renderProcurementTab = async function () {
   const res = (window.RESERVATIONS || []).find(r => r.id === activeResDetailId);
   if (!res) return;
 
-  ['food','equipment','decoration','personnel'].forEach(cat => {
+  ['food', 'equipment', 'decoration', 'personnel'].forEach(cat => {
     const list = document.getElementById(`proc-${cat === 'personnel' ? 'pers' : cat}-list`);
     if (list) list.innerHTML = '<div style="font-size:12px; color:var(--text-dim); padding:20px; text-align:center;">Loading items...</div>';
   });
@@ -5419,9 +5436,9 @@ window.renderProcurementTab = async function() {
   const items = itemNames.map(name => CAT.find(c => c.name === name)).filter(Boolean);
   const pax = parseInt(res.pax) || 0;
 
-  const foodResult   = renderProcFood(items, pax, procData);
+  const foodResult = renderProcFood(items, pax, procData);
   renderProcEquip(items, procData);
-  const decorResult  = renderProcDecor(items, procData) || { decorCost: 0 };
+  const decorResult = renderProcDecor(items, procData) || { decorCost: 0 };
   const personResult = renderProcPersonnel(items, procData) || { personnelCost: 0 };
 
   const supplierGroups = {};
@@ -5451,14 +5468,14 @@ async function fetchProcurementData(resId) {
     const { doc, getDoc } = window.firebaseFns;
     const snap = await getDoc(doc(window.firebaseDB, 'procurement', resId));
     return snap.exists() ? snap.data() : { sorted: {} };
-  } catch(e) { return { sorted: {} }; }
+  } catch (e) { return { sorted: {} }; }
 }
 
 function renderProcFood(items, pax, procData) {
   const list = document.getElementById('proc-food-list');
   if (!list) return;
   const foodItems = items.filter(i => i.cat === 'food');
-  
+
   let html = `
     <div style="margin-bottom:20px; font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Supplier Purchase Orders</div>
     
@@ -5470,7 +5487,7 @@ function renderProcFood(items, pax, procData) {
         <div style="font-size:14px; font-weight:800; color:var(--gold);">₱${Math.round(pax * 45).toLocaleString()}</div>
       </div>
       <div style="font-size:11px; color:var(--text-mid); line-height:1.8; border-top:1px solid var(--border); padding-top:15px;">
-        ${foodItems.slice(0,2).map(f => `• ${pax} units of ${f.name} components`).join('<br>')}
+        ${foodItems.slice(0, 2).map(f => `• ${pax} units of ${f.name} components`).join('<br>')}
       </div>
       <button style="margin-top:15px; width:100%; padding:10px; border:1px solid var(--gold); background:transparent; color:var(--gold); border-radius:8px; font-size:11px; font-weight:700;">View Full PO Details</button>
     </div>
@@ -5483,11 +5500,11 @@ function renderProcFood(items, pax, procData) {
         <div style="font-size:14px; font-weight:800; color:var(--text);">₱${Math.round(pax * 22).toLocaleString()}</div>
       </div>
       <div style="font-size:11px; color:var(--text-dim); line-height:1.8; border-top:1px solid var(--border); padding-top:15px;">
-        ${foodItems.slice(2,4).map(f => `• Fresh vegetables and side ingredients for ${f.name}`).join('<br>')}
+        ${foodItems.slice(2, 4).map(f => `• Fresh vegetables and side ingredients for ${f.name}`).join('<br>')}
       </div>
     </div>
   `;
-  
+
   list.innerHTML = html;
 }
 
@@ -5507,7 +5524,7 @@ function renderProcDecor(items, procData) {
   const list = document.getElementById('proc-decor-list');
   if (!list) return;
   const decorItems = items.filter(i => i.cat === 'decoration');
-  
+
   let html = `
     <div style="margin-bottom:15px; font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Aesthetic Shopping List</div>
     <div style="display:flex; flex-direction:column; gap:12px;">
@@ -5531,7 +5548,7 @@ function renderProcDecor(items, procData) {
 function renderProcPersonnel(items, procData) {
   const list = document.getElementById('proc-personnel-list');
   if (!list) return;
-  
+
   const personnel = [
     { role: 'Event Coordinator', status: 'Hired', name: 'Maria Clara', rate: 15000 },
     { role: 'Service Staff', status: 'Allocated', name: 'Waitstaff Team (6)', rate: 0 },
@@ -5651,7 +5668,7 @@ async function renderReservationTimelineView() {
     const now = new Date();
     const diffTime = eventDate - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     analyticsContainer.innerHTML = `
       <div class="logistics-card">
         <div class="lbl">Countdown</div>
@@ -5692,14 +5709,14 @@ async function renderReservationTimelineView() {
   // 4. RENDER CALENDAR
   if (calEl) {
     const calendarEvents = [];
-    
+
     // Add Milestone Blocks
     LOGISTICS_MILESTONE_DEFS.forEach((m, idx) => {
       const mStart = new Date(startDate);
       mStart.setDate(startDate.getDate() + (idx * 1.5));
       const mEnd = new Date(mStart);
       mEnd.setDate(mStart.getDate() + 2);
-      
+
       calendarEvents.push({
         id: m.id,
         title: m.label,
@@ -5806,7 +5823,7 @@ async function renderReservationTimelineView() {
   }
 }
 
-window.selectTimelineMilestone = function(id) {
+window.selectTimelineMilestone = function (id) {
   activeMilestoneId = id;
   renderReservationTimelineView();
 };
@@ -5814,12 +5831,12 @@ window.selectTimelineMilestone = function(id) {
 window.renderReservationTimelineView = renderReservationTimelineView;
 
 
-window.renderReservationSummary = function(res) {
+window.renderReservationSummary = function (res) {
   const container = document.getElementById('resd-summary-content');
   if (!container) return;
 
   const items = Array.isArray(res.packageItems) ? res.packageItems : [];
-  
+
   container.innerHTML = `
     <div class="summary-mini-card" style="margin:0; width:100%; max-width:none; border:1px solid var(--border); box-shadow:none; text-align:left;">
       <div class="summary-section-title">Reservation Summary</div>
@@ -5866,7 +5883,7 @@ function applyUIScale() {
   }
 }
 
-window.changeUIScale = function(delta) {
+window.changeUIScale = function (delta) {
   currentUIScale += delta;
   if (currentUIScale < 0.5) currentUIScale = 0.5;
   if (currentUIScale > 2.0) currentUIScale = 2.0;
