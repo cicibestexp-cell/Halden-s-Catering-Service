@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartServe | Total Fix</title>
+    <style>
+        :root { --primary: #2563eb; --bg: #f1f5f9; --panel: #ffffff; --border: #cbd5e1; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        header { background: #0f172a; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .controls { padding: 1rem; background: var(--panel); border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: center; }
+        main { display: flex; flex: 1; overflow: hidden; }
+        #sidebar { width: 300px; background: var(--panel); border-right: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; }
+        #canvas-container { flex: 1; overflow: auto; display: flex; justify-content: center; align-items: center; background: #cbd5e1; }
+        svg { background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+
+        /* Objects */
+        .table { fill: #fbbf24; stroke: #b45309; stroke-width: 2; cursor: move; }
+        .table.selected { stroke: #2563eb; stroke-width: 4; stroke-dasharray: 4; }
+        .chair { fill: #fff; stroke: #64748b; stroke-width: 2; cursor: pointer; }
+        .chair:hover { fill: #f1f5f9; stroke: #2563eb; }
+        .chair-locked { stroke: #2563eb; fill: #dbeafe; }
+        .chair-taken { fill: #2563eb !important; stroke: #1e3a8a !important; }
+        .label { font-size: 11px; pointer-events: none; text-anchor: middle; font-weight: bold; fill: #000; }
+
+        /* Stats */
+        .stats-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600; }
+        .stat-val { color: var(--primary); font-size: 1.1rem; }
+
+        /* UI */
+        button { padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 600; }
+        .btn-blue { background: var(--primary); color: white; border: none; }
+        .btn-danger { background: #ef4444; color: white; border: none; margin-top: 10px; display: none; }
+        .mode-badge { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+        .admin-mode { background: #fee2e2; color: #991b1b; }
+        .customer-mode { background: #dcfce7; color: #166534; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div><strong>SmartServe</strong> | Layout Fix</div>
+    <div id="modeTag" class="mode-badge admin-mode">Admin Mode</div>
+</header>
+
+<div class="controls">
+    <button onclick="addElement('table-round')">Add Round Table</button>
+    <button onclick="addElement('table-rect')">Add Rect Table</button>
+    <button onclick="addElement('chair')">Add Single Chair</button>
+    <div style="flex-grow: 1;"></div>
+    <button class="btn-blue" onclick="toggleMode()" id="toggleBtn">Switch to Customer View</button>
+</div>
+
+<main>
+    <div id="sidebar">
+        <h3>Event Summary</h3>
+        <div class="stats-card">
+            <div class="stat-row"><span>Tables:</span> <span id="sum-tables" class="stat-val">0</span></div>
+            <div class="stat-row"><span>Chairs:</span> <span id="sum-chairs" class="stat-val">0</span></div>
+            <hr style="border:0; border-top:1px solid #cbd5e1; margin:10px 0;">
+            <div class="stat-row"><span>Total PAX:</span> <span id="sum-pax" class="stat-val">0</span></div>
+        </div>
+
+        <div id="inspector">
+            <h3>Inspector</h3>
+            <div id="selection-info">Select a table to see options.</div>
+            <button id="unlockBtn" class="btn-danger" onclick="unlockChairs()">Unlock All Attached Chairs</button>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <svg id="canvas" width="900" height="700"></svg>
+    </div>
+</main>
+
+<script>
+    let mode = 'admin';
+    let elements = [];
+    let selectedId = null;
+    let draggingEl = null;
+    let offset = { x: 0, y: 0 };
+    const SNAP_DIST = 90;
+
+    function addElement(type) {
+        const id = Date.now();
+        elements.push({
+            id: id,
+            type: type,
+            x: 200,
+            y: 200,
+            parentId: null,
+            guest: type === 'chair' ? "" : null
+        });
+        render();
+    }
+
+    function toggleMode() {
+        mode = mode === 'admin' ? 'customer' : 'admin';
+        selectedId = null;
+        document.getElementById('modeTag').innerText = mode.toUpperCase() + " MODE";
+        document.getElementById('modeTag').className = `mode-badge ${mode}-mode`;
+        document.getElementById('toggleBtn').innerText = mode === 'admin' ? "Switch to Customer View" : "Switch to Admin View";
+        render();
+    }
+
+    function unlockChairs() {
+        elements.forEach(el => { if (el.parentId === selectedId) el.parentId = null; });
+        render();
+    }
+
+    function render() {
+        const canvas = document.getElementById('canvas');
+        canvas.innerHTML = '';
+        
+        let tCount = 0;
+        let cCount = 0;
+
+        // Sort: Tables first (bottom), then chairs (top)
+        const sorted = [...elements].sort((a, b) => {
+            if (a.type.includes('table') && b.type === 'chair') return -1;
+            if (a.type === 'chair' && b.type.includes('table')) return 1;
+            return 0;
+        });
+
+        sorted.forEach(el => {
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            group.setAttribute("transform", `translate(${el.x}, ${el.y})`);
+
+            if (el.type.includes('table')) {
+                tCount++;
+                const shape = (el.type === 'table-round') 
+                    ? document.createElementNS("http://www.w3.org/2000/svg", "circle")
+                    : document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                
+                if (el.type === 'table-round') {
+                    shape.setAttribute("r", "45");
+                } else {
+                    shape.setAttribute("width", "130"); shape.setAttribute("height", "80");
+                    shape.setAttribute("x", "-65"); shape.setAttribute("y", "-40");
+                }
+                
+                shape.setAttribute("class", `table ${selectedId === el.id ? 'selected' : ''}`);
+                
+                if (mode === 'admin') {
+                    shape.onmousedown = (e) => { e.stopPropagation(); startDrag(e, el); };
+                    shape.onclick = (e) => { e.stopPropagation(); selectedId = el.id; render(); };
+                    shape.oncontextmenu = (e) => { e.preventDefault(); deleteEl(el.id); };
+                }
+                group.appendChild(shape);
+            } 
+            else {
+                cCount++;
+                const chair = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                chair.setAttribute("r", "16");
+                const isLocked = el.parentId !== null;
+                chair.setAttribute("class", `chair ${isLocked ? 'chair-locked' : ''} ${el.guest ? 'chair-taken' : ''}`);
+                
+                // --- THE ULTIMATE CLICK FIX ---
+                if (mode === 'customer') {
+                    chair.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const name = prompt("Assign guest name to this chair:", el.guest);
+                        if (name !== null) {
+                            el.guest = name;
+                            render();
+                        }
+                    };
+                } else {
+                    chair.onmousedown = (e) => { e.stopPropagation(); startDrag(e, el); };
+                    chair.oncontextmenu = (e) => { e.preventDefault(); deleteEl(el.id); };
+                }
+
+                group.appendChild(chair);
+
+                if (el.guest) {
+                    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    txt.setAttribute("y", "38");
+                    txt.setAttribute("class", "label");
+                    txt.textContent = el.guest;
+                    group.appendChild(txt);
+                }
+            }
+            canvas.appendChild(group);
+        });
+
+        // Sidebar Update
+        document.getElementById('sum-tables').innerText = tCount;
+        document.getElementById('sum-chairs').innerText = cCount;
+        document.getElementById('sum-pax').innerText = cCount;
+        
+        const hasChildren = elements.some(e => e.parentId === selectedId);
+        document.getElementById('unlockBtn').style.display = (selectedId && hasChildren) ? 'block' : 'none';
+        document.getElementById('selection-info').innerText = selectedId ? `Table selected.` : "Select a table to unlock chairs.";
+    }
+
+    function deleteEl(id) {
+        elements.forEach(e => { if (e.parentId === id) e.parentId = null; });
+        elements = elements.filter(e => e.id !== id);
+        render();
+    }
+
+    function startDrag(e, el) {
+        draggingEl = el;
+        const CTM = canvas.getScreenCTM();
+        offset.x = (e.clientX - CTM.e) / CTM.a - el.x;
+        offset.y = (e.clientY - CTM.f) / CTM.d - el.y;
+    }
+
+    window.onmousemove = (e) => {
+        if (!draggingEl || mode !== 'admin') return;
+        const CTM = canvas.getScreenCTM();
+        const mx = (e.clientX - CTM.e) / CTM.a;
+        const my = (e.clientY - CTM.f) / CTM.d;
+
+        const dx = (mx - offset.x) - draggingEl.x;
+        const dy = (my - offset.y) - draggingEl.y;
+
+        draggingEl.x += dx;
+        draggingEl.y += dy;
+
+        if (draggingEl.type.includes('table')) {
+            elements.forEach(el => {
+                if (el.parentId === draggingEl.id) { el.x += dx; el.y += dy; }
+            });
+        }
+        render();
+    };
+
+    window.onmouseup = () => {
+        if (draggingEl && draggingEl.type === 'chair') {
+            let closest = null;
+            let minDist = SNAP_DIST;
+            elements.forEach(target => {
+                if (target.type.includes('table')) {
+                    const d = Math.sqrt((draggingEl.x - target.x)**2 + (draggingEl.y - target.y)**2);
+                    if (d < minDist) { minDist = d; closest = target.id; }
+                }
+            });
+            draggingEl.parentId = closest;
+        }
+        draggingEl = null;
+        render();
+    };
+
+    render();
+</script>
+</body>
+</html>

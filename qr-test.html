@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <h1>QR Code Test</h1>
+    <button onclick="testQR()">Generate Test QR</button>
+    <div id="qrcode"></div>
+    
+    <script>
+        function testQR() {
+            console.log('QRCode library:', typeof QRCode);
+            if (typeof QRCode === 'undefined') {
+                alert('QRCode library not loaded');
+                return;
+            }
+            
+            new QRCode(document.getElementById("qrcode"), {
+                text: "Test QR Code Data",
+                width: 128,
+                height: 128
+            });
+        }
+    </script>
+</body>
+</html>

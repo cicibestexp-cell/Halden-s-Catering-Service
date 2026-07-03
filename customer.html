@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Figma Preview — Customer Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ===== FIGMA PREVIEW OVERRIDES: kill all animations ===== */
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* Force dash-overlay to be fully visible and fill screen */
+    .dash-overlay {
+      display: flex !important;
+      position: fixed !important;
+      inset: 0 !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      z-index: 9999 !important;
+      background: var(--bg) !important;
+    }
+
+    /* All dash-tabs visible (we only show the main one but have others styled properly) */
+    .dash-tab { display: none; }
+    .dash-tab.active { display: block; }
+
+    /* Reservation card styles */
+    .res-card {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .res-card.approved {
+      border-left: 3px solid #22c55e;
+    }
+
+    .res-card.processing {
+      border-left: 3px solid #f59e0b;
+    }
+
+    .res-card-info { flex: 1; }
+
+    .res-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--brown);
+      margin-bottom: 4px;
+    }
+
+    .res-card-status {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .res-card-status.confirmed { color: #22c55e; }
+    .res-card-status.pending { color: #f59e0b; }
+
+    .res-card-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--text-mid);
+      margin-bottom: 8px;
+    }
+
+    .res-card-meta span { display: flex; align-items: center; gap: 4px; }
+
+    .res-card-venue {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .res-card-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .res-map-thumb {
+      width: 120px;
+      height: 100px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--bg3);
+      overflow: hidden;
+    }
+
+    .res-map-thumb iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 10px;
+      pointer-events: none;
+    }
+
+    .btn-pay-now {
+      background: var(--primary);
+      color: var(--brown);
+      border: none;
+      padding: 7px 18px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .res-group-rest-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .rg-label-confirmed { color: #22c55e; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+
+    .rg-section-hdr {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-mid);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .count-badge {
+      background: var(--cream2);
+      color: var(--brown);
+      border-radius: 20px;
+      padding: 1px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .no-res { color: var(--text-dim); font-size: 13px; padding: 20px 0; }
+  </style>
+</head>
+<body>
+
+  <!-- FULL SCREEN DASHBOARD — directly rendered, no overlay/animation -->
+  <div id="dash-overlay" class="dash-overlay">
+    <div class="dash-panel">
+
+      <!-- ===== SIDEBAR ===== -->
+      <div class="dash-sidebar">
+        <div class="dash-brand">
+          <div class="dash-brand-icon">H</div>
+          <span>Halden's</span>
+        </div>
+        <div class="dash-nav">
+          <div class="dash-nav-item active">
+            <span class="dn-icon">📋</span> My Reservations
+          </div>
+          <div class="dash-nav-item">
+            <span class="dn-icon">📅</span> Event Calendar
+          </div>
+          <div class="dash-nav-item">
+            <span class="dn-icon">🤝</span> Meetings
+          </div>
+          <div class="dash-nav-item">
+            <span class="dn-icon">🚩</span> Action Flags
+          </div>
+          <div class="dash-nav-item">
+            <span class="dn-icon">💬</span> Chat Support
+          </div>
+        </div>
+        <div class="dash-user">
+          <div class="dash-user-ava">👤</div>
+          <div class="dash-user-info">
+            <div class="dash-user-name">robert</div>
+            <div class="dash-user-email">cicibestop@gmail.com</div>
+          </div>
+        </div>
+        <button class="btn-dash-logout">✕ Close &amp; Sign Out</button>
+      </div>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <div class="dash-main">
+        <div class="dash-top-bar">
+          <div class="dash-top-left">
+            <button class="dash-notif-btn">
+              <span class="dn-bell">🔔</span>
+              <span class="dn-badge">2</span>
+            </button>
+          </div>
+          <button class="dash-close">✕ Close Dashboard</button>
+        </div>
+
+        <!-- ===== RESERVATIONS TAB (active) ===== -->
+        <div id="dash-tab-reservations" class="dash-tab active">
+          <div class="dash-hdr">
+            <h1>My Reservations</h1>
+            <p>Track your event status and history</p>
+          </div>
+
+          <!-- APPROVED SECTION -->
+          <div class="res-group res-group-approved">
+            <div class="res-group-hdr" style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-mid);margin-bottom:12px;">
+              <span style="font-size:16px;">✅</span> Approved / Confirmed
+              <span class="rg-count" style="background:var(--cream2);color:var(--brown);border-radius:20px;padding:1px 10px;font-size:12px;font-weight:700;">1</span>
+            </div>
+
+            <!-- Approved Card -->
+            <div class="res-card approved" style="background:var(--warm-white);">
+              <div class="res-card-info">
+                <div class="rg-label-confirmed">CONFIRMED</div>
+                <div class="res-card-title">Birthday Party</div>
+                <div class="res-card-meta">
+                  <span>📅 Apr 14, 2026</span>
+                  <span>👥 60 pax</span>
+                  <span>💰 ₱17,200</span>
+                </div>
+                <div class="res-card-venue">📍 STI College, EDSA-Munoz Pedestrian Footbridge, Ramon Magsaysay, Bago Bantay, 1st District, Quezon City, Eastern Manila District, Metro Manila, 1105, Philippines</div>
+                <div class="res-card-actions">
+                  <span style="font-size:12px;color:var(--text-dim);font-style:italic;">confirmed</span>
+                  <button class="btn-pay-now">💳 Pay Now</button>
+                </div>
+              </div>
+              <div class="res-map-thumb">
+                <iframe
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=121.00,14.64,121.02,14.66&layer=mapnik&marker=14.651,121.011"
+                  scrolling="no">
+                </iframe>
+              </div>
+            </div>
+          </div>
+
+          <!-- PROCESSING + REJECTED GRID -->
+          <div class="res-group-rest-grid" style="margin-top:20px;">
+
+            <!-- PROCESSING -->
+            <div>
+              <div class="rg-section-hdr">
+                <span>🔄</span> Processing
+                <span class="count-badge">2</span>
+              </div>
+
+              <div class="res-card processing">
+                <div class="res-card-info">
+                  <div class="res-card-title">18th Birthday (Debut)</div>
+                  <div class="res-card-status pending">pending</div>
+                  <div class="res-card-meta">
+                    <span>📅 Jul 5, 2026</span>
+                    <span>👥 35 pax</span>
+                    <span>💰 ₱274,650</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="res-card processing">
+                <div class="res-card-info">
+                  <div class="res-card-title">Birthday Party</div>
+                  <div class="res-card-status pending">pending</div>
+                  <div class="res-card-meta">
+                    <span>📅 Apr 20, 2026</span>
+                    <span>👥 50 pax</span>
+                    <span>💰 ₱16,350</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- REJECTED -->
+            <div>
+              <div class="rg-section-hdr">
+                <span>❌</span> Rejected
+                <span class="count-badge">0</span>
+              </div>
+              <div class="no-res">No rejected reservations.</div>
+            </div>
+
+          </div>
+        </div><!-- /dash-tab-reservations -->
+
+      </div><!-- /dash-main -->
+    </div><!-- /dash-panel -->
+  </div><!-- /dash-overlay -->
+
+</body>
+</html>
