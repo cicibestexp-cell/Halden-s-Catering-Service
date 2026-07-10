@@ -1,0 +1,6 @@
+{
+  "name": "smartserve-sms-proxy",
+  "version": "1.0.0",
+  "description": "SMS proxy for SmartServe via Semaphore",
+  "private": true
+}
