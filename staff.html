@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff Dashboard — Halden's</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="admin.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FOUC prevention: apply saved theme before first paint -->
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('halden_theme') || 'dark');</script>
+  <script src="theme.js"></script>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="nav-brand">
+    <div class="nav-brand-icon">H</div>
+    <div>
+      <span class="nav-brand-name">Halden's</span>
+      <span class="nav-brand-badge" id="staff-brand-badge">Staff</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-admin-info">Logged in as <strong id="admin-name">Staff Member</strong></div>
+    <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span class="theme-icon">️</span><span class="theme-label">Light</span>
+    </button>
+    <button class="btn-logout" onclick="adminLogout()">Sign Out</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <div class="sidebar-item active" onclick="showSection('dashboard',this)"><span class="s-icon"></span> Dashboard</div>
+      <div class="sidebar-item" onclick="showSection('execution-day',this)"><span class="s-icon"></span> Execution Day</div>
+      <div class="sidebar-item" onclick="showSection('execution-performance',this);renderExecutionPerformance();"><span class="s-icon"></span> Execution Performance</div>
+
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="section-dashboard">
+      <div class="page-hdr">
+        <div class="page-hdr-left"><h1>Staff Dashboard</h1><p>Welcome back! Track your assignments and execution performance.</p></div>
+        <div id="staff-last-synced" style="font-size:11px; color:var(--text-dim); align-self:center;"></div>
+      </div>
+
+      <!-- Shift Reminder Banner -->
+      <div id="staff-shift-banner" style="display:none; align-items:center; gap:16px; background:rgba(212,175,55,0.07); border:1px solid rgba(212,175,55,0.25); border-radius:12px; padding:16px 22px; margin-bottom:24px;"></div>
+
+      <!-- Analytics -->
+      <div class="stats-row" style="margin-bottom:24px;">
+         <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(196,154,60,0.1); color:var(--gold);"></div>
+            <div class="stat-label">Assigned Events</div>
+            <div class="stat-value" id="staff-stat-events">0</div>
+         </div>
+         <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(59,130,246,0.1); color:#3b82f6;"></div>
+            <div class="stat-label">Days on Duty</div>
+            <div class="stat-value" id="staff-stat-days">0</div>
+         </div>
+         <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(34,197,94,0.1); color:var(--green);"></div>
+            <div class="stat-label">Completed Tasks</div>
+            <div class="stat-value" id="staff-stat-tasks">0</div>
+         </div>
+         <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(168,85,247,0.1); color:#a855f7;"></div>
+            <div class="stat-label">Performance Score</div>
+            <div class="stat-value">98%</div>
+         </div>
+      </div>
+
+      <!-- Assigned Reservations -->
+      <div class="panel" style="margin-bottom:24px;">
+        <div class="panel-hdr"><div><div class="panel-title">My Assigned Reservations</div><div class="panel-sub">Events where you are part of the execution team</div></div></div>
+        <div class="panel-body" id="staff-assigned-list">
+          <div style="text-align:center; padding:60px; color:var(--text-dim);"><div style="font-size:40px; margin-bottom:15px;"></div><div>No active assignments found.</div></div>
+        </div>
+      </div>
+
+      <!-- Bottom Row: Announcements + Activity Feed -->
+      <div class="two-col" style="gap:20px; align-items:start;">
+        <div class="panel" style="margin:0;">
+          <div class="panel-hdr"><div><div class="panel-title"> Announcements</div><div class="panel-sub">Notices from management</div></div></div>
+          <div id="staff-announcements" style="min-height:80px;">
+            <div style="padding:20px; color:var(--text-dim); font-size:13px; text-align:center;">Loading announcements...</div>
+          </div>
+        </div>
+        <div class="panel" style="margin:0;">
+          <div class="panel-hdr"><div><div class="panel-title"> Recent Activity</div><div class="panel-sub">Your task completion log</div></div></div>
+          <div id="staff-activity-feed" style="min-height:80px;">
+            <div style="padding:20px; color:var(--text-dim); font-size:13px; text-align:center;">No recent activity yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- EXECUTION DAY SECTION -->
+    <div id="section-execution-day" class="section">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Execution Day & Performance</h1>
+          <p>Track your assignments and logistical responsibilities in real-time.</p>
+        </div>
+      </div>
+
+      <div class="exec-layout" style="display:grid; grid-template-columns: 320px 1fr; gap:24px; min-height:600px;">
+        <div class="exec-sidebar" style="background:var(--bg2); border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
+          <div style="padding:16px 20px; background:var(--bg3); border-bottom:1px solid var(--border); font-size:12px; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:1px;">
+            Your Assignments
+          </div>
+          <div id="staff-execution-list" style="flex:1; overflow-y:auto;">
+             <!-- populated via staff.js -->
+          </div>
+        </div>
+
+        <div class="exec-main" style="background:var(--card); border:1px solid var(--border); border-radius:16px; display:flex; flex-direction:column; overflow:hidden;">
+          <div id="staff-execution-detail-empty" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px; text-align:center; color:var(--text-dim);">
+            <div style="font-size:48px; margin-bottom:20px; opacity:0.3;"></div>
+            <h3 style="font-family:'Arial'; font-size:20px; color:var(--cream);">No Event Selected</h3>
+            <p style="font-size:14px; max-width:300px;">Select an assigned reservation from the left to view and begin your execution tasks.</p>
+          </div>
+
+          <div id="staff-execution-detail-view" style="display:none; flex:1; flex-direction:column;">
+             <!-- populated via staff.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXECUTION LIVE VIEW (PORTAL) -->
+    <div id="section-execution-live" class="section" style="padding:0; height:calc(100vh - 64px); background:var(--bg);">
+        <!-- Full-screen live view container -->
+        <div id="staff-execution-live-container" style="height:100%; display:flex; flex-direction:column;">
+            <!-- Content built dynamically in staff.js -->
+        </div>
+    </div>
+  </div>
+
+    <!-- EXECUTION PERFORMANCE MODULE -->
+    <div id="section-execution-performance" class="section">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1>Execution Performance</h1>
+          <p>Your personal execution history, task records, working hours, and estimated salary — saved automatically after each completed event.</p>
+        </div>
+      </div>
+      <div id="exec-performance-container">
+        <div style="text-align:center;padding:60px;color:var(--text-dim);">
+          <div style="font-size:15px;font-weight:700;">No performance records yet</div>
+          <div style="font-size:12px;margin-top:6px;">Records are saved automatically after completing the Restorage phase checklist.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL  = 'https://nukbdmyqizrnkmbusdtm.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51a2JkbXlxaXpybmttYnVzZHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMjM3NTQsImV4cCI6MjA5ODg5OTc1NH0.WlKtqa8hBxLedDHS7-q10yoPne6VTjt5F4E86vTA5eY';
+    window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  </script>
+  <!-- FIRESTORE EMULATION ADAPTER -->
+  <script src="supabase_adapter.js?v=3"></script>
+
+<script src="staff.js"></script>
+<!-- STRATEGY VIEW MODAL -->
+<div id="staff-strategy-overlay" class="modal-overlay"></div>
+<div id="staff-strategy-modal" class="modal fullscreen-modal">
+  <div class="modal-hdr">
+    <div class="modal-title">Execution Day Strategy Preview</div>
+    <button class="modal-close" onclick="closeStaffStrategy()">✕</button>
+  </div>
+  <div class="modal-body" id="staff-strategy-content" style="padding:0;">
+     <!-- dynamic content -->
+  </div>
+</div>
+</body>
+</html>
+
+
