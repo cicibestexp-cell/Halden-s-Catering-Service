@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equipment Scan - SmartServe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0e0b07;--surface:#1a1510;--panel:#211c15;--border:rgba(255,255,255,0.08);--gold:#c49a3c;--cream:#f0e6cc;--text:#c8bfac;--text-dim:#7a6e5e;--green:#2d8a4e;--red:#c0392b;--orange:#d4750a;--radius:14px}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    #auth-loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px}
+    .spinner{width:40px;height:40px;border:3px solid rgba(196,154,60,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .scan-wrap{width:100%;max-width:480px;display:none}
+    .scan-header{text-align:center;margin-bottom:24px}
+    .brand{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+    .subtitle{font-size:11px;color:var(--text-dim);margin-top:2px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .eq-info-header{padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+    .eq-badge{display:inline-block;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:0.5px;margin-bottom:8px}
+    .eq-name{font-size:20px;font-weight:800;color:var(--cream);line-height:1.2}
+    .eq-meta{margin-top:6px;font-size:12px;color:var(--text-dim);display:flex;gap:10px;flex-wrap:wrap}
+    .qty-pills{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 20px;border-bottom:1px solid var(--border)}
+    .qty-pill{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center}
+    .qty-pill .val{font-size:20px;font-weight:800;color:var(--cream)}
+    .qty-pill .lbl{font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px}
+    .qty-pill.good .val{color:var(--green)}.qty-pill.maint .val{color:var(--orange)}.qty-pill.miss .val{color:var(--red)}.qty-pill.ret .val{color:var(--text-dim)}
+    /* Default view */
+    .actions-row{padding:16px 20px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--border)}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 18px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s}
+    .btn:active{transform:scale(0.98)}.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+    .btn-primary{background:var(--gold);color:#0e0b07}.btn-primary:hover:not(:disabled){background:#d4a940}
+    .btn-outline{background:transparent;border:1px solid var(--border);color:var(--cream)}.btn-outline:hover{background:rgba(255,255,255,0.04)}
+    .btn-danger{background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.35);color:#e05c4e}
+    .btn-ghost{background:rgba(255,255,255,0.04);color:var(--text)}
+    .btn-rc{background:rgba(196,154,60,0.08);border:1px solid rgba(196,154,60,0.3);color:var(--gold)}
+    .btn-rc:hover:not(:disabled){background:rgba(196,154,60,0.18)}
+    .btn-rc:disabled{opacity:0.35;cursor:not-allowed;color:var(--text-dim);border-color:var(--border);background:transparent}
+    /* RC mode */
+    .rc-mode-panel{display:none;flex-direction:column}
+    .rc-mode-panel.active{display:flex}
+    .rc-mode-header{padding:12px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);background:rgba(196,154,60,0.05)}
+    .rc-mode-badge{font-size:10px;font-weight:700;color:var(--gold);background:rgba(196,154,60,0.12);border:1px solid rgba(196,154,60,0.25);padding:3px 10px;border-radius:20px;letter-spacing:0.5px}
+    .btn-back{background:none;border:none;color:var(--text-dim);cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;transition:all 0.15s;margin-left:auto}
+    .btn-back:hover{color:var(--cream);background:rgba(255,255,255,0.05)}
+    .rc-actions-row{padding:16px 20px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--border)}
+    .confirm-row{padding:14px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border)}
+    .confirm-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+    .confirm-row label{font-size:13px;font-weight:600;color:var(--cream);cursor:pointer}
+    .confirm-row .note{font-size:11px;color:var(--text-dim);margin-top:2px}
+    .footer-row{padding:14px 20px;display:flex;gap:10px}
+    .footer-row .btn{flex:1;font-size:13px}
+    /* Sub-panels */
+    .sub-panel{display:none;background:var(--surface);border-top:1px solid var(--border)}
+    .sub-panel.open{display:block}
+    .sub-panel-header{padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between}
+    .sub-panel-title{font-size:14px;font-weight:700;color:var(--cream)}
+    .btn-back-sub{font-size:12px;color:var(--text-dim);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:4px}
+    .btn-back-sub:hover{color:var(--cream)}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 20px 14px}
+    .detail-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+    .di-lbl{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:3px}
+    .di-val{font-size:13px;font-weight:700;color:var(--cream);word-break:break-word}
+    .di-val.green{color:#4caf7d}.di-val.red{color:#e05c4e}.di-val.dim{color:var(--text-dim)}
+    .section-head{padding:10px 20px 6px;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px}
+    .alloc-list{padding:0 20px 14px;display:flex;flex-direction:column;gap:6px}
+    .alloc-row{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+    .alloc-batch{font-size:10px;font-weight:700;color:var(--gold);margin-bottom:2px;letter-spacing:0.5px;text-transform:uppercase}
+    .alloc-res{font-size:13px;font-weight:600;color:var(--cream)}
+    .alloc-meta{font-size:11px;color:var(--text-dim);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap}
+    .alloc-empty{font-size:12px;color:var(--text-dim);font-style:italic}
+    .incident-list{padding:0 20px}
+    .incident-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;position:relative}
+    .incident-item label{font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px}
+    .incident-item select,.incident-item input[type=number]{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-family:'Inter',sans-serif;font-size:13px;padding:9px 12px;outline:none;margin-bottom:8px}
+    .incident-item select option{background:#1a1510}
+    .incident-row-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .btn-remove-incident{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px}
+    .btn-remove-incident:hover{color:var(--red)}
+    .incident-actions{padding:10px 20px 16px;display:flex;gap:8px}
+    .pending-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--orange)}
+    #discard-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:flex-end;justify-content:center;padding:20px}
+    #discard-modal.show{display:flex}
+    #discard-modal-inner{background:#1a1510;border:1px solid rgba(192,57,43,0.4);border-radius:14px;padding:22px;width:100%;max-width:440px}
+    #scan-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--panel);border:1px solid var(--border);color:var(--cream);font-size:13px;font-weight:500;padding:12px 22px;border-radius:30px;transition:transform 0.3s ease;z-index:999;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+    #scan-toast.show{transform:translateX(-50%) translateY(0)}
+    #scan-toast.success{border-color:var(--green);color:#4cb874}
+    #scan-toast.error{border-color:var(--red);color:#e05c4e}
+    .error-card{text-align:center;padding:40px 24px}
+    .error-card .icon{font-size:36px;margin-bottom:12px;color:var(--text-dim)}
+    .error-card .title{font-size:16px;font-weight:700;color:var(--cream);margin-bottom:6px}
+    .error-card .msg{font-size:13px;color:var(--text-dim)}
+    .shimmer-line{height:11px;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 100%);background-size:300px 100%;animation:shimmer 1.4s infinite;margin-bottom:7px}
+    @keyframes shimmer{0%{background-position:-300px 0}100%{background-position:300px 0}}
+  </style>
+</head>
+<body>
+
+<div id="auth-loading">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--text-dim);">Verifying session...</div>
+</div>
+
+<div class="scan-wrap" id="scan-wrap">
+  <div class="scan-header">
+    <div class="brand">SmartServe</div>
+    <div class="subtitle" id="scan-subtitle">Equipment Scan</div>
+  </div>
+  <div class="card" id="main-card">
+
+    <!-- Equipment Info -->
+    <div class="eq-info-header">
+      <div class="eq-badge" id="eq-asset-id">Loading...</div>
+      <div class="eq-name" id="eq-name">&#8212;</div>
+      <div class="eq-meta">
+        <span><i class="fas fa-tag"></i> <span id="eq-category">&#8212;</span></span>
+        <span><i class="fas fa-layer-group"></i> <span id="eq-type">&#8212;</span></span>
+        <span id="eq-alloc-meta" style="display:none;"><i class="fas fa-link"></i> <span id="eq-alloc-label">&#8212;</span></span>
+      </div>
+    </div>
+
+    <!-- Qty Pills -->
+    <div class="qty-pills">
+      <div class="qty-pill good"><div class="val" id="pill-good">&#8212;</div><div class="lbl">Good</div></div>
+      <div class="qty-pill maint"><div class="val" id="pill-maint">&#8212;</div><div class="lbl">Maintenance</div></div>
+      <div class="qty-pill miss"><div class="val" id="pill-miss">&#8212;</div><div class="lbl">Missing</div></div>
+      <div class="qty-pill ret"><div class="val" id="pill-ret">&#8212;</div><div class="lbl">Retired</div></div>
+    </div>
+
+    <!-- DEFAULT VIEW -->
+    <div id="default-view">
+      <div class="actions-row">
+        <button class="btn btn-outline" id="btn-view-details" onclick="openDetailPanel()">
+          <i class="fas fa-info-circle"></i> View Details
+        </button>
+        <button class="btn btn-rc" id="btn-routine-check" onclick="enterRoutineCheckMode()" disabled
+          title="Start a routine check session in the admin panel first">
+          <i class="fas fa-clipboard-check"></i> Routine Checking
+          <span id="rc-active-pill" style="display:none;margin-left:2px;font-size:9px;font-weight:800;color:#0e0b07;background:var(--gold);padding:2px 7px;border-radius:20px;">ACTIVE</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ROUTINE CHECK MODE -->
+    <div class="rc-mode-panel" id="rc-mode-panel">
+      <div class="rc-mode-header">
+        <span class="rc-mode-badge"><i class="fas fa-clipboard-check"></i>&nbsp; Routine Check Mode</span>
+        <button class="btn-back" onclick="exitRoutineCheckMode()"><i class="fas fa-arrow-left"></i> Back</button>
+      </div>
+      <div class="rc-actions-row">
+        <button class="btn btn-danger" id="btn-report-incident" onclick="openIncidentPanel()">
+          <i class="fas fa-exclamation-triangle"></i> Report Incident
+          <span id="incident-count-badge" class="pending-badge" style="display:none;">0 pending</span>
+        </button>
+      </div>
+      <div class="confirm-row" onclick="toggleConfirm()">
+        <input type="checkbox" id="chk-confirm" onchange="onConfirmChange()" onclick="event.stopPropagation()" />
+        <div>
+          <label for="chk-confirm">Confirm everything is okay</label>
+          <div class="note">Checking this locks incident reporting and marks all as Good</div>
+        </div>
+      </div>
+      <div class="footer-row">
+        <button class="btn btn-ghost" id="btn-discard" onclick="showDiscardModal()"><i class="fas fa-trash"></i> Remove</button>
+        <button class="btn btn-primary" id="btn-save" onclick="saveCheck()"><i class="fas fa-check"></i> Save</button>
+      </div>
+    </div>
+
+    <!-- DETAILS SUB-PANEL -->
+    <div class="sub-panel" id="panel-details">
+      <div class="sub-panel-header">
+        <span class="sub-panel-title">Equipment Details</span>
+        <button class="btn-back-sub" onclick="closeSubPanel('panel-details')"><i class="fas fa-chevron-up"></i> Close</button>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="di-lbl">Total Qty</div><div class="di-val" id="det-total">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Available</div><div class="di-val" id="det-avail">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Condition</div><div class="di-val" id="det-condition">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Last Inspected</div><div class="di-val" id="det-last-insp">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Good</div><div class="di-val green" id="det-good">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Maintenance</div><div class="di-val" style="color:var(--orange)" id="det-maint">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Missing</div><div class="di-val red" id="det-miss">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Retired</div><div class="di-val dim" id="det-ret">&#8212;</div></div>
+      </div>
+      <div class="section-head"><i class="fas fa-receipt"></i> Purchase Info</div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="di-lbl">Date Purchased</div><div class="di-val" id="det-purchase-date">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Source / Supplier</div><div class="di-val" id="det-supplier">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Unit Cost</div><div class="di-val" id="det-unit-cost">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Total Value</div><div class="di-val" id="det-total-cost">&#8212;</div></div>
+      </div>
+      <div class="section-head" id="cur-alloc-head" style="display:none;"><i class="fas fa-boxes"></i> Current Allocations</div>
+      <div class="alloc-list" id="current-alloc-list"></div>
+      <div class="section-head"><i class="fas fa-history"></i> Allocation History</div>
+      <div class="alloc-list" id="alloc-history-list">
+        <div class="shimmer-line" style="width:65%;"></div>
+        <div class="shimmer-line" style="width:45%;"></div>
+      </div>
+    </div>
+
+    <!-- INCIDENT SUB-PANEL -->
+    <div class="sub-panel" id="panel-incident">
+      <div class="sub-panel-header">
+        <span class="sub-panel-title">Report Incident</span>
+        <button class="btn-back-sub" onclick="closeSubPanel('panel-incident')"><i class="fas fa-chevron-up"></i> Done</button>
+      </div>
+      <div class="incident-list" id="incident-list"></div>
+      <div class="incident-actions">
+        <button class="btn btn-ghost" style="flex:1;font-size:13px;" onclick="addIncidentRow()"><i class="fas fa-plus"></i> Add Another</button>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /scan-wrap -->
+
+<!-- Discard Modal -->
+<div id="discard-modal" onclick="if(event.target===this)hideDiscardModal()">
+  <div id="discard-modal-inner">
+    <div style="font-weight:600;color:var(--cream);margin-bottom:8px;text-align:center;">Remove changes?</div>
+    <div style="font-size:12px;color:var(--text-dim);text-align:center;margin-bottom:18px;">This will clear any logged checks for this item.</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="hideDiscardModal()">No</button>
+      <button class="btn btn-danger" style="flex:1;background:#c0392b;border-color:#c0392b;color:#fff;" onclick="confirmDiscard()">Yes, Remove</button>
+    </div>
+  </div>
+</div>
+
+<div id="scan-toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL  = 'https://nukbdmyqizrnkmbusdtm.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51a2JkbXlxaXpybmttYnVzZHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMjM3NTQsImV4cCI6MjA5ODg5OTc1NH0.WlKtqa8hBxLedDHS7-q10yoPne6VTjt5F4E86vTA5eY';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let CURRENT_EQ=null,CURRENT_USER=null,INCIDENTS=[],CONFIRMED_OKAY=false,_incIdx=0;
+let ACTIVE_SESSION=null,SESSION_ROW_ID=null,_inRcMode=false;
+const RC_SESSION_KEY='rc_active_session';
+const RC_ITEMS_KEY='rc_checked_items';
+const RC_EXPIRY_MS=48*60*60*1000;
+
+function toast(msg,type){var el=document.getElementById('scan-toast');el.textContent=msg;el.className='show '+(type||'');clearTimeout(el._t);el._t=setTimeout(function(){el.className='';},3000);}
+function getUrlParam(n){return new URLSearchParams(window.location.search).get(n);}
+function set(id,val){var el=document.getElementById(id);if(el)el.textContent=(val!=null?val:'\u2014');}
+function getRcSession(){try{return JSON.parse(localStorage.getItem(RC_SESSION_KEY)||'null');}catch(e){return null;}}
+function getRcCheckedItems(){try{return JSON.parse(localStorage.getItem(RC_ITEMS_KEY)||'{}');}catch(e){return{};}}
+function saveRcCheckedItems(c){localStorage.setItem(RC_ITEMS_KEY,JSON.stringify(c));}
+function fmtCurrency(n){if(!n||isNaN(n))return'\u2014';return'\u20b1'+parseFloat(n).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtDate(d){if(!d)return'\u2014';try{return new Date(d+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}catch(e){return d;}}
+
+async function init(){
+  var sess=(await sb.auth.getSession()).data.session;
+  CURRENT_USER=sess?sess.user:null;
+  if(!CURRENT_USER&&window.location.protocol==='file:')CURRENT_USER={email:'local-admin@demo.com',id:'local-file-demo'};
+  document.getElementById('auth-loading').style.display='none';
+  document.getElementById('scan-wrap').style.display='block';
+  var eqParam=getUrlParam('eq');
+  if(!eqParam){renderError('No equipment ID in QR code.','Scan a valid equipment QR code.');return;}
+  await checkActiveSession();
+  var items=getRcCheckedItems();
+  var eqKey=eqParam.toUpperCase();
+  var existingEntry=Object.entries(items).find(function(e){return e[0].toUpperCase()===eqKey;});
+  if(existingEntry){
+    var state=existingEntry[1];
+    SESSION_ROW_ID=state.routineCheckRowId||null;
+    CONFIRMED_OKAY=state.status==='good'&&(!state.incidents||!state.incidents.length);
+    if(state.incidents&&state.incidents.length)state.incidents.forEach(function(inc){INCIDENTS.push({type:inc.type,qty:inc.qty,domIdx:_incIdx++});});
+  }
+  await loadEquipment(eqParam);
+  if(CONFIRMED_OKAY){var chk=document.getElementById('chk-confirm');if(chk)chk.checked=true;document.getElementById('btn-report-incident').disabled=true;}
+  if(INCIDENTS.length){INCIDENTS.forEach(function(inc){_appendIncidentDOM(inc);});updateIncidentBadge();}
+}
+
+async function checkActiveSession(){
+  var rcBtn=document.getElementById('btn-routine-check');
+  var pill=document.getElementById('rc-active-pill');
+  try{
+    var res=await sb.from('routine_check').select('id,equipment_name,notes').eq('asset_id','SESSION-ACTIVE').eq('notes','SESSION-ACTIVE').limit(1).maybeSingle();
+    if(res.data){
+      // Session info is stored as JSON in equipment_name field
+      try{ACTIVE_SESSION=JSON.parse(res.data.equipment_name||'{}');}catch(e){ACTIVE_SESSION={id:'unknown'};}
+      if(rcBtn){rcBtn.disabled=false;rcBtn.title='Active routine session detected';}
+      if(pill)pill.style.display='inline-block';
+    } else {
+
+      var localSes=getRcSession();
+      if(localSes&&(Date.now()-new Date(localSes.startedAt).getTime())<RC_EXPIRY_MS){
+        ACTIVE_SESSION=localSes;
+        if(rcBtn){rcBtn.disabled=false;rcBtn.title='Active session (local)';}
+        if(pill)pill.style.display='inline-block';
+      } else {
+        if(rcBtn){rcBtn.disabled=true;rcBtn.title='No active routine session - start one in the admin panel';}
+      }
+    }
+  }catch(e){
+    console.warn('[scan] Session check error:',e);
+    var ls=getRcSession();
+    if(ls&&(Date.now()-new Date(ls.startedAt).getTime())<RC_EXPIRY_MS){ACTIVE_SESSION=ls;if(rcBtn)rcBtn.disabled=false;}
+  }
+}
+
+function enterRoutineCheckMode(){
+  if(!ACTIVE_SESSION){toast('No active routine session.','error');return;}
+  _inRcMode=true;
+  document.getElementById('default-view').style.display='none';
+  document.getElementById('rc-mode-panel').classList.add('active');
+  document.getElementById('scan-subtitle').textContent='Equipment Routine Check';
+}
+function exitRoutineCheckMode(){
+  _inRcMode=false;
+  document.getElementById('rc-mode-panel').classList.remove('active');
+  document.getElementById('default-view').style.display='block';
+  document.getElementById('scan-subtitle').textContent='Equipment Scan';
+  closeSubPanel('panel-incident');
+}
+
+async function loadEquipment(eqParam){
+  var r1=await sb.from('equipment_inventory').select('*').ilike('asset_id',eqParam).maybeSingle();
+  var data=r1.data,error=r1.error;
+  if(!data||error){var r2=await sb.from('equipment_inventory').select('*').eq('id',eqParam).maybeSingle();data=r2.data;error=r2.error;}
+  if(error||!data){renderError('Equipment not found','ID: '+eqParam);return;}
+  CURRENT_EQ=data;renderEquipmentInfo(data);loadAllocationHistory(data);
+}
+
+function renderEquipmentInfo(eq){
+  set('eq-asset-id',eq.asset_id||eq.id);set('eq-name',eq.name);
+  set('eq-category',eq.category||'\u2014');set('eq-type',eq.type||eq.allocation_type||'\u2014');
+  if(eq.allocated_to){document.getElementById('eq-alloc-meta').style.display='flex';set('eq-alloc-label',eq.allocated_to);}
+  var good=eq.good_qty!=null?eq.good_qty:(eq.available_qty!=null?eq.available_qty:0);
+  var maint=eq.maintenance_qty||0,miss=eq.missing_qty||0,ret=eq.retired_qty||0;
+  set('pill-good',good);set('pill-maint',maint);set('pill-miss',miss);set('pill-ret',ret);
+  set('det-total',eq.total_qty!=null?eq.total_qty:'\u2014');
+  set('det-avail',eq.available_qty!=null?eq.available_qty:'\u2014');
+  set('det-condition',eq.condition||'\u2014');
+  set('det-last-insp',eq.last_inspected?fmtDate(eq.last_inspected):'Never');
+  set('det-good',good);set('det-maint',maint);set('det-miss',miss);set('det-ret',ret);
+  set('det-purchase-date',eq.purchase_date?fmtDate(eq.purchase_date):'\u2014');
+  set('det-supplier',eq.supplier||eq.source_location||'\u2014');
+  var unitCost=parseFloat(eq.price)||parseFloat(eq.value)||0;
+  var totalQty=parseInt(eq.total_qty)||0;
+  set('det-unit-cost',unitCost?fmtCurrency(unitCost):'\u2014');
+  set('det-total-cost',(unitCost&&totalQty)?fmtCurrency(unitCost*totalQty):'\u2014');
+  var headEl=document.getElementById('cur-alloc-head');
+  var listEl=document.getElementById('current-alloc-list');
+  if(eq.allocation_batch&&eq.allocated_to){
+    if(headEl)headEl.style.display='flex';
+    listEl.innerHTML='<div class="alloc-row">'
+      +'<div class="alloc-batch">'+eq.allocation_batch+'</div>'
+      +'<div class="alloc-res">'+eq.allocated_to+'</div>'
+      +'<div class="alloc-meta">'
+      +(eq.allocation_date?'<span><i class="fas fa-calendar-alt"></i> '+fmtDate(eq.allocation_date)+'</span>':'')
+      +(eq.allocated_qty?'<span><i class="fas fa-box"></i> Qty: '+eq.allocated_qty+'</span>':'')
+      +'</div></div>';
+  } else {
+    if(headEl)headEl.style.display='none';
+    listEl.innerHTML='';
+  }
+}
+
+async function loadAllocationHistory(eq){
+  var histEl=document.getElementById('alloc-history-list');
+  if(!histEl)return;
+  try{
+    var orParts=[];
+    if(eq.asset_id)orParts.push('asset_id.eq.'+eq.asset_id);
+    if(eq.id)orParts.push('equipment_id.eq.'+eq.id);
+    if(!orParts.length){histEl.innerHTML='<p class="alloc-empty">No allocation history recorded yet.</p>';return;}
+    var res=await sb.from('allocation_history').select('*').or(orParts.join(',')).eq('is_rental',false).order('recorded_at',{ascending:false}).limit(20);
+    if(res.error||!res.data||!res.data.length){histEl.innerHTML='<p class="alloc-empty">No allocation history recorded yet.</p>';return;}
+    // Additional client-side guard: exclude any rental rows that may have slipped through
+    var rows=res.data.filter(function(r){return !r.is_rental;});
+    if(!rows.length){histEl.innerHTML='<p class="alloc-empty">No allocation history recorded yet.</p>';return;}
+    histEl.innerHTML=rows.map(function(row){
+      return '<div class="alloc-row">'
+        +'<div class="alloc-batch">'+(row.allocation_batch||'\u2014')+'</div>'
+        +'<div class="alloc-res">'+(row.reservation_name||'\u2014')+'</div>'
+        +'<div class="alloc-meta">'
+        +(row.allocation_date?'<span><i class="fas fa-calendar-alt"></i> '+fmtDate(row.allocation_date)+'</span>':'')
+        +(row.allocated_qty!=null?'<span><i class="fas fa-box"></i> Qty: '+row.allocated_qty+'</span>':'')
+        +'</div></div>';
+    }).join('');
+  }catch(e){histEl.innerHTML='<p class="alloc-empty">Could not load history.</p>';}
+}
+
+function renderError(title,msg){document.getElementById('main-card').innerHTML='<div class="error-card"><div class="icon"><i class="fas fa-exclamation-circle"></i></div><div class="title">'+title+'</div><div class="msg">'+msg+'</div></div>';}
+
+function openDetailPanel(){closeSubPanel('panel-incident');document.getElementById('panel-details').classList.toggle('open');}
+function openIncidentPanel(){if(CONFIRMED_OKAY){toast('Uncheck confirm okay first.','error');return;}closeSubPanel('panel-details');document.getElementById('panel-incident').classList.add('open');if(!INCIDENTS.length)addIncidentRow();}
+function closeSubPanel(id){document.getElementById(id).classList.remove('open');}
+
+function _usedIncidentTypes(){
+  return INCIDENTS.map(function(i){return i.type==='retired'?'trash':i.type;});
+}
+function _refreshIncidentSelectOptions(){
+  var used=_usedIncidentTypes();
+  INCIDENTS.forEach(function(inc){
+    var sel=document.getElementById('inc-type-'+inc.domIdx);if(!sel)return;
+    var myType=inc.type==='retired'?'trash':inc.type;
+    Array.from(sel.options).forEach(function(o){
+      o.disabled=o.value!==myType&&used.includes(o.value);
+    });
+  });
+  var addBtn=document.getElementById('btn-add-incident');
+  if(addBtn)addBtn.style.display=used.length>=3?'none':'';
+}
+function _appendIncidentDOM(inc){
+  var maxQ=CURRENT_EQ?(CURRENT_EQ.good_qty||CURRENT_EQ.available_qty||99):99;
+  var list=document.getElementById('incident-list');
+  var div=document.createElement('div');div.className='incident-item';div.id='incident-row-'+inc.domIdx;
+  var myType=inc.type==='retired'?'trash':inc.type;
+  var used=_usedIncidentTypes().filter(function(t){return t!==myType;});
+  div.innerHTML='<button class="btn-remove-incident" onclick="removeIncident('+inc.domIdx+')"><i class="fas fa-times"></i></button>'
+    +'<div class="incident-row-cols">'
+    +'<div><label>Incident Type</label><select id="inc-type-'+inc.domIdx+'" onchange="updateIncident('+inc.domIdx+')">'
+    +'<option value="broken"'+(myType==='broken'?' selected':'')+(used.includes('broken')?' disabled':'')+'>Broken / Damaged</option>'
+    +'<option value="missing"'+(myType==='missing'?' selected':'')+(used.includes('missing')?' disabled':'')+'>Missing</option>'
+    +'<option value="trash"'+(myType==='trash'?' selected':'')+(used.includes('trash')?' disabled':'')+'>Retired / Disposed</option>'
+    +'</select></div>'
+    +'<div><label>Quantity Affected</label><input type="number" id="inc-qty-'+inc.domIdx+'" value="'+(inc.qty||1)+'" min="1" max="'+maxQ+'" onchange="updateIncident('+inc.domIdx+')" /></div>'
+    +'</div>';
+  list.appendChild(div);
+}
+function _unusedType(){
+  var allTypes=['broken','missing','trash'];
+  var used=_usedIncidentTypes();
+  return allTypes.find(function(t){return !used.includes(t);})||null;
+}
+function addIncidentRow(){
+  var next=_unusedType();
+  if(!next)return;
+  var idx=_incIdx++;INCIDENTS.push({type:next,qty:1,domIdx:idx});_appendIncidentDOM({type:next,qty:1,domIdx:idx});
+  _refreshIncidentSelectOptions();updateIncidentBadge();
+}
+function updateIncident(idx){
+  var t=document.getElementById('inc-type-'+idx),q=document.getElementById('inc-qty-'+idx);
+  if(!t||!q)return;
+  var inc=INCIDENTS.find(function(i){return i.domIdx===idx;});
+  if(inc){inc.type=t.value;inc.qty=parseInt(q.value)||1;}
+  _refreshIncidentSelectOptions();updateIncidentBadge();
+}
+function removeIncident(idx){
+  var row=document.getElementById('incident-row-'+idx);if(row)row.remove();
+  INCIDENTS=INCIDENTS.filter(function(i){return i.domIdx!==idx;});
+  _refreshIncidentSelectOptions();updateIncidentBadge();
+}
+function updateIncidentBadge(){var badge=document.getElementById('incident-count-badge');if(!badge)return;badge.style.display=INCIDENTS.length?'inline-flex':'none';badge.textContent=INCIDENTS.length+' pending';if(INCIDENTS.length&&document.getElementById('chk-confirm').checked){document.getElementById('chk-confirm').checked=false;CONFIRMED_OKAY=false;}}
+
+
+function toggleConfirm(){var chk=document.getElementById('chk-confirm');chk.checked=!chk.checked;onConfirmChange();}
+function onConfirmChange(){var chk=document.getElementById('chk-confirm');CONFIRMED_OKAY=chk.checked;if(CONFIRMED_OKAY&&INCIDENTS.length){toast('Remove all incidents first.','error');chk.checked=false;CONFIRMED_OKAY=false;return;}document.getElementById('btn-report-incident').disabled=CONFIRMED_OKAY;}
+
+function showDiscardModal(){document.getElementById('discard-modal').classList.add('show');}
+function hideDiscardModal(){document.getElementById('discard-modal').classList.remove('show');}
+async function confirmDiscard(){
+  hideDiscardModal();
+  if(ACTIVE_SESSION&&CURRENT_EQ){var items=getRcCheckedItems();var key=(CURRENT_EQ.asset_id||'').toUpperCase();var match=Object.keys(items).find(function(k){return k.toUpperCase()===key;});if(match){delete items[match];saveRcCheckedItems(items);}}
+  if(SESSION_ROW_ID){try{await sb.from('routine_check').delete().eq('id',SESSION_ROW_ID);}catch(e){}SESSION_ROW_ID=null;}
+  INCIDENTS=[];_incIdx=0;CONFIRMED_OKAY=false;
+  document.getElementById('chk-confirm').checked=false;
+  document.getElementById('incident-list').innerHTML='';
+  document.getElementById('incident-count-badge').style.display='none';
+  document.getElementById('btn-report-incident').disabled=false;
+  closeSubPanel('panel-details');closeSubPanel('panel-incident');
+  toast('Changes removed');
+}
+
+async function saveCheck(){
+  if(!CURRENT_EQ)return;
+  if(!CURRENT_USER){toast('You must be logged in to save.','error');return;}
+  var saveBtn=document.getElementById('btn-save');
+  saveBtn.disabled=true;saveBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving...';
+  var eq=CURRENT_EQ;
+  var newGood=eq.good_qty!=null?eq.good_qty:(eq.available_qty!=null?eq.available_qty:(eq.total_qty||0));
+  var newMaint=eq.maintenance_qty||0,newMiss=eq.missing_qty||0,newRet=eq.retired_qty||0;
+  if(!CONFIRMED_OKAY&&!INCIDENTS.length){toast('Confirm okay or report an incident first.','error');saveBtn.disabled=false;saveBtn.innerHTML='<i class="fas fa-check"></i> Save';return;}
+  if(!CONFIRMED_OKAY){INCIDENTS.forEach(function(inc){var a=Math.min(inc.qty,newGood);newGood-=a;if(inc.type==='broken')newMaint+=a;else if(inc.type==='missing')newMiss+=a;else if(inc.type==='trash'||inc.type==='retired')newRet+=a;});}
+  var eqRes=await sb.from('equipment_inventory').update({good_qty:newGood,maintenance_qty:newMaint,missing_qty:newMiss,retired_qty:newRet,last_inspected:new Date().toISOString().split('T')[0]}).eq('id',eq.id);
+  if(eqRes.error){toast('Failed to save.','error');console.error(eqRes.error);saveBtn.disabled=false;saveBtn.innerHTML='<i class="fas fa-check"></i> Save';return;}
+  var checkedBy=CURRENT_USER?(CURRENT_USER.email||CURRENT_USER.id):'Admin';
+  var sessionNote=ACTIVE_SESSION?'SESSION:'+ACTIVE_SESSION.id:'QR Scan';
+  var rcPayload={equipment_id:eq.id,asset_id:eq.asset_id||null,equipment_name:eq.name,checked_by:checkedBy,checked_at:new Date().toISOString(),status:INCIDENTS.length?'incident':'good',incidents:INCIDENTS.length?INCIDENTS.slice():null,notes:sessionNote};
+  var savedRowId=SESSION_ROW_ID;
+  if(savedRowId){await sb.from('routine_check').update(rcPayload).eq('id',savedRowId);}
+  else{var ins=(await sb.from('routine_check').insert(rcPayload).select('id').maybeSingle()).data;if(ins)savedRowId=ins.id;SESSION_ROW_ID=savedRowId;}
+  var assetKey=(eq.asset_id||'').toUpperCase();
+  if(assetKey){var chkItems=getRcCheckedItems();chkItems[assetKey]={status:rcPayload.status,incidents:INCIDENTS.slice(),routineCheckRowId:savedRowId||null};saveRcCheckedItems(chkItems);}
+  eq.good_qty=newGood;eq.maintenance_qty=newMaint;eq.missing_qty=newMiss;eq.retired_qty=newRet;
+  renderEquipmentInfo(eq);
+  toast('Check saved!','success');
+  saveBtn.disabled=false;saveBtn.innerHTML='<i class="fas fa-check"></i> Save';
+}
+
+init();
+</script>
+</body>
+</html>
