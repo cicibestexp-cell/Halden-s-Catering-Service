@@ -7,24 +7,21 @@ export default async function handler(req, res) {
   const openrouterKey = (process.env.OPENROUTER_API_KEY || '').trim();
 
   // Option 1: Direct Google Gemini API
-  // Uses the proper systemInstruction field — NOT the fake user/model turn injection
-  // that was confusing the model and producing empty/blocked responses.
+  // Only tries ONE model to stay within Vercel's 10-second serverless timeout.
   if (geminiKey) {
     try {
       const messages = req.body.messages || [];
       const systemMsg = messages.find(m => m.role === 'system')?.content || '';
       const userMsgs = messages.filter(m => m.role !== 'system');
 
-      // Build contents — strictly alternating user/model turns
+      // Build strictly alternating user/model turns
       const contents = [];
       let lastRole = null;
       for (const m of userMsgs) {
         const role = m.role === 'assistant' ? 'model' : 'user';
         const text = (typeof m.content === 'string' ? m.content : JSON.stringify(m.content || '')).trim();
         if (!text) continue;
-
         if (role === lastRole && contents.length > 0) {
-          // Merge consecutive same-role messages to avoid API rejection
           contents[contents.length - 1].parts[0].text += '\n\n' + text;
         } else {
           contents.push({ role, parts: [{ text }] });
@@ -32,47 +29,54 @@ export default async function handler(req, res) {
         }
       }
 
-      // Gemini requires the conversation to start with a user turn
+      // Gemini requires conversation to start with a user turn
       if (contents.length === 0 || contents[0].role !== 'user') {
         contents.unshift({ role: 'user', parts: [{ text: 'Hello' }] });
       }
 
       const requestBody = {
         contents,
-        generationConfig: { temperature: 0.75, maxOutputTokens: 1200 }
+        generationConfig: { temperature: 0.75, maxOutputTokens: 800 }
       };
 
-      // Pass system instructions via the proper Gemini systemInstruction field
+      // Use systemInstruction (proper Gemini API field).
+      // Truncate to 6000 chars to avoid slow responses that cause Vercel timeout.
       if (systemMsg) {
-        requestBody.systemInstruction = { parts: [{ text: systemMsg }] };
+        requestBody.systemInstruction = { parts: [{ text: systemMsg.slice(0, 6000) }] };
       }
 
-      // Valid, confirmed working Gemini model names
-      const geminiModels = ['gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-pro'];
-      for (const mod of geminiModels) {
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent?key=${geminiKey}`,
-          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) }
-        );
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) }
+      );
 
-        if (geminiRes.ok) {
-          const geminiData = await geminiRes.json();
-          const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) {
-            return res.status(200).json({ choices: [{ message: { content: text } }] });
-          }
-          console.warn(`Gemini ${mod}: candidate returned but no text.`, JSON.stringify(geminiData).slice(0, 400));
-        } else {
-          const errText = await geminiRes.text();
-          console.warn(`Gemini ${mod} HTTP ${geminiRes.status}:`, errText.slice(0, 400));
+      if (geminiRes.ok) {
+        const geminiData = await geminiRes.json();
+        const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          return res.status(200).json({ choices: [{ message: { content: text } }] });
         }
+        // No text — return the actual block/finish reason for debugging
+        const reason = geminiData.candidates?.[0]?.finishReason
+          || geminiData.promptFeedback?.blockReason
+          || 'EMPTY_RESPONSE';
+        console.warn('Gemini empty, reason:', reason, JSON.stringify(geminiData).slice(0, 300));
+        return res.status(200).json({ choices: [], _geminiError: reason });
+      } else {
+        const errText = await geminiRes.text();
+        console.warn(`Gemini HTTP ${geminiRes.status}:`, errText.slice(0, 300));
+        return res.status(200).json({
+          choices: [],
+          _geminiError: `HTTP_${geminiRes.status}: ${errText.slice(0, 120)}`
+        });
       }
     } catch (err) {
-      console.warn('Gemini API exception:', err.message);
+      console.warn('Gemini exception:', err.message);
+      return res.status(200).json({ choices: [], _geminiError: `EXCEPTION: ${err.message}` });
     }
   }
 
-  // Option 2: OpenRouter fallback (only runs if OPENROUTER_API_KEY is set in Vercel env)
+  // Option 2: OpenRouter fallback (only if key is set)
   if (openrouterKey) {
     try {
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -92,9 +96,8 @@ export default async function handler(req, res) {
     }
   }
 
-  // Both paths failed — return a detectable empty response
   return res.status(200).json({
     choices: [],
-    error: { message: 'All AI models unavailable. Please try again shortly.' }
+    _geminiError: geminiKey ? 'ALL_FAILED' : 'NO_API_KEY_CONFIGURED'
   });
 }
