@@ -13,10 +13,20 @@ export default async function handler(req, res) {
       const systemMsg = messages.find(m => m.role === 'system')?.content || '';
       const userMsgs = messages.filter(m => m.role !== 'system');
 
-      // Strictly alternate turns (user -> model -> user -> model) to satisfy Gemini API requirements
+      // Build turn structure with system instructions injected as initial system-turn
       const contents = [];
-      let lastRole = null;
+      if (systemMsg) {
+        contents.push({
+          role: 'user',
+          parts: [{ text: `[SYSTEM INSTRUCTIONS & CATALOG DATA]\n${systemMsg}\n\nPlease acknowledge and adhere strictly.` }]
+        });
+        contents.push({
+          role: 'model',
+          parts: [{ text: 'Understood. I am Hal\'Serve AI for Halden\'s Catering. I will strictly follow all rules and guidelines.' }]
+        });
+      }
 
+      let lastRole = 'model';
       for (const m of userMsgs) {
         const role = m.role === 'assistant' ? 'model' : 'user';
         const text = (typeof m.content === 'string' ? m.content : JSON.stringify(m.content || '')).trim();
@@ -30,21 +40,12 @@ export default async function handler(req, res) {
         }
       }
 
-      if (contents.length > 0 && contents[0].role === 'model') {
-        contents.shift();
-      }
-
-      if (contents.length === 0) {
-        contents.push({ role: 'user', parts: [{ text: 'Hello' }] });
-      }
-
       const geminiModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
       for (const mod of geminiModels) {
         const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent?key=${geminiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            systemInstruction: systemMsg ? { parts: [{ text: systemMsg }] } : undefined,
             contents: contents,
             generationConfig: {
               temperature: 0.7,
@@ -53,17 +54,22 @@ export default async function handler(req, res) {
           })
         });
 
-        const geminiData = await geminiRes.json();
-        if (geminiData.candidates?.[0]?.content?.parts?.[0]?.text) {
-          const text = geminiData.candidates[0].content.parts[0].text;
-          res.status(200).json({
-            choices: [{ message: { content: text } }]
-          });
-          return;
+        if (geminiRes.ok) {
+          const geminiData = await geminiRes.json();
+          if (geminiData.candidates?.[0]?.content?.parts?.[0]?.text) {
+            const text = geminiData.candidates[0].content.parts[0].text;
+            res.status(200).json({
+              choices: [{ message: { content: text } }]
+            });
+            return;
+          }
+        } else {
+          const errText = await geminiRes.text();
+          console.warn(`Gemini API model ${mod} error (${geminiRes.status}):`, errText);
         }
       }
     } catch (err) {
-      console.warn('Direct Gemini API error:', err);
+      console.warn('Direct Gemini API exception:', err);
     }
   }
 
