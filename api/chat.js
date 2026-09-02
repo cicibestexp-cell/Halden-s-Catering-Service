@@ -73,7 +73,11 @@ export default async function handler(req, res) {
         const data = await response.json();
         const text = data.choices?.[0]?.message?.content;
         if (text && text.trim()) {
-          return res.status(200).json({ choices: [{ message: { content: text } }] });
+          return res.status(200).json({
+            choices: [{ message: { content: text } }],
+            _provider: 'openrouter',
+            _model: model
+          });
         }
 
       } catch (_) {
@@ -121,11 +125,15 @@ export default async function handler(req, res) {
         { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) }
       );
 
-      if (geminiRes.ok) {
+        if (geminiRes.ok) {
         const geminiData = await geminiRes.json();
         const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
         if (text) {
-          return res.status(200).json({ choices: [{ message: { content: text } }] });
+          return res.status(200).json({
+            choices: [{ message: { content: text } }],
+            _provider: 'gemini',
+            _model: 'gemini-1.5-flash'
+          });
         }
       }
     } catch (_) {
