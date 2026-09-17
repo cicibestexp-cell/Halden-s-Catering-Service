@@ -1,0 +1,136 @@
+# Logistics Timeline Overhaul
+
+This plan rewrites the milestone generation system, adds smart per-day checklists under the calendar, and wires up auto-detection and navigation for tasks.
+
+---
+
+## Key Findings from Research
+
+| Thing | Where it lives |
+|---|---|
+| Milestone definitions | `admin.js` L139 — `LOGISTICS_MILESTONE_DEFS[]` |
+| Auto-generation function | `admin.js` L12469 — `generateAutoLogisticsMilestones(res)` |
+| Milestone rendering | `admin.js` L7461 — `renderLogisticsMilestones(res)` |
+| Activity panel rendering | `admin.js` L7527 — `renderLogisticsActivities()` |
+| Calendar & events | `admin.js` L7702 — `renderReservationTimelineView()` |
+| Per-day task list (existing) | `admin.js` L7402 — `renderTimelineTaskList()` in `#resd-task-list` (currently not visible under calendar) |
+| Meetings in Firebase | Collection `meetings`, fields: `reservationId`, `agenda` (comma-sep), `status` ('completed'\|'scheduled') |
+| Downpayment due date | `res.downpaymentDueDate` (already read by generator) |
+| Navigate to Meetings Hub | `showSection('meetings', el)` |
+| Navigate to Payments | `showSection('billing', el)` (need to verify) |
+| Meeting agenda options | HTML checkboxes: `Contract finalization`, `Food tasting`, `Additional reservation discussion`, `Final program rundown`, `Design and decorations to be selected`, `Payment Assessment` |
+
+---
+
+## Proposed Changes
+
+### 1. Rewrite `LOGISTICS_MILESTONE_DEFS` in `admin.js`
+
+**New milestone order and tasks:**
+
+```
+Meeting (color: #3b82f6, blue)
+  Tasks: pulled dynamically from the reservation's meetings
+  → Not in DEFS statically; generated at runtime from Firebase
+
+Payment (color: #f59e0b, amber)
+  Tasks: ["Downpayment Assessed"]
+  → date pinned to res.downpaymentDueDate (already partially done)
+
+Resource Planning (color: #06b6d4, cyan)
+  Tasks: ["Equipment Allocation", "Rental Confirmation", "Staff Assignment",
+          "Supplier Coordination", "Ingredient Procurement"]
+
+Preparation (color: #10b981, emerald)
+  Tasks: ["Food Preparation Started", "Food Preparation Completed",
+          "Equipment Packed", "Equipment Checked", "Vehicle Loaded",
+          "Final Staff Briefing", "Event Readiness Confirmed"]
+
+Execution (color: #c49a3c, gold) — untouched, just the event day marker
+```
+
+**Post Event is removed.**
+
+#### [MODIFY] `LOGISTICS_MILESTONE_DEFS` — `admin.js` L139–L205
+
+---
+
+### 2. Rewrite `generateAutoLogisticsMilestones(res)` in `admin.js`
+
+Changes:
+- Accept an optional `meetings` array parameter (fetched meetings for this reservation)
+- **Meeting milestone**: tasks generated from `meetings` array — one task per agenda item per meeting, marked `autoCheck: true` if the meeting is completed
+- **Payment milestone**: single task "Downpayment Assessed", date = `res.downpaymentDueDate` or proportional fallback. The milestone start/end = downpayment due date (single-day milestone)
+- **Resource Planning, Preparation**: evenly spread their tasks as before
+- Remove Post Event milestone
+- Each task gains a new field: `linkTo: 'meetings'|'billing'|'procurement'|null` — used for redirect on click
+
+#### [MODIFY] `generateAutoLogisticsMilestones` — `admin.js` L12469–L12582
+
+---
+
+### 3. Add `renderDailyChecklistPanel()` — new function
+
+This replaces / augments `renderTimelineTaskList()`. A new panel **below the calendar** (already has `#resd-timeline-activities`) will:
+
+1. Show tasks grouped **by date** (closest date first)
+2. Each date block = a heading + a checklist
+3. Each checklist item has:
+   - A **checkbox** — clicking it toggles `done`/`pending`
+   - A **clickable task name** — navigates to the correct section
+4. Tasks that have `autoCheck: true` AND their source meeting is completed → auto-shown as checked (read-only)
+
+This is wired into `renderReservationTimelineView()` replacing the call to `renderTimelineTaskList()`.
+
+> Because this needs to read Firebase `meetings` to know which are completed, we call `fetchMeetingsForRes(resId)` (already used elsewhere in the file), cache the result, then call the render.
+
+#### [NEW] `renderDailyChecklistPanel(res, tasks, completedAgendas)` — added after `renderLogisticsActivities`
+
+---
+
+### 4. Update `renderLogisticsActivities()` for Meeting milestone
+
+When the active milestone is `meeting`, instead of showing generic chips, show each task with:
+- Its agenda name
+- Whether it's been completed (auto-check from Firebase)
+- A "Go to Meetings Hub" button
+
+---
+
+### 5. Update `eventClick` in the FullCalendar config
+
+When a task event is clicked, check `task.linkTo`:
+- `'meetings'` → `showSection('meetings', document.getElementById('nav-meetings'))`
+- `'billing'` → navigate to billing tab
+- Otherwise → `toggleTimelineTaskStatus(id)` (existing behavior)
+
+---
+
+### 6. Update auto-generation call at contract finalization (`admin.js` ~L4141)
+
+Pass the meetings for this reservation into `generateAutoLogisticsMilestones` so meeting tasks are populated at generation time too.
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> **What are the exact milestone tasks for Resource Planning and Preparation?**
+> From your screenshots, I have:
+> - Resource Planning: Equipment Allocation, Rental Confirmation, Staff Assignment, Supplier Coordination, Ingredient Procurement
+> - Preparation: Food Preparation Started, Food Preparation Completed, Equipment Packed, Equipment Checked, Vehicle Loaded, Final Staff Briefing, Event Readiness Confirmed
+> 
+> Please confirm or correct these before I execute.
+
+> [!NOTE]
+> The **Meeting milestone** will dynamically build its tasks from actual scheduled meetings for the reservation in Firebase. If a reservation has no meetings yet (newly created), it will still show a placeholder "Schedule Required Meeting" task.
+
+> [!NOTE]
+> The **navigation** for clicking a task name: Meeting tasks → Meetings Hub, Payment → stays in timeline/billing section, Resource/Prep → respective tabs in reservation details.
+
+## Verification Plan
+- Finalize a contract for a test reservation, open the logistics timeline — verify new milestone order
+- Check that "Downpayment Assessed" task lands on the downpayment due date
+- Verify meeting tasks auto-check when the meeting status is `completed` in Firebase
+- Verify clicking a meeting task name navigates to Meetings Hub
+- Verify "Post Event" is gone
