@@ -1,0 +1,2746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equipment Scan SmartServe</title>
+  <link rel="icon" type="image/png" href="haldens_logo.png" />
+
+
+  <link rel="icon" type="image/png" href="haldens_logo.png" />
+ 
+  <link rel="icon" type="image/png" href="haldens_logo.png" />
+ 
+  <link rel="icon" type="image/png" href="haldens_logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0e0b07;--surface:#1a1510;--panel:#211c15;--border:rgba(255,255,255,0.08);--gold:#c49a3c;--cream:#f0e6cc;--text:#c8bfac;--text-dim:#7a6e5e;--green:#2d8a4e;--red:#c0392b;--orange:#d4750a;--radius:14px}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    #auth-loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px}
+    .spinner{width:40px;height:40px;border:3px solid rgba(196,154,60,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .scan-wrap{width:100%;max-width:480px;display:none}
+    .scan-header{text-align:center;margin-bottom:24px}
+    .brand{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+    .subtitle{font-size:11px;color:var(--text-dim);margin-top:2px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .eq-info-header{padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+    .eq-img-wrap{width:100%;height:160px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+    .eq-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity 0.3s;}
+    .eq-img-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-dim);}
+    .eq-img-placeholder i{font-size:32px;opacity:0.3;}
+    .eq-img-placeholder span{font-size:11px;opacity:0.4;letter-spacing:0.5px;}
+    .eq-badge{display:inline-block;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:0.5px;margin-bottom:8px}
+    .eq-name{font-size:20px;font-weight:800;color:var(--cream);line-height:1.2}
+    .eq-meta{margin-top:6px;font-size:12px;color:var(--text-dim);display:flex;gap:10px;flex-wrap:wrap}
+    .qty-pills{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 20px;border-bottom:1px solid var(--border)}
+    .qty-pill{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center}
+    .qty-pill .val{font-size:20px;font-weight:800;color:var(--cream)}
+    .qty-pill .lbl{font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px}
+    .qty-pill.good .val{color:var(--green)}.qty-pill.maint .val{color:var(--orange)}.qty-pill.miss .val{color:var(--red)}.qty-pill.ret .val{color:var(--text-dim)}
+    /* Default view */
+    .actions-row{padding:16px 20px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--border)}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 18px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s}
+    .btn:active{transform:scale(0.98)}.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+    .btn-primary{background:var(--gold);color:#0e0b07}.btn-primary:hover:not(:disabled){background:#d4a940}
+    .btn-outline{background:transparent;border:1px solid var(--border);color:var(--cream)}.btn-outline:hover{background:rgba(255,255,255,0.04)}
+    .btn-danger{background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.35);color:#e05c4e}
+    .btn-ghost{background:rgba(255,255,255,0.04);color:var(--text)}
+    .btn-rc{background:rgba(196,154,60,0.08);border:1px solid rgba(196,154,60,0.3);color:var(--gold)}
+    .btn-rc:hover:not(:disabled){background:rgba(196,154,60,0.18)}
+    .btn-rc:disabled{opacity:0.35;cursor:not-allowed;color:var(--text-dim);border-color:var(--border);background:transparent}
+    /* RC mode */
+    .rc-mode-panel{display:none;flex-direction:column}
+    .rc-mode-panel.active{display:flex}
+    .rc-mode-header{padding:12px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);background:rgba(196,154,60,0.05)}
+    .rc-mode-badge{font-size:10px;font-weight:700;color:#fff;background:none;border:none;padding:3px 10px;border-radius:20px;letter-spacing:0.5px}
+    .btn-back{background:none;border:none;color:var(--text-dim);cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;transition:all 0.15s;margin-left:auto}
+    .btn-back:hover{color:var(--cream);background:rgba(255,255,255,0.05)}
+    .rc-actions-row{padding:16px 20px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--border)}
+    .confirm-row{padding:14px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border)}
+    .confirm-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+    .confirm-row label{font-size:13px;font-weight:600;color:var(--cream);cursor:pointer}
+    .confirm-row .note{font-size:11px;color:var(--text-dim);margin-top:2px}
+    .footer-row{padding:14px 20px;display:flex;gap:10px}
+    .footer-row .btn{flex:1;font-size:13px}
+    /* Sub-panels */
+    .sub-panel{display:none;background:var(--surface);border-top:1px solid var(--border)}
+    .sub-panel.open{display:block}
+    .sub-panel-header{padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between}
+    .sub-panel-title{font-size:14px;font-weight:700;color:var(--cream)}
+    .btn-back-sub{font-size:12px;color:var(--text-dim);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:4px}
+    .btn-back-sub:hover{color:var(--cream)}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 20px 14px}
+    .detail-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+    .di-lbl{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:3px}
+    .di-val{font-size:13px;font-weight:700;color:var(--cream);word-break:break-word}
+    .di-val.green{color:#4caf7d}.di-val.red{color:#e05c4e}.di-val.dim{color:var(--text-dim)}
+    .section-head{padding:10px 20px 6px;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px}
+    .alloc-list{padding:0 20px 14px;display:flex;flex-direction:column;gap:6px}
+    .alloc-row{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+    .alloc-batch{font-size:10px;font-weight:700;color:var(--gold);margin-bottom:2px;letter-spacing:0.5px;text-transform:uppercase}
+    .alloc-res{font-size:13px;font-weight:600;color:var(--cream)}
+    .alloc-meta{font-size:11px;color:var(--text-dim);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap}
+    .alloc-empty{font-size:12px;color:var(--text-dim);font-style:italic}
+    .incident-list{padding:0 20px}
+    .incident-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;position:relative}
+    .incident-item label{font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px}
+    .incident-item select,.incident-item input[type=number]{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-family:'Inter',sans-serif;font-size:13px;padding:9px 12px;outline:none;margin-bottom:8px}
+    .incident-item select option{background:#1a1510}
+    .incident-row-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .btn-remove-incident{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px}
+    .btn-remove-incident:hover{color:var(--red)}
+    .incident-actions{padding:10px 20px 16px;display:flex;gap:8px}
+    .pending-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--orange)}
+    #discard-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:flex-end;justify-content:center;padding:20px}
+    #discard-modal.show{display:flex}
+    #discard-modal-inner{background:#1a1510;border:1px solid rgba(192,57,43,0.4);border-radius:14px;padding:22px;width:100%;max-width:440px}
+    #scan-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--panel);border:1px solid var(--border);color:var(--cream);font-size:13px;font-weight:500;padding:12px 22px;border-radius:30px;transition:transform 0.3s ease;z-index:999;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+    #scan-toast.show{transform:translateX(-50%) translateY(0)}
+    #scan-toast.success{border-color:var(--green);color:#4cb874}
+    #scan-toast.error{border-color:var(--red);color:#e05c4e}
+    .error-card{text-align:center;padding:40px 24px}
+    .error-card .icon{font-size:36px;margin-bottom:12px;color:var(--text-dim)}
+    .error-card .title{font-size:16px;font-weight:700;color:var(--cream);margin-bottom:6px}
+    .error-card .msg{font-size:13px;color:var(--text-dim)}
+    .shimmer-line{height:11px;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 100%);background-size:300px 100%;animation:shimmer 1.4s infinite;margin-bottom:7px}
+    @keyframes shimmer{0%{background-position:-300px 0}100%{background-position:300px 0}}
+    /* Allocation accordion */
+    .alloc-accordion{cursor:pointer;user-select:none;}
+    .alloc-acc-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+    .alloc-acc-chev{font-size:11px;color:var(--text-dim);transition:transform 0.2s;margin-top:3px;flex-shrink:0;}
+    .alloc-acc-chev.open{transform:rotate(180deg);}
+    .alloc-acc-body{display:none;padding-top:10px;border-top:1px solid var(--border);margin-top:8px;}
+    .alloc-acc-body.open{display:block;}
+    .alloc-mini-map{height:130px;border-radius:8px;margin-top:8px;border:1px solid var(--border);overflow:hidden;}
+    .alloc-detail-line{display:flex;justify-content:space-between;align-items:flex-start;font-size:11px;margin-bottom:5px;gap:8px;}
+    .alloc-detail-line .adl-lbl{color:var(--text-dim);white-space:nowrap;}
+    .alloc-detail-line .adl-val{color:var(--cream);font-weight:600;text-align:right;}
+    /* Analytics */
+    .analytics-grid{padding:14px 20px;display:flex;flex-direction:column;gap:14px;}
+    .analytics-chart-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+    .analytics-chart-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+    .analytics-chart-title.maint{color:var(--orange);}
+    .analytics-chart-title.miss{color:var(--red);}
+    .analytics-chart-title.ret{color:var(--text-dim);}
+    .analytics-chart-card canvas{height:120px !important;}
+    .scan-chart-ctrl-bar{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.06);}
+    .scan-ctrl-left{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;}
+    .scan-ctrl-right{display:flex;align-items:center;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:3px;scrollbar-width:thin;width:100%;}
+    .btn-scan-date-select{background:rgba(196,154,60,0.12);border:1px solid rgba(196,154,60,0.35);color:var(--gold);font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;}
+    .btn-scan-nav{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--cream);font-size:10px;font-weight:600;padding:4px 7px;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+    .btn-scan-nav:hover, .btn-scan-date-select:hover{background:rgba(196,154,60,0.2);}
+    .btn-scan-range{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text-dim);font-size:10px;font-weight:600;padding:3px 7px;border-radius:5px;cursor:pointer;transition:all 0.15s ease;white-space:nowrap;flex-shrink:0;}
+    .btn-scan-range:hover{color:var(--cream);border-color:rgba(255,255,255,0.2);}
+    .btn-scan-range.active{background:var(--gold);color:#0e0b07;border-color:var(--gold);font-weight:700;}
+    /* History Filters */
+    .eq-hist-flt-btn{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text-dim);font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all 0.15s ease;white-space:nowrap;flex-shrink:0;}
+    .eq-hist-flt-btn:hover{color:var(--cream);border-color:rgba(255,255,255,0.2);}
+    .eq-hist-flt-btn.active{background:var(--gold);color:#0e0b07;border-color:var(--gold);}
+    /* Location */
+    .loc-map{height:180px;border-radius:10px;border:1px solid var(--border);margin-top:10px;overflow:hidden;}
+    /* Next Allocation panel */
+    .next-alloc-panel{border-bottom:1px solid var(--border);background:rgba(196,154,60,0.04);}
+    .next-alloc-header{padding:12px 20px 4px;}
+    .next-alloc-title{font-size:10px;font-weight:800;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;}
+    .next-alloc-date-center{text-align:center;font-size:16px;font-weight:800;color:var(--cream);padding:4px 20px 10px;letter-spacing:0.3px;}
+    .next-alloc-res{padding:0 14px;display:flex;flex-direction:column;gap:8px;padding-bottom:14px;}
+    .next-alloc-row{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .next-alloc-row-info{padding:10px 12px 8px;}
+    .next-alloc-res-name{font-size:13px;font-weight:700;color:var(--cream);margin-bottom:5px;}
+    .next-alloc-detail-line{font-size:11px;color:var(--text-dim);margin-bottom:3px;display:flex;gap:5px;}
+    .next-alloc-detail-line b{color:var(--cream);font-weight:600;}
+    .next-alloc-dispatch-zone{border-top:1px solid var(--border);padding:8px 12px;}
+    .next-alloc-dispatch-row{display:flex;align-items:center;gap:8px;}
+    .next-alloc-dispatch-label{font-size:10px;font-weight:700;color:var(--text-dim);white-space:nowrap;}
+    .next-alloc-qty-input{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;color:var(--cream);font-family:'Inter',sans-serif;font-size:14px;font-weight:700;width:56px;padding:5px 8px;outline:none;text-align:center;}
+    .next-alloc-qty-hint{font-size:10px;color:var(--text-dim);flex:1;}
+    .next-alloc-save-btn{background:var(--gold);color:#0e0b07;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:6px 12px;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+    .next-alloc-save-btn:hover{background:#d4a940;}
+    .next-alloc-cancel-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;padding:6px 10px;cursor:pointer;white-space:nowrap;}
+    .next-alloc-cancel-btn:hover{color:var(--cream);}
+    .next-alloc-pending-zone{border-top:1px solid rgba(212,117,10,0.25);padding:8px 12px;background:rgba(212,117,10,0.06);display:flex;align-items:center;gap:8px;}
+    .next-alloc-pending-icon{font-size:14px;flex-shrink:0;}
+    .next-alloc-pending-text{font-size:11px;color:var(--orange);font-weight:600;flex:1;line-height:1.4;}
+    .next-alloc-empty{padding:12px 20px 16px;font-size:12px;color:var(--text-dim);font-style:italic;}
+  </style>
+</head>
+<body>
+
+<div id="auth-loading">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--text-dim);">Verifying session...</div>
+</div>
+
+<div class="scan-wrap" id="scan-wrap">
+  <div class="scan-header">
+    <div class="brand">HAL'SERVE</div>
+    <div class="subtitle" id="scan-subtitle">Equipment Scan</div>
+  </div>
+  <div id="batch-back-bar" style="display:none; margin-bottom:14px;">
+    <button class="btn btn-outline" style="width:100%; font-size:13px; padding:10px;" onclick="goBackToBatch()">
+       Back to Compiled Batch
+    </button>
+  </div>
+  <div class="card" id="main-card">
+
+
+    <!-- Equipment Image -->
+    <div class="eq-img-wrap" id="eq-img-wrap">
+      <div class="eq-img-placeholder" id="eq-img-placeholder">
+        
+        <span>NO IMAGE</span>
+      </div>
+    </div>
+
+    <!-- NEXT ALLOCATION PANEL -->
+    <div id="next-alloc-panel" class="next-alloc-panel" style="display:none;">
+      <div class="next-alloc-header">
+        <div class="next-alloc-title">Next Allocation</div>
+      </div>
+      <div class="next-alloc-date-center" id="next-alloc-date-badge"></div>
+      <div class="next-alloc-res" id="next-alloc-res-list"></div>
+    </div>
+
+    <!-- Equipment Info -->
+    <div class="eq-info-header">
+      <div class="eq-badge" id="eq-asset-id">Loading...</div>
+      <div class="eq-name" id="eq-name">&#8212;</div>
+      <div class="eq-meta">
+        <span> <span id="eq-category">&#8212;</span></span>
+        <span> <span id="eq-type">&#8212;</span></span>
+        <span id="eq-alloc-meta" style="display:none;"> <span id="eq-alloc-label">&#8212;</span></span>
+      </div>
+    </div>
+
+    <!-- Qty Pills -->
+    <div class="qty-pills">
+      <div class="qty-pill good"><div class="val" id="pill-good">&#8212;</div><div class="lbl">Good</div></div>
+      <div class="qty-pill maint"><div class="val" id="pill-maint">&#8212;</div><div class="lbl">Maintenance</div></div>
+      <div class="qty-pill miss"><div class="val" id="pill-miss">&#8212;</div><div class="lbl">Missing</div></div>
+      <div class="qty-pill ret"><div class="val" id="pill-ret">&#8212;</div><div class="lbl">Retired</div></div>
+    </div>
+
+
+
+    <!-- DEFAULT VIEW -->
+    <div id="default-view">
+      <div class="actions-row">
+        <button class="btn btn-outline" id="btn-view-details" onclick="openDetailPanel()">
+           View Details
+        </button>
+        <button class="btn btn-outline" id="btn-analytics" onclick="openAnalyticsPanel()">
+           Analytics
+        </button>
+        <button class="btn btn-outline" id="btn-history" onclick="openEquipmentHistoryPanel()">
+           History
+        </button>
+        <button class="btn btn-outline" id="btn-standalone-incident" onclick="openStandaloneIncidentPanel()">
+           Report Incident
+        </button>
+        <button class="btn btn-rc" id="btn-routine-check" onclick="enterRoutineCheckMode()" disabled
+          title="Start a routine check session in the admin panel first">
+           Routine Checking
+          <span id="rc-active-pill" style="display:none;margin-left:2px;font-size:9px;font-weight:800;color:#0e0b07;background:var(--gold);padding:2px 7px;border-radius:20px;">ACTIVE</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ROUTINE CHECK MODE -->
+    <div class="rc-mode-panel" id="rc-mode-panel">
+      <div class="rc-mode-header">
+        <span class="rc-mode-badge">&nbsp; Routine Check Mode</span>
+        <button class="btn-back" onclick="exitRoutineCheckMode()"> Back</button>
+      </div>
+      <div class="rc-actions-row">
+        <button class="btn" id="btn-report-incident" onclick="openIncidentPanel()" style="background:#e74c3c;border:none;color:#000;font-weight:700;">
+          Report Incident
+          <span id="incident-count-badge" class="pending-badge" style="display:none;">0 pending</span>
+        </button>
+      </div>
+      <div class="confirm-row" onclick="toggleConfirm()">
+        <input type="checkbox" id="chk-confirm" onchange="onConfirmChange()" onclick="event.stopPropagation()" />
+        <div>
+          <label for="chk-confirm">Confirm everything is okay</label>
+          <div class="note">Checking this locks incident reporting and marks all as Good</div>
+        </div>
+      </div>
+      <div class="footer-row">
+        <button class="btn btn-ghost" id="btn-discard" onclick="showDiscardModal()"> Remove</button>
+        <button class="btn btn-primary" id="btn-save" onclick="saveCheck()"> Save</button>
+      </div>
+    </div>
+
+    <!-- ROUTINE CHECK CONCLUDED PANEL -->
+    <div id="rc-concluded-panel" style="display:none; padding:28px 24px; text-align:center; background:rgba(45,138,78,0.08); border-top:1px solid rgba(45,138,78,0.3);">
+      <div style="font-size:26px; margin-bottom:12px;">&#10003;</div>
+      <div style="font-size:16px; font-weight:800; color:var(--cream); margin-bottom:6px;">Routine Check Concluded</div>
+      <div style="font-size:12px; color:var(--text-dim); margin-bottom:20px;">This inspection session has been submitted and closed.</div>
+      <button class="btn btn-outline" style="width:100%; font-size:13px;" onclick="closeConcludedPanel()">Got It</button>
+    </div>
+
+    <!-- DETAILS SUB-PANEL -->
+    <div class="sub-panel" id="panel-details">
+      <div class="sub-panel-header">
+        <span class="sub-panel-title">Equipment Details</span>
+        <button class="btn-back-sub" onclick="closeSubPanel('panel-details')"> Close</button>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="di-lbl">Total Qty</div><div class="di-val" id="det-total">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Available</div><div class="di-val" id="det-avail">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Condition</div><div class="di-val" id="det-condition">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Last Inspected</div><div class="di-val" id="det-last-insp">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Good</div><div class="di-val green" id="det-good">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Maintenance</div><div class="di-val" style="color:var(--orange)" id="det-maint">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Missing</div><div class="di-val red" id="det-miss">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Retired</div><div class="di-val dim" id="det-ret">&#8212;</div></div>
+      </div>
+      <div class="section-head"> Purchase Info</div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="di-lbl">Date Purchased</div><div class="di-val" id="det-purchase-date">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Source / Supplier</div><div class="di-val" id="det-supplier">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Unit Cost</div><div class="di-val" id="det-unit-cost">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Unit Type</div><div class="di-val" id="det-unit-type">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Shopping Cost</div><div class="di-val" id="det-shopping-cost">&#8212;</div></div>
+        <div class="detail-item"><div class="di-lbl">Total Value</div><div class="di-val" id="det-total-cost">&#8212;</div></div>
+      </div>
+      <!-- Purchase History Records Table -->
+      <div class="section-head" style="margin-top:16px;">Purchase History</div>
+      <div id="det-purchase-history-container" style="margin-top:8px; overflow-x:auto;"></div>
+      <div class="section-head" id="cur-alloc-head" style="display:none;"> Current Allocations</div>
+      <div class="alloc-list" id="current-alloc-list"></div>
+      <div class="section-head"> Allocation History</div>
+      <div class="alloc-list" id="alloc-history-list">
+        <div class="shimmer-line" style="width:65%;"></div>
+        <div class="shimmer-line" style="width:45%;"></div>
+      </div>
+    </div>
+
+    <!-- INCIDENT SUB-PANEL (Routine Checks) -->
+    <div class="sub-panel" id="panel-incident">
+      <div class="sub-panel-header">
+        <span class="sub-panel-title">Report Incident</span>
+        <button class="btn-back-sub" onclick="closeSubPanel('panel-incident')"> Done</button>
+      </div>
+      <div class="incident-list" id="incident-list"></div>
+      <div class="incident-actions">
+        <button class="btn btn-ghost" style="flex:1;font-size:13px;" onclick="addIncidentRow()"> Add Another</button>
+      </div>
+    </div>
+
+    <!-- STANDALONE INCIDENT SUB-PANEL (Outside Routine Checks) -->
+    <div class="sub-panel" id="panel-standalone-incident">
+      <div class="sub-panel-header">
+        <span class="sub-panel-title">Report Equipment Incident</span>
+        <button class="btn-back-sub" onclick="cancelStandaloneIncidents()"> Close</button>
+      </div>
+      <div style="padding:12px 20px 6px;font-size:12px;color:var(--text-dim);">
+        Report equipment incident outside routine inspections. Reports will be logged and reflected in equipment inventory.
+      </div>
+      <div class="incident-list" id="standalone-incident-list"></div>
+      <div class="incident-actions">
+        <button class="btn btn-ghost" id="btn-add-standalone-inc" style="flex:1;font-size:13px;" onclick="addStandaloneIncidentRow()">+ Add Incident</button>
+      </div>
+      <div class="footer-row" style="border-top:1px solid var(--border);padding:14px 20px;display:flex;gap:10px;">
+        <button class="btn btn-ghost" id="btn-cancel-standalone" style="flex:1;" onclick="cancelStandaloneIncidents()">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-standalone" style="flex:1;" onclick="promptSaveStandaloneIncidents()">Save</button>
+      </div>
+    </div>
+
+    <!-- STANDALONE INCIDENT CONFIRMATION MODAL -->
+    <div id="standalone-confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:400px;text-align:center;">
+        <div style="font-size:16px;font-weight:700;color:var(--cream);margin-bottom:8px;">Submit Incident Reports?</div>
+        <div style="font-size:13px;color:var(--text-dim);margin-bottom:20px;line-height:1.5;">Are you sure you want to submit these incident reports? Equipment inventory quantities will be saved and updated accordingly.</div>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button class="btn btn-ghost" style="flex:1;font-size:13px;" onclick="closeStandaloneConfirmModal()">No</button>
+          <button class="btn btn-primary" style="flex:1;font-size:13px;" onclick="confirmSaveStandaloneIncidents()">Yes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS SUB-PANEL -->
+    <div class="sub-panel" id="panel-analytics">
+      <div class="sub-panel-header">
+        <span class="sub-panel-title">Equipment Analytics</span>
+        <button class="btn-back-sub" onclick="closeSubPanel('panel-analytics')"> Close</button>
+      </div>
+      <div class="analytics-grid">
+        <!-- 1. Allocation Frequency Graph -->
+        <div class="analytics-chart-card">
+          <div class="analytics-chart-title" style="color:var(--gold);">Allocation Frequency per Reservation</div>
+          <div class="scan-chart-ctrl-bar">
+            <div class="scan-ctrl-left">
+              <button type="button" class="btn-scan-date-select" onclick="openScanDatePickerModal('alloc-freq')"><span id="scan-date-label-alloc-freq">October 2026</span> &#9662;</button>
+              <button type="button" class="btn-scan-nav" onclick="navScanFilterMonth('alloc-freq', -1)">&larr; Previous Month</button>
+              <button type="button" class="btn-scan-nav" onclick="navScanFilterMonth('alloc-freq', 1)">Next Month &rarr;</button>
+            </div>
+            <div class="scan-ctrl-right">
+              <button type="button" class="btn-scan-range" id="btn-range-alloc-freq-1" onclick="setScanRange('alloc-freq', 1)">This Month</button>
+              <button type="button" class="btn-scan-range" id="btn-range-alloc-freq-3" onclick="setScanRange('alloc-freq', 3)">Last 3 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-alloc-freq-6" onclick="setScanRange('alloc-freq', 6)">Last 6 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-alloc-freq-12" onclick="setScanRange('alloc-freq', 12)">Last 12 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-alloc-freq-custom" onclick="promptScanCustomRange('alloc-freq')">Custom Range</button>
+            </div>
+          </div>
+          <div style="height:140px;position:relative;">
+            <canvas id="chart-alloc-freq"></canvas>
+          </div>
+        </div>
+
+        <!-- 2. Return Rate Area -->
+        <div class="analytics-chart-card">
+          <div class="analytics-chart-title" style="color:#2ea043;">Return Rate (After Event Execution)</div>
+          <div class="scan-chart-ctrl-bar">
+            <div class="scan-ctrl-left">
+              <button type="button" class="btn-scan-date-select" onclick="openScanDatePickerModal('return-rate')"><span id="scan-date-label-return-rate">October 2026</span> &#9662;</button>
+              <button type="button" class="btn-scan-nav" onclick="navScanFilterMonth('return-rate', -1)">&larr; Previous Month</button>
+              <button type="button" class="btn-scan-nav" onclick="navScanFilterMonth('return-rate', 1)">Next Month &rarr;</button>
+            </div>
+            <div class="scan-ctrl-right">
+              <button type="button" class="btn-scan-range" id="btn-range-return-rate-1" onclick="setScanRange('return-rate', 1)">This Month</button>
+              <button type="button" class="btn-scan-range" id="btn-range-return-rate-3" onclick="setScanRange('return-rate', 3)">Last 3 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-return-rate-6" onclick="setScanRange('return-rate', 6)">Last 6 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-return-rate-12" onclick="setScanRange('return-rate', 12)">Last 12 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-return-rate-custom" onclick="promptScanCustomRange('return-rate')">Custom Range</button>
+            </div>
+          </div>
+          <div style="height:140px;position:relative;">
+            <canvas id="chart-return-rate"></canvas>
+          </div>
+          <!-- 3 Percentages under the Return Rate Graph -->
+          <div class="analytics-pct-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Total Return Rate</div>
+              <div id="stat-ret-rate-total" style="font-size:14px;font-weight:800;color:#2ea043;margin-top:2px;">100%</div>
+            </div>
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Last Month</div>
+              <div id="stat-ret-rate-last-month" style="font-size:14px;font-weight:800;color:var(--cream);margin-top:2px;">100%</div>
+            </div>
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">This Month</div>
+              <div id="stat-ret-rate-this-month" style="font-size:14px;font-weight:800;color:var(--cream);margin-top:2px;">100%</div>
+              <div id="stat-ret-rate-change" style="font-size:10px;color:var(--text-dim);margin-top:1px;font-weight:600;">0% change</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Toggle Bar for Incident Charts: Inventory, Execution, All (All is selected by default) -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
+          <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Incident Source</div>
+          <div class="incident-flt-group" style="display:flex;gap:4px;background:rgba(255,255,255,0.04);padding:3px;border-radius:8px;border:1px solid var(--border);">
+            <button type="button" class="inc-flt-btn" id="btn-flt-inventory" onclick="setScanIncidentFilter('inventory')" style="background:transparent;border:none;color:var(--text-dim);font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer;">Inventory</button>
+            <button type="button" class="inc-flt-btn" id="btn-flt-execution" onclick="setScanIncidentFilter('execution')" style="background:transparent;border:none;color:var(--text-dim);font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer;">Execution</button>
+            <button type="button" class="inc-flt-btn active" id="btn-flt-all" onclick="setScanIncidentFilter('all')" style="background:var(--gold);border:none;color:#0e0b07;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer;">All</button>
+          </div>
+        </div>
+
+        <!-- 3. Maintenance Incidents (Broken) -->
+        <div class="analytics-chart-card">
+          <div class="analytics-chart-title maint">Maintenance Incidents (Broken)</div>
+          <div class="scan-chart-ctrl-bar">
+            <div class="scan-ctrl-left">
+              <button type="button" class="btn-scan-date-select" onclick="openScanDatePickerModal('maint')"><span id="scan-date-label-maint">October 2026</span> &#9662;</button>
+              <button type="button" class="btn-scan-nav" onclick="navScanFilterMonth('maint', -1)">&larr; Previous Month</button>
+              <button type="button" class="btn-scan-nav" onclick="navScanFilterMonth('maint', 1)">Next Month &rarr;</button>
+            </div>
+            <div class="scan-ctrl-right">
+              <button type="button" class="btn-scan-range" id="btn-range-maint-1" onclick="setScanRange('maint', 1)">This Month</button>
+              <button type="button" class="btn-scan-range" id="btn-range-maint-3" onclick="setScanRange('maint', 3)">Last 3 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-maint-6" onclick="setScanRange('maint', 6)">Last 6 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-maint-12" onclick="setScanRange('maint', 12)">Last 12 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-maint-custom" onclick="promptScanCustomRange('maint')">Custom Range</button>
+            </div>
+          </div>
+          <canvas id="chart-maint"></canvas>
+          <div class="analytics-pct-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Total</div>
+              <div id="stat-maint-total" style="font-size:14px;font-weight:800;color:var(--orange);margin-top:2px;">0%</div>
+            </div>
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Last Month</div>
+              <div id="stat-maint-last-month" style="font-size:14px;font-weight:800;color:var(--cream);margin-top:2px;">0%</div>
+            </div>
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">This Month</div>
+              <div id="stat-maint-this-month" style="font-size:14px;font-weight:800;color:var(--cream);margin-top:2px;">0%</div>
+              <div id="stat-maint-change" style="font-size:10px;color:var(--text-dim);margin-top:1px;font-weight:600;">0% change</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Missing Incidents -->
+        <div class="analytics-chart-card">
+          <div class="analytics-chart-title miss">Missing Incidents</div>
+          <div class="scan-chart-ctrl-bar">
+            <div class="scan-ctrl-left">
+              <button type="button" class="btn-scan-date-select" onclick="openScanDatePickerModal('miss')"><span id="scan-date-label-miss">October 2026</span> &#9662;</button>
+              <button type="button" class="btn-scan-nav" onclick="navScanFilterMonth('miss', -1)">&larr; Previous Month</button>
+              <button type="button" class="btn-scan-nav" onclick="navScanFilterMonth('miss', 1)">Next Month &rarr;</button>
+            </div>
+            <div class="scan-ctrl-right">
+              <button type="button" class="btn-scan-range" id="btn-range-miss-1" onclick="setScanRange('miss', 1)">This Month</button>
+              <button type="button" class="btn-scan-range" id="btn-range-miss-3" onclick="setScanRange('miss', 3)">Last 3 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-miss-6" onclick="setScanRange('miss', 6)">Last 6 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-miss-12" onclick="setScanRange('miss', 12)">Last 12 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-miss-custom" onclick="promptScanCustomRange('miss')">Custom Range</button>
+            </div>
+          </div>
+          <canvas id="chart-miss"></canvas>
+          <div class="analytics-pct-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Total</div>
+              <div id="stat-miss-total" style="font-size:14px;font-weight:800;color:var(--red);margin-top:2px;">0%</div>
+            </div>
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Last Month</div>
+              <div id="stat-miss-last-month" style="font-size:14px;font-weight:800;color:var(--cream);margin-top:2px;">0%</div>
+            </div>
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">This Month</div>
+              <div id="stat-miss-this-month" style="font-size:14px;font-weight:800;color:var(--cream);margin-top:2px;">0%</div>
+              <div id="stat-miss-change" style="font-size:10px;color:var(--text-dim);margin-top:1px;font-weight:600;">0% change</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Retired / Disposed -->
+        <div class="analytics-chart-card">
+          <div class="analytics-chart-title ret">Retired / Disposed</div>
+          <div class="scan-chart-ctrl-bar">
+            <div class="scan-ctrl-left">
+              <button type="button" class="btn-scan-date-select" onclick="openScanDatePickerModal('ret')"><span id="scan-date-label-ret">October 2026</span> &#9662;</button>
+              <button type="button" class="btn-scan-nav" onclick="navScanFilterMonth('ret', -1)">&larr; Previous Month</button>
+              <button type="button" class="btn-scan-nav" onclick="navScanFilterMonth('ret', 1)">Next Month &rarr;</button>
+            </div>
+            <div class="scan-ctrl-right">
+              <button type="button" class="btn-scan-range" id="btn-range-ret-1" onclick="setScanRange('ret', 1)">This Month</button>
+              <button type="button" class="btn-scan-range" id="btn-range-ret-3" onclick="setScanRange('ret', 3)">Last 3 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-ret-6" onclick="setScanRange('ret', 6)">Last 6 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-ret-12" onclick="setScanRange('ret', 12)">Last 12 Months</button>
+              <button type="button" class="btn-scan-range" id="btn-range-ret-custom" onclick="promptScanCustomRange('ret')">Custom Range</button>
+            </div>
+          </div>
+          <canvas id="chart-ret"></canvas>
+          <div class="analytics-pct-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Total</div>
+              <div id="stat-ret-total" style="font-size:14px;font-weight:800;color:var(--text-dim);margin-top:2px;">0%</div>
+            </div>
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Last Month</div>
+              <div id="stat-ret-last-month" style="font-size:14px;font-weight:800;color:var(--cream);margin-top:2px;">0%</div>
+            </div>
+            <div class="analytics-pct-box" style="text-align:center;">
+              <div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-weight:700;">This Month</div>
+              <div id="stat-ret-this-month" style="font-size:14px;font-weight:800;color:var(--cream);margin-top:2px;">0%</div>
+              <div id="stat-ret-change" style="font-size:10px;color:var(--text-dim);margin-top:1px;font-weight:600;">0% change</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY SUB-PANEL -->
+    <div class="sub-panel" id="panel-history">
+      <div class="sub-panel-header">
+        <span class="sub-panel-title">Equipment History</span>
+        <button class="btn-back-sub" onclick="closeSubPanel('panel-history')"> Close</button>
+      </div>
+      <div style="padding:14px 20px;">
+        <div style="display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:4px; scrollbar-width:thin;">
+          <button type="button" class="eq-hist-flt-btn active" id="btn-hist-flt-all" onclick="filterEquipmentHistory('all')">All</button>
+          <button type="button" class="eq-hist-flt-btn" id="btn-hist-flt-allocation" onclick="filterEquipmentHistory('allocation')">Allocation</button>
+          <button type="button" class="eq-hist-flt-btn" id="btn-hist-flt-broken" onclick="filterEquipmentHistory('broken')">Broken</button>
+          <button type="button" class="eq-hist-flt-btn" id="btn-hist-flt-missing" onclick="filterEquipmentHistory('missing')">Missing</button>
+          <button type="button" class="eq-hist-flt-btn" id="btn-hist-flt-retired" onclick="filterEquipmentHistory('retired')">Retired</button>
+        </div>
+        <div id="eq-history-list" style="display:flex; flex-direction:column; gap:10px; max-height:480px; overflow-y:auto; padding-right:2px;">
+          <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:12px;">Loading history...</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /scan-wrap -->
+
+<!-- Discard Modal -->
+<div id="discard-modal" onclick="if(event.target===this)hideDiscardModal()">
+  <div id="discard-modal-inner">
+    <div style="font-weight:600;color:var(--cream);margin-bottom:8px;text-align:center;">Remove changes?</div>
+    <div style="font-size:12px;color:var(--text-dim);text-align:center;margin-bottom:18px;">This will clear any logged checks for this item.</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="hideDiscardModal()">No</button>
+      <button class="btn btn-danger" style="flex:1;background:#c0392b;border-color:#c0392b;color:#fff;" onclick="confirmDiscard()">Yes, Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- Date Picker Modal for Scan Analytics -->
+<div id="scan-date-picker-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:999999;align-items:center;justify-content:center;backdrop-filter:blur(3px);">
+  <div style="background:#18120c;border:1px solid rgba(196,154,60,0.4);border-radius:14px;padding:26px 22px;width:90%;max-width:320px;text-align:center;box-shadow:0 12px 36px rgba(0,0,0,0.7);">
+    <div style="font-size:14px;font-weight:700;color:var(--cream);margin-bottom:14px;letter-spacing:0.5px;">Select Month & Year</div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <select id="scan-picker-month" style="flex:1;font-size:12px;padding:8px 10px;background:#241b12;color:var(--cream);border:1px solid rgba(196,154,60,0.3);border-radius:6px;outline:none;">
+        <option value="0">January</option>
+        <option value="1">February</option>
+        <option value="2">March</option>
+        <option value="3">April</option>
+        <option value="4">May</option>
+        <option value="5">June</option>
+        <option value="6">July</option>
+        <option value="7">August</option>
+        <option value="8">September</option>
+        <option value="9">October</option>
+        <option value="10">November</option>
+        <option value="11">December</option>
+      </select>
+      <input type="number" id="scan-picker-year" min="2020" max="2050" style="width:90px;font-size:12px;padding:8px 10px;background:#241b12;color:var(--cream);border:1px solid rgba(196,154,60,0.3);border-radius:6px;text-align:center;outline:none;" />
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-outline" style="font-size:12px;padding:6px 14px;cursor:pointer;" onclick="closeScanDatePickerModal()">Cancel</button>
+      <button class="btn btn-primary" style="font-size:12px;padding:6px 16px;background:var(--gold);color:#0e0b07;font-weight:700;border:none;border-radius:6px;cursor:pointer;" onclick="saveScanDatePickerModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="scan-toast"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL  = 'https://nukbdmyqizrnkmbusdtm.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51a2JkbXlxaXpybmttYnVzZHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMjM3NTQsImV4cCI6MjA5ODg5OTc1NH0.WlKtqa8hBxLedDHS7-q10yoPne6VTjt5F4E86vTA5eY';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const CLOUDINARY_CLOUD_NAME = 'dg8ytmck5';
+const CLOUDINARY_UPLOAD_PRESET = 'test_default';
+
+let CURRENT_EQ=null,CURRENT_USER=null,INCIDENTS=[],CONFIRMED_OKAY=false,_incIdx=0;
+let ACTIVE_SESSION=null,SESSION_ROW_ID=null,_inRcMode=false;
+let _rcRealtimeChannel=null;
+const RC_SESSION_KEY='rc_active_session';
+const RC_ITEMS_KEY='rc_checked_items';
+const RC_EXPIRY_MS=48*60*60*1000;
+
+// ====== CLOUDINARY UPLOAD HELPER ======
+async function uploadIncidentImageToCloudinary(file){
+  var fd=new FormData();
+  fd.append('file',file);
+  fd.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);
+  fd.append('folder','incident_photos');
+  var url='https://api.cloudinary.com/v1_1/'+CLOUDINARY_CLOUD_NAME+'/image/upload';
+  var res=await fetch(url,{method:'POST',body:fd});
+  if(!res.ok)throw new Error('Cloudinary upload failed: '+res.status);
+  return await res.json(); // {secure_url, public_id, delete_token, ...}
+}
+
+async function deleteCloudinaryImage(deleteToken){
+  if(!deleteToken)return;
+  try{
+    var fd=new FormData();
+    fd.append('token',deleteToken);
+    await fetch('https://api.cloudinary.com/v1_1/'+CLOUDINARY_CLOUD_NAME+'/delete_by_token',{method:'POST',body:fd});
+  }catch(e){console.warn('[scan] Cloudinary delete failed (non-critical):',e);}
+}
+
+function toast(msg,type){var el=document.getElementById('scan-toast');el.textContent=msg;el.className='show '+(type||'');clearTimeout(el._t);el._t=setTimeout(function(){el.className='';},3000);}
+function getUrlParam(n){return new URLSearchParams(window.location.search).get(n);}
+function set(id,val){var el=document.getElementById(id);if(el)el.textContent=(val!=null?val:'\u2014');}
+function getRcSession(){try{return JSON.parse(localStorage.getItem(RC_SESSION_KEY)||'null');}catch(e){return null;}}
+function getRcCheckedItems(){try{return JSON.parse(localStorage.getItem(RC_ITEMS_KEY)||'{}');}catch(e){return{};}}
+function saveRcCheckedItems(c){localStorage.setItem(RC_ITEMS_KEY,JSON.stringify(c));}
+function fmtCurrency(n){if(!n||isNaN(n))return'\u2014';return'\u20b1'+parseFloat(n).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtDate(d){if(!d)return'\u2014';try{return new Date(d+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}catch(e){return d;}}
+
+async function init(){
+  var sess=(await sb.auth.getSession()).data.session;
+  CURRENT_USER=sess?sess.user:null;
+  if(!CURRENT_USER&&window.location.protocol==='file:')CURRENT_USER={email:'local-admin@demo.com',id:'local-file-demo'};
+  document.getElementById('auth-loading').style.display='none';
+  document.getElementById('scan-wrap').style.display='block';
+  var eqParam=getUrlParam('eq');
+  var batchParam=getUrlParam('batch');
+  var urlParams=new URLSearchParams(window.location.search);
+  var idsParams=urlParams.getAll('ids');
+
+  if(!eqParam && !batchParam && !idsParams.length){
+    renderError('No equipment specified in QR code.','Scan a valid single or compiled equipment QR code.');
+    return;
+  }
+
+  // If this is a compiled batch scan (batch param or multiple ids or ids without single eq)
+  if(batchParam || idsParams.length > 1 || (!eqParam && idsParams.length === 1)){
+    await loadCompiledBatch(batchParam, idsParams);
+    return;
+  }
+
+  if(getUrlParam('fromBatch')){
+    var bBar = document.getElementById('batch-back-bar');
+    if(bBar) bBar.style.display = 'block';
+  }
+
+  await checkActiveSession();
+
+  var items=getRcCheckedItems();
+  var eqKey=eqParam.toUpperCase();
+  var existingEntry=Object.entries(items).find(function(e){return e[0].toUpperCase()===eqKey;});
+  if(existingEntry){
+    var state=existingEntry[1];
+    SESSION_ROW_ID=state.routineCheckRowId||null;
+    CONFIRMED_OKAY=state.status==='good'&&(!state.incidents||!state.incidents.length);
+    if(state.incidents&&state.incidents.length)state.incidents.forEach(function(inc){INCIDENTS.push({type:inc.type,qty:inc.qty,domIdx:_incIdx++});});
+  }
+  await loadEquipment(eqParam);
+  if(CONFIRMED_OKAY){var chk=document.getElementById('chk-confirm');if(chk)chk.checked=true;document.getElementById('btn-report-incident').disabled=true;}
+  if(INCIDENTS.length){INCIDENTS.forEach(function(inc){_appendIncidentDOM(inc);});updateIncidentBadge();}
+}
+
+async function loadCompiledBatch(batchId, idsList){
+  document.getElementById('scan-subtitle').textContent = 'Compiled Batch Scan';
+  var batchName = 'Compiled Equipment Batch';
+  var equipIds = Array.isArray(idsList) ? idsList.slice() : [];
+
+  if(batchId && !batchId.startsWith('local-')){
+    try {
+      var res = await sb.from('equipment_qr_batches').select('*').eq('id', batchId).maybeSingle();
+      if(res.data){
+        if(res.data.batch_name) batchName = res.data.batch_name;
+        if(Array.isArray(res.data.equipment_ids) && res.data.equipment_ids.length){
+          // combine unique IDs
+          res.data.equipment_ids.forEach(function(id){ if(!equipIds.includes(id)) equipIds.push(id); });
+        }
+      }
+    } catch(e){ console.warn('[scan] Batch load error:', e); }
+  }
+
+  if(!equipIds.length){
+    renderError('Batch empty', 'No equipment items found in this compiled batch QR code.');
+    return;
+  }
+
+  // Load equipment details from DB
+  var equipData = [];
+  try {
+    var r1 = await sb.from('equipment_inventory').select('*').in('id', equipIds);
+    if(r1.data) equipData = r1.data;
+    // Also try matching asset_id if some IDs are asset_ids
+    if(equipData.length < equipIds.length){
+      var r2 = await sb.from('equipment_inventory').select('*').in('asset_id', equipIds);
+      if(r2.data){
+        r2.data.forEach(function(item){
+          if(!equipData.some(function(e){ return e.id === item.id; })) equipData.push(item);
+        });
+      }
+    }
+  } catch(e){ console.error('[scan] Batch equipment load error:', e); }
+
+  renderBatchView(batchName, equipData, equipIds);
+}
+
+function renderBatchView(batchName, items, requestedIds){
+  var card = document.getElementById('main-card');
+  if(!card) return;
+
+  var itemsHtml = '';
+  if(!items || !items.length){
+    itemsHtml = '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px;">No equipment records found for the IDs in this batch.</div>';
+  } else {
+    itemsHtml = items.map(function(eq){
+      var good = eq.good_qty != null ? eq.good_qty : (eq.available_qty != null ? eq.available_qty : 0);
+      var maint = eq.maintenance_qty || 0;
+      var miss = eq.missing_qty || 0;
+      var ret = eq.retired_qty || 0;
+      var assetIdLabel = eq.asset_id ? '<span style="color:var(--gold);font-weight:700;margin-right:6px;">' + escHtml(eq.asset_id) + '</span>' : '';
+
+      var currentQuery = window.location.search;
+      return '<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'
+        + '<div>'
+        + '<div style="font-size:16px;font-weight:700;color:var(--cream);">' + assetIdLabel + escHtml(eq.name) + '</div>'
+        + '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">' + escHtml(eq.category || eq.type || 'Equipment') + '</div>'
+        + '</div>'
+        + '<button class="btn btn-outline" style="padding:6px 12px;font-size:12px;" onclick="window.location.href=\'scan.html?eq=' + encodeURIComponent(eq.asset_id || eq.id) + '&fromBatch=' + encodeURIComponent(currentQuery) + '\'">'
+        + ' View Item</button>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;text-align:center;">'
+        + '<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:6px;"><div style="font-size:14px;font-weight:800;color:var(--green);">' + good + '</div><div style="font-size:8px;color:var(--text-dim);text-transform:uppercase;">Good</div></div>'
+        + '<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:6px;"><div style="font-size:14px;font-weight:800;color:var(--orange);">' + maint + '</div><div style="font-size:8px;color:var(--text-dim);text-transform:uppercase;">Maint</div></div>'
+        + '<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:6px;"><div style="font-size:14px;font-weight:800;color:var(--red);">' + miss + '</div><div style="font-size:8px;color:var(--text-dim);text-transform:uppercase;">Miss</div></div>'
+        + '<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:6px;"><div style="font-size:14px;font-weight:800;color:var(--text-dim);">' + ret + '</div><div style="font-size:8px;color:var(--text-dim);text-transform:uppercase;">Ret</div></div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  card.innerHTML = '<div style="padding:20px;border-bottom:1px solid var(--border);">'
+    + '<div style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;"> COMPILED BATCH</div>'
+    + '<div style="font-size:20px;font-weight:800;color:var(--cream);">' + escHtml(batchName) + '</div>'
+    + '<div style="font-size:12px;color:var(--text-dim);margin-top:4px;">Contains ' + (items ? items.length : 0) + ' equipment item' + (items && items.length !== 1 ? 's' : '') + '</div>'
+    + '</div>'
+    + '<div style="padding:16px 20px;">' + itemsHtml + '</div>';
+}
+
+function goBackToBatch(){
+  var fromBatch = getUrlParam('fromBatch');
+  if(fromBatch){
+    window.location.href = 'scan.html' + fromBatch;
+  } else {
+    window.history.back();
+  }
+}
+
+
+
+async function checkActiveSession(){
+  var rcBtn=document.getElementById('btn-routine-check');
+  var pill=document.getElementById('rc-active-pill');
+  try{
+    var res=await sb.from('routine_check_sessions').select('*').eq('status','active').limit(1).maybeSingle();
+    if(res.data){
+      ACTIVE_SESSION={id:res.data.id, startedAt:res.data.started_at, startedBy:res.data.started_by};
+      if(rcBtn){rcBtn.disabled=false;rcBtn.title='Active routine session detected';}
+      if(pill)pill.style.display='inline-block';
+    } else {
+      var localSes=getRcSession();
+      if(localSes&&(Date.now()-new Date(localSes.startedAt).getTime())<RC_EXPIRY_MS){
+        ACTIVE_SESSION=localSes;
+        if(rcBtn){rcBtn.disabled=false;rcBtn.title='Active session (local)';}
+        if(pill)pill.style.display='inline-block';
+      } else {
+        if(rcBtn){rcBtn.disabled=true;rcBtn.title='No active routine session - start one in the admin panel';}
+      }
+    }
+  }catch(e){
+    console.warn('[scan] Session check error:',e);
+    var ls=getRcSession();
+    if(ls&&(Date.now()-new Date(ls.startedAt).getTime())<RC_EXPIRY_MS){ACTIVE_SESSION=ls;if(rcBtn)rcBtn.disabled=false;}
+  }
+  startRcRealtime();
+}
+
+function startRcRealtime(){
+  if(_rcRealtimeChannel)return; // already subscribed
+  _rcRealtimeChannel=sb.channel('rc_session_watch')
+    .on('postgres_changes',{
+      event:'*',
+      schema:'public',
+      table:'routine_check_sessions'
+    },function(payload){
+      if(payload.eventType==='DELETE'||(payload.new&&payload.new.status!=='active')){
+        ACTIVE_SESSION=null;
+        var rcBtn=document.getElementById('btn-routine-check');
+        var pill=document.getElementById('rc-active-pill');
+        if(rcBtn){rcBtn.disabled=true;rcBtn.title='No active session';}
+        if(pill)pill.style.display='none';
+        if(_inRcMode) showRoutineCheckConcludedPanel();
+      } else if (payload.eventType==='INSERT'||payload.eventType==='UPDATE'){
+        var r = payload.new;
+        ACTIVE_SESSION={id:r.id, startedAt:r.started_at, startedBy:r.started_by};
+        var rcBtn=document.getElementById('btn-routine-check');
+        var pill=document.getElementById('rc-active-pill');
+        if(rcBtn){rcBtn.disabled=false;rcBtn.title='Active routine session';}
+        if(pill)pill.style.display='inline-block';
+      }
+    })
+    .subscribe();
+  try{
+    var bc=new BroadcastChannel('rc_session_channel');
+    bc.onmessage=function(ev){
+      if(ev.data&&ev.data.type==='RC_STARTED'){
+        ACTIVE_SESSION=ev.data.session||{id:'session'};
+        var rcBtn=document.getElementById('btn-routine-check');
+        var pill=document.getElementById('rc-active-pill');
+        if(rcBtn){rcBtn.disabled=false;rcBtn.title='Active routine session';}
+        if(pill)pill.style.display='inline-block';
+      } else if(ev.data&&ev.data.type==='RC_ENDED'){
+        ACTIVE_SESSION=null;
+        var rcBtn=document.getElementById('btn-routine-check');
+        var pill=document.getElementById('rc-active-pill');
+        if(rcBtn){rcBtn.disabled=true;rcBtn.title='No active session';}
+        if(pill)pill.style.display='none';
+        if(_inRcMode) showRoutineCheckConcludedPanel();
+      }
+    };
+  }catch(e){}
+}
+
+function showRoutineCheckConcludedPanel(){
+  _inRcMode=false;
+  // Hide RC mode panel
+  var rcPanel=document.getElementById('rc-mode-panel');
+  if(rcPanel)rcPanel.classList.remove('active');
+  // Hide default view too (we show concluded panel instead)
+  var defView=document.getElementById('default-view');
+  if(defView)defView.style.display='none';
+  // Close any open sub-panels
+  closeSubPanel('panel-incident');
+  // Show concluded panel
+  var concluded=document.getElementById('rc-concluded-panel');
+  if(concluded)concluded.style.display='block';
+  document.getElementById('scan-subtitle').textContent='Equipment Scan';
+}
+
+function closeConcludedPanel(){
+  var concluded=document.getElementById('rc-concluded-panel');
+  if(concluded)concluded.style.display='none';
+  var defView=document.getElementById('default-view');
+  if(defView)defView.style.display='block';
+}
+
+function enterRoutineCheckMode(){
+  if(!ACTIVE_SESSION){toast('No active routine session.','error');return;}
+  _inRcMode=true;
+  document.getElementById('default-view').style.display='none';
+  document.getElementById('rc-mode-panel').classList.add('active');
+  document.getElementById('scan-subtitle').textContent='Equipment Routine Check';
+  // Subscribe to per-equipment RC changes from admin/staff
+  if(CURRENT_EQ) enterRcEquipmentRealtime(CURRENT_EQ);
+}
+
+var _rcEqRealtimeChannel=null;
+function enterRcEquipmentRealtime(eq){
+  if(_rcEqRealtimeChannel){try{sb.removeChannel(_rcEqRealtimeChannel);}catch(e){}}
+  var eqId=eq.id;
+  var assetId=(eq.asset_id||'').toUpperCase();
+  _rcEqRealtimeChannel=sb.channel('rc_eq_watch_'+eqId)
+    .on('postgres_changes',{
+      event:'INSERT',schema:'public',table:'routine_check'
+    },function(payload){
+      var r=payload.new;
+      // Only react to rows matching this equipment
+      if(r.equipment_id!==eqId&&(r.asset_id||'').toUpperCase()!==assetId)return;
+      applyRemoteRcRow(r);
+    })
+    .on('postgres_changes',{
+      event:'UPDATE',schema:'public',table:'routine_check'
+    },function(payload){
+      var r=payload.new;
+      if(r.equipment_id!==eqId&&(r.asset_id||'').toUpperCase()!==assetId)return;
+      applyRemoteRcRow(r);
+    })
+    .on('postgres_changes',{
+      event:'DELETE',schema:'public',table:'routine_check'
+    },function(payload){
+      var r=payload.old;
+      if(!r)return;
+      if(r.equipment_id!==eqId&&(r.asset_id||'').toUpperCase()!==assetId)return;
+      // Remote side cleared this item — clear local incidents too (only if from a different session)
+      if(SESSION_ROW_ID&&r.id===SESSION_ROW_ID)return; // our own delete, ignore
+      INCIDENTS=[];_incIdx=0;SESSION_ROW_ID=null;
+      document.getElementById('incident-list').innerHTML='';
+      updateIncidentBadge();
+      toast('Incidents cleared remotely','');
+    })
+    .subscribe();
+}
+
+function applyRemoteRcRow(row){
+  // Only apply if we are inside RC mode and this isn't our own row
+  if(!_inRcMode)return;
+  if(SESSION_ROW_ID&&row.id===SESSION_ROW_ID)return; // our own row, skip
+  if(row.status==='incident'&&row.incidents){
+    var incs=[];
+    try{incs=typeof row.incidents==='string'?JSON.parse(row.incidents):(row.incidents||[]);}catch(e){}
+    if(!incs.length)return;
+    // Merge remote incidents into INCIDENTS array (only add types we don't already have)
+    var changed=false;
+    incs.forEach(function(ri){
+      var existing=INCIDENTS.find(function(i){return i.type===ri.type;});
+      if(!existing){
+        var domIdx=_incIdx++;
+        var newInc={type:ri.type,qty:ri.qty||1,domIdx:domIdx,imageUrl:ri.imageUrl||null};
+        INCIDENTS.push(newInc);
+        _appendIncidentDOM(newInc);
+        changed=true;
+      } else if(existing.qty!==ri.qty){
+        existing.qty=ri.qty;
+        var qEl=document.getElementById('inc-qty-'+existing.domIdx);
+        if(qEl)qEl.value=ri.qty;
+        changed=true;
+      }
+    });
+    if(changed){
+      SESSION_ROW_ID=SESSION_ROW_ID||row.id; // track this row
+      _refreshIncidentSelectOptions();
+      updateIncidentBadge();
+      toast('Incident updated from admin/staff','');
+    }
+  }
+}
+function exitRoutineCheckMode(){
+  _inRcMode=false;
+  document.getElementById('rc-mode-panel').classList.remove('active');
+  document.getElementById('default-view').style.display='block';
+  document.getElementById('scan-subtitle').textContent='Equipment Scan';
+  closeSubPanel('panel-incident');
+}
+
+async function loadEquipment(eqParam){
+  var r1=await sb.from('equipment_inventory').select('*').ilike('asset_id',eqParam).maybeSingle();
+  var data=r1.data,error=r1.error;
+  if(!data||error){var r2=await sb.from('equipment_inventory').select('*').eq('id',eqParam).maybeSingle();data=r2.data;error=r2.error;}
+  if(error||!data){renderError('Equipment not found','ID: '+eqParam);return;}
+  CURRENT_EQ=data;renderEquipmentInfo(data);loadAllocationHistory(data);loadCurrentAllocations(data);loadNextAllocations(data);
+}
+
+function renderEquipmentInfo(eq){
+  set('eq-asset-id',eq.asset_id||eq.id);set('eq-name',eq.name);
+  set('eq-category',eq.category||'\u2014');set('eq-type',eq.type||eq.allocation_type||'\u2014');
+  // Equipment image
+  var imgWrap = document.getElementById('eq-img-wrap');
+  var imgPlaceholder = document.getElementById('eq-img-placeholder');
+  if(imgWrap){
+    // Remove any previously injected img
+    var oldImg = imgWrap.querySelector('img');
+    if(oldImg) oldImg.remove();
+    if(eq.image_url){
+      var imgEl = document.createElement('img');
+      imgEl.src = eq.image_url;
+      imgEl.alt = eq.name || 'Equipment';
+      imgEl.style.opacity = '0';
+      imgEl.onload = function(){ this.style.opacity = '1'; };
+      imgEl.onerror = function(){
+        this.remove();
+        if(imgPlaceholder) imgPlaceholder.style.display = 'flex';
+      };
+      if(imgPlaceholder) imgPlaceholder.style.display = 'none';
+      imgWrap.appendChild(imgEl);
+    } else {
+      if(imgPlaceholder) imgPlaceholder.style.display = 'flex';
+    }
+  }
+  var allocMeta = document.getElementById('eq-alloc-meta');
+  if(allocMeta) allocMeta.style.display = 'none';
+  var good=eq.good_qty!=null?eq.good_qty:(eq.available_qty!=null?eq.available_qty:0);
+  var maint=eq.maintenance_qty||0,miss=eq.missing_qty||0,ret=eq.retired_qty||0;
+  set('pill-good',good);set('pill-maint',maint);set('pill-miss',miss);set('pill-ret',ret);
+  set('det-total',eq.total_qty!=null?eq.total_qty:'\u2014');
+  set('det-avail',eq.available_qty!=null?eq.available_qty:'\u2014');
+  var detCondStr = eq.condition || 'Good';
+  var condSc, condCc;
+  var condRq = miss + ret;
+  if(maint > 0 && condRq > 0){condSc = 'Needs Maintenance & Resupply'; condCc='var(--red)';}
+  else if(maint > 0){condSc = 'Needs Maintenance'; condCc='var(--orange)';}
+  else if(condRq > 0){condSc = 'Needs Resupply'; condCc='var(--orange)';}
+  else {
+    if(detCondStr === 'Damaged' || detCondStr === 'Poor'){condSc = 'Needs Maintenance'; condCc='var(--red)';}
+    else {condSc = 'Good'; condCc='var(--green)';}
+  }
+  var condEl = document.getElementById('det-condition');
+  if(condEl){condEl.textContent = condSc; condEl.style.color = condCc; condEl.style.fontWeight = '600';}
+  set('det-last-insp',eq.last_inspected?fmtDate(eq.last_inspected):'Never');
+  set('det-good',good);set('det-maint',maint);set('det-miss',miss);set('det-ret',ret);
+  set('det-purchase-date',eq.purchase_date?fmtDate(eq.purchase_date):'\u2014');
+  set('det-supplier',eq.supplier||eq.source_location||'\u2014');
+  var unitCost=parseFloat(eq.price)||parseFloat(eq.value)||0;
+  var totalQty=parseInt(eq.total_qty)||0;
+  set('det-unit-cost',unitCost?fmtCurrency(unitCost):'\u2014');
+  set('det-unit-type', eq.unit_type || '\u2014');
+  var shoppingCost = parseFloat(eq.shopping_cost) || 0;
+  set('det-shopping-cost', shoppingCost ? fmtCurrency(shoppingCost) : '\u2014');
+  let finalTotalCost = shoppingCost * totalQty;
+  if (eq.unit_type === 'sets') {
+    finalTotalCost = shoppingCost;
+  } else if (eq.unit_type && eq.unit_type.startsWith('every_')) {
+    const n = parseInt(eq.unit_type.split('_')[1]) || 1;
+    finalTotalCost = Math.ceil(totalQty / n) * shoppingCost;
+  }
+  set('det-total-cost', (shoppingCost && totalQty) ? fmtCurrency(finalTotalCost) : '\u2014');
+  // Render purchase history table in details sub-panel
+  if (typeof renderPurchaseHistoryTable === 'function') {
+    renderPurchaseHistoryTable(eq);
+  }
+  // Current allocations are populated by loadCurrentAllocations() after this returns
+  var listEl=document.getElementById('current-alloc-list');
+  if(listEl){listEl.innerHTML='<div class="shimmer-line" style="width:70%;"></div><div class="shimmer-line" style="width:50%;"></div>';}
+}
+
+// Render Purchase History Records Table (No emojis, strictly escaped, weighted average)
+function renderPurchaseHistoryTable(eq) {
+  var container = document.getElementById('det-purchase-history-container');
+  if (!container) return;
+
+  var history = [];
+  if (eq && eq.purchase_history && Array.isArray(eq.purchase_history) && eq.purchase_history.length > 0) {
+    history = eq.purchase_history;
+  } else if (eq && typeof eq.purchase_history === 'string') {
+    try { history = JSON.parse(eq.purchase_history); } catch (e) {}
+  }
+
+  // Fallback to synthesizing initial purchase if empty
+  if (!history || !history.length) {
+    var initialDate = eq && eq.purchase_date ? fmtDate(eq.purchase_date) : 'Initial Purchase';
+    var initialSupplier = (eq && (eq.supplier || eq.source_location)) || 'Not specified';
+    var initialQty = (eq && parseInt(eq.total_qty)) || 1;
+    var initialCost = (eq && (parseFloat(eq.shopping_cost) || parseFloat(eq.price) || parseFloat(eq.value))) || 0;
+    var initialUnitType = (eq && (eq.shopping_unit_type || eq.shoppingUnitType || eq.unit_type)) || 'pcs';
+    history = [{
+      date: initialDate,
+      supplier: initialSupplier,
+      qty: initialQty,
+      cost: initialCost,
+      shopping_unit_type: initialUnitType
+    }];
+  }
+
+  var totalPurchased = 0;
+  var totalCostAcc = 0;
+  var rowsHtml = '';
+
+  history.forEach(function(item) {
+    var pDate = item.date ? (String(item.date).includes('-') ? fmtDate(item.date) : item.date) : '\u2014';
+    var pSup = item.supplier || '\u2014';
+    var pQty = parseInt(item.qty) || 0;
+    var pCost = parseFloat(item.cost != null ? item.cost : (item.shopping_cost || item.unit_cost || 0)) || 0;
+    var pUnitType = item.shopping_unit_type || item.unit_type || 'pcs';
+
+    totalPurchased += pQty;
+    totalCostAcc += (pQty * pCost);
+
+    rowsHtml += '<tr style="border-bottom:1px solid rgba(255,255,255,0.06);">' +
+      '<td style="padding:8px 10px; font-size:12px; color:var(--cream);">' + escHtml(pDate) + '</td>' +
+      '<td style="padding:8px 10px; font-size:12px; color:var(--cream);">' + escHtml(pSup) + '</td>' +
+      '<td style="padding:8px 10px; font-size:12px; color:var(--cream); text-align:right;">' + pQty + '</td>' +
+      '<td style="padding:8px 10px; font-size:12px; color:var(--cream); text-align:right;">' + fmtCurrency(pCost) + '</td>' +
+      '<td style="padding:8px 10px; font-size:12px; color:var(--cream); text-align:center;">' + escHtml(pUnitType) + '</td>' +
+    '</tr>';
+  });
+
+  var weightedAvgCost = totalPurchased > 0 ? (totalCostAcc / totalPurchased) : 0;
+  var mainUnit = (history[0] && history[0].shopping_unit_type) ? history[0].shopping_unit_type : (eq && eq.unit_type ? eq.unit_type : 'pcs');
+
+  container.innerHTML = '<table style="width:100%; border-collapse:collapse; margin-bottom:10px; border:1px solid var(--border); border-radius:6px; overflow:hidden;">' +
+    '<thead>' +
+      '<tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid var(--border);">' +
+        '<th style="padding:8px 10px; text-align:left; font-size:11px; color:var(--text-dim); font-weight:600;">Purchase Date</th>' +
+        '<th style="padding:8px 10px; text-align:left; font-size:11px; color:var(--text-dim); font-weight:600;">Supplier</th>' +
+        '<th style="padding:8px 10px; text-align:right; font-size:11px; color:var(--text-dim); font-weight:600;">Qty</th>' +
+        '<th style="padding:8px 10px; text-align:right; font-size:11px; color:var(--text-dim); font-weight:600;">Shopping Cost</th>' +
+        '<th style="padding:8px 10px; text-align:center; font-size:11px; color:var(--text-dim); font-weight:600;">Unit Type</th>' +
+      '</tr>' +
+    '</thead>' +
+    '<tbody>' + rowsHtml + '</tbody>' +
+  '</table>' +
+  '<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:6px;">' +
+    '<div>' +
+      '<div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; font-weight:600;">Total Purchased</div>' +
+      '<div style="font-size:14px; font-weight:700; color:var(--cream); margin-top:2px;">' + totalPurchased + ' ' + escHtml(mainUnit) + '</div>' +
+    '</div>' +
+    '<div style="text-align:right;">' +
+      '<div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; font-weight:600;">Weighted Average Cost</div>' +
+      '<div style="font-size:14px; font-weight:700; color:var(--cream); margin-top:2px;">' + fmtCurrency(weightedAvgCost) + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+async function loadAllocationHistory(eq){
+  var histEl=document.getElementById('alloc-history-list');
+  if(!histEl)return;
+  try{
+    var orParts=[];
+    if(eq.asset_id)orParts.push('asset_id.eq.'+eq.asset_id);
+    if(eq.id)orParts.push('equipment_id.eq.'+eq.id);
+    if(!orParts.length){histEl.innerHTML='<p class="alloc-empty">No allocation history recorded yet.</p>';return;}
+    var res=await sb.from('allocation_history').select('*').or(orParts.join(',')).eq('is_rental',false).order('recorded_at',{ascending:false}).limit(20);
+    if(res.error||!res.data||!res.data.length){histEl.innerHTML='<p class="alloc-empty">No allocation history recorded yet.</p>';return;}
+    // Additional client-side guard: exclude any rental rows and venue-provided allocations
+    var rows=res.data.filter(function(r){return !r.is_rental && !(r.allocation_batch && r.allocation_batch.startsWith('VENUE-'));});
+    if(!rows.length){histEl.innerHTML='<p class="alloc-empty">No allocation history recorded yet.</p>';return;}
+    histEl.innerHTML=rows.map(function(row){
+      return '<div class="alloc-row">'
+        +'<div class="alloc-batch">'+(row.allocation_batch||'\u2014')+'</div>'
+        +'<div class="alloc-res">'+(row.reservation_name||'\u2014')+'</div>'
+        +'<div class="alloc-meta">'
+        +(row.allocation_date?'<span> '+fmtDate(row.allocation_date)+'</span>':'')
+        +(row.allocated_qty!=null?'<span> Qty: '+row.allocated_qty+'</span>':'')
+        +'</div></div>';
+    }).join('');
+  }catch(e){histEl.innerHTML='<p class="alloc-empty">Could not load history.</p>';}
+}
+
+function renderError(title,msg){document.getElementById('main-card').innerHTML='<div class="error-card"><div class="icon"></div><div class="title">'+title+'</div><div class="msg">'+msg+'</div></div>';}
+
+function openDetailPanel(){
+  closeSubPanel('panel-incident');
+  closeSubPanel('panel-standalone-incident');
+  closeSubPanel('panel-analytics');
+  closeSubPanel('panel-location');
+  closeSubPanel('panel-history');
+  var p = document.getElementById('panel-details');
+  if (p) p.classList.toggle('open');
+}
+
+function openIncidentPanel(){if(CONFIRMED_OKAY){toast('Uncheck confirm okay first.','error');return;}closeSubPanel('panel-details');closeSubPanel('panel-standalone-incident');closeSubPanel('panel-analytics');closeSubPanel('panel-location');document.getElementById('panel-incident').classList.add('open');if(!INCIDENTS.length)addIncidentRow();}
+
+function closeSubPanel(id){
+  var el = document.getElementById(id);
+  if (el && el.classList) {
+    el.classList.remove('open');
+  }
+}
+
+function _usedIncidentTypes(){
+  return INCIDENTS.map(function(i){return i.type==='retired'?'trash':i.type;});
+}
+function _refreshIncidentSelectOptions(){
+  var used=_usedIncidentTypes();
+  INCIDENTS.forEach(function(inc){
+    var sel=document.getElementById('inc-type-'+inc.domIdx);if(!sel)return;
+    var myType=inc.type==='retired'?'trash':inc.type;
+    Array.from(sel.options).forEach(function(o){
+      o.disabled=o.value!==myType&&used.includes(o.value);
+    });
+  });
+  var addBtn=document.getElementById('btn-add-incident');
+  if(addBtn)addBtn.style.display=used.length>=3?'none':'';
+}
+function _appendIncidentDOM(inc){
+  var maxQ=CURRENT_EQ?(CURRENT_EQ.good_qty||CURRENT_EQ.available_qty||99):99;
+  var list=document.getElementById('incident-list');
+  var div=document.createElement('div');div.className='incident-item';div.id='incident-row-'+inc.domIdx;
+  var myType=inc.type==='retired'?'trash':inc.type;
+  var used=_usedIncidentTypes().filter(function(t){return t!==myType;});
+  var thumbHtml=inc.imageUrl?'<img src="'+inc.imageUrl+'" style="width:28px;height:28px;object-fit:cover;border-radius:4px;border:1px solid rgba(196,154,60,0.4);flex-shrink:0;" />':'';
+  div.innerHTML='<div class="incident-row-cols">'
+    +'<div><label>Incident Type</label><select id="inc-type-'+inc.domIdx+'" onchange="updateIncident('+inc.domIdx+')">'
+    +'<option value="broken"'+(myType==='broken'?' selected':'')+(used.includes('broken')?' disabled':'')+'>Broken / Damaged</option>'
+    +'<option value="missing"'+(myType==='missing'?' selected':'')+(used.includes('missing')?' disabled':'')+'>Missing</option>'
+    +'<option value="trash"'+(myType==='trash'?' selected':'')+(used.includes('trash')?' disabled':'')+'>Retired / Disposed</option>'
+    +'</select></div>'
+    +'<div>'
+    +'<label>Quantity Affected</label>'
+    +'<div style="display:flex;align-items:center;gap:6px;">'
+    +'<input type="number" id="inc-qty-'+inc.domIdx+'" value="'+(inc.qty||1)+'" min="1" max="'+maxQ+'" onchange="updateIncident('+inc.domIdx+')" style="flex:1;" />'
+    +'<input type="file" id="inc-file-'+inc.domIdx+'" accept="image/*" capture="environment" style="display:none;" onchange="handleScanIncidentFileChange('+inc.domIdx+',this)" />'
+    +'<button onclick="document.getElementById(\'inc-file-'+inc.domIdx+'\').click()" style="background:rgba(196,154,60,0.12);border:1px solid rgba(196,154,60,0.3);color:var(--gold);border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;" id="inc-upload-btn-'+inc.domIdx+'">'
+    +(inc.imageUrl?'Replace':'Upload')
+    +'</button>'
+    +'<span id="inc-thumb-'+inc.domIdx+'">'+thumbHtml+'</span>'
+    +'<button onclick="removeIncident('+inc.domIdx+')" title="Remove this incident" style="background:rgba(224,92,78,0.15);border:1px solid rgba(224,92,78,0.35);color:#e05c4e;border-radius:6px;padding:5px 9px;font-size:14px;font-weight:900;cursor:pointer;line-height:1;flex-shrink:0;">&#xd7;</button>'
+    +'</div>'
+    +'</div>'
+    +'</div>';
+  list.appendChild(div);
+}
+
+async function handleScanIncidentFileChange(domIdx,input){
+  var file=input.files&&input.files[0];
+  if(!file)return;
+  var btn=document.getElementById('inc-upload-btn-'+domIdx);
+  var thumbEl=document.getElementById('inc-thumb-'+domIdx);
+  if(btn){btn.textContent='Uploading...';btn.disabled=true;}
+  try{
+    var result=await uploadIncidentImageToCloudinary(file);
+    var inc=INCIDENTS.find(function(i){return i.domIdx===domIdx;});
+    if(inc){
+      inc.imageUrl=result.secure_url;
+      inc.imagePublicId=result.public_id;
+      inc.imageDeleteToken=result.delete_token||null;
+    }
+    if(thumbEl)thumbEl.innerHTML='<img src="'+result.secure_url+'" style="width:28px;height:28px;object-fit:cover;border-radius:4px;border:1px solid rgba(196,154,60,0.4);flex-shrink:0;" />';
+    if(btn){btn.textContent='Replace';btn.disabled=false;}
+    // Immediately update Supabase row if we have one
+    if(SESSION_ROW_ID){
+      try{
+        // Store first incident image on the row (most common case)
+        var firstWithImg=INCIDENTS.find(function(i){return i.imageUrl;});
+        if(firstWithImg){
+          await sb.from('routine_check').update({
+            incident_image_url:firstWithImg.imageUrl,
+            incident_image_public_id:firstWithImg.imagePublicId
+          }).eq('id',SESSION_ROW_ID);
+        }
+      }catch(e){console.warn('[scan] Supabase image update failed:',e);}
+    }
+    toast('Photo uploaded','success');
+  }catch(e){
+    if(btn){btn.textContent='Upload';btn.disabled=false;}
+    toast('Upload failed: '+e.message,'error');
+  }
+}
+function _unusedType(){
+  var allTypes=['broken','missing','trash'];
+  var used=_usedIncidentTypes();
+  return allTypes.find(function(t){return !used.includes(t);})||null;
+}
+function addIncidentRow(){
+  var next=_unusedType();
+  if(!next)return;
+  var idx=_incIdx++;INCIDENTS.push({type:next,qty:1,domIdx:idx});_appendIncidentDOM({type:next,qty:1,domIdx:idx});
+  _refreshIncidentSelectOptions();updateIncidentBadge();
+}
+function updateIncident(idx){
+  var t=document.getElementById('inc-type-'+idx),q=document.getElementById('inc-qty-'+idx);
+  if(!t||!q)return;
+  var inc=INCIDENTS.find(function(i){return i.domIdx===idx;});
+  if(inc){inc.type=t.value;inc.qty=parseInt(q.value)||1;}
+  _refreshIncidentSelectOptions();updateIncidentBadge();
+}
+function removeIncident(idx){
+  var row=document.getElementById('incident-row-'+idx);if(row)row.remove();
+  // Clean up Cloudinary image if exists
+  var removing=INCIDENTS.find(function(i){return i.domIdx===idx;});
+  if(removing&&removing.imageDeleteToken)deleteCloudinaryImage(removing.imageDeleteToken);
+  INCIDENTS=INCIDENTS.filter(function(i){return i.domIdx!==idx;});
+  _refreshIncidentSelectOptions();updateIncidentBadge();
+  // Sync removal to Supabase so admin/staff see the updated incident list
+  syncIncidentsToSupabase();
+}
+
+async function syncIncidentsToSupabase(){
+  if(!SESSION_ROW_ID||!ACTIVE_SESSION)return;
+  try{
+    if(INCIDENTS.length===0){
+      // No incidents left — delete the row so admin/staff see item as unchecked
+      await sb.from('routine_check').delete().eq('id',SESSION_ROW_ID);
+      SESSION_ROW_ID=null;
+      // Also clear from rc_checked_items
+      if(CURRENT_EQ){
+        var items=getRcCheckedItems();
+        var key=(CURRENT_EQ.asset_id||'').toUpperCase();
+        var match=Object.keys(items).find(function(k){return k.toUpperCase()===key;});
+        if(match){delete items[match];saveRcCheckedItems(items);}
+      }
+    } else {
+      // Update row with remaining incidents
+      var safeIncs=INCIDENTS.map(function(i){return{type:i.type,qty:i.qty,imageUrl:i.imageUrl||null};});
+      var firstImg=INCIDENTS.find(function(i){return i.imageUrl;});
+      await sb.from('routine_check').update({
+        incidents:JSON.stringify(safeIncs),
+        status:'incident',
+        incident_image_url:firstImg?firstImg.imageUrl:null,
+        incident_image_public_id:firstImg?firstImg.imagePublicId:null
+      }).eq('id',SESSION_ROW_ID);
+    }
+  }catch(e){console.warn('[scan] syncIncidentsToSupabase failed:',e);}
+}
+function updateIncidentBadge(){var badge=document.getElementById('incident-count-badge');if(!badge)return;badge.style.display=INCIDENTS.length?'inline-flex':'none';badge.textContent=INCIDENTS.length+' pending';if(INCIDENTS.length&&document.getElementById('chk-confirm').checked){document.getElementById('chk-confirm').checked=false;CONFIRMED_OKAY=false;}}
+
+
+function toggleConfirm(){var chk=document.getElementById('chk-confirm');chk.checked=!chk.checked;onConfirmChange();}
+function onConfirmChange(){var chk=document.getElementById('chk-confirm');CONFIRMED_OKAY=chk.checked;if(CONFIRMED_OKAY&&INCIDENTS.length){toast('Remove all incidents first.','error');chk.checked=false;CONFIRMED_OKAY=false;return;}document.getElementById('btn-report-incident').disabled=CONFIRMED_OKAY;}
+
+function showDiscardModal(){document.getElementById('discard-modal').classList.add('show');}
+function hideDiscardModal(){document.getElementById('discard-modal').classList.remove('show');}
+async function confirmDiscard(){
+  hideDiscardModal();
+  if(ACTIVE_SESSION&&CURRENT_EQ){var items=getRcCheckedItems();var key=(CURRENT_EQ.asset_id||'').toUpperCase();var match=Object.keys(items).find(function(k){return k.toUpperCase()===key;});if(match){delete items[match];saveRcCheckedItems(items);}}
+  if(SESSION_ROW_ID){try{await sb.from('routine_check').delete().eq('id',SESSION_ROW_ID);}catch(e){}SESSION_ROW_ID=null;}
+  // Clean up all Cloudinary images from this session
+  INCIDENTS.forEach(function(inc){if(inc.imageDeleteToken)deleteCloudinaryImage(inc.imageDeleteToken);});
+  INCIDENTS=[];_incIdx=0;CONFIRMED_OKAY=false;
+  document.getElementById('chk-confirm').checked=false;
+  document.getElementById('incident-list').innerHTML='';
+  document.getElementById('incident-count-badge').style.display='none';
+  document.getElementById('btn-report-incident').disabled=false;
+  closeSubPanel('panel-details');closeSubPanel('panel-incident');
+  toast('Changes removed');
+}
+
+async function saveCheck(){
+  if(!CURRENT_EQ)return;
+  if(!CURRENT_USER){toast('You must be logged in to save.','error');return;}
+  var saveBtn=document.getElementById('btn-save');
+  saveBtn.disabled=true;saveBtn.innerHTML=' Saving...';
+  var eq=CURRENT_EQ;
+  var newGood=eq.good_qty!=null?eq.good_qty:(eq.available_qty!=null?eq.available_qty:(eq.total_qty||0));
+  var newMaint=eq.maintenance_qty||0,newMiss=eq.missing_qty||0,newRet=eq.retired_qty||0;
+  if(!CONFIRMED_OKAY&&!INCIDENTS.length){toast('Confirm okay or report an incident first.','error');saveBtn.disabled=false;saveBtn.innerHTML=' Save';return;}
+  if(!CONFIRMED_OKAY){INCIDENTS.forEach(function(inc){var a=Math.min(inc.qty,newGood);newGood-=a;if(inc.type==='broken')newMaint+=a;else if(inc.type==='missing')newMiss+=a;else if(inc.type==='trash'||inc.type==='retired')newRet+=a;});}
+  var eqRes=await sb.from('equipment_inventory').update({good_qty:newGood,maintenance_qty:newMaint,missing_qty:newMiss,retired_qty:newRet,last_inspected:new Date().toISOString().split('T')[0]}).eq('id',eq.id);
+  if(eqRes.error){toast('Failed to save.','error');console.error(eqRes.error);saveBtn.disabled=false;saveBtn.innerHTML=' Save';return;}
+  var checkedBy=CURRENT_USER?(CURRENT_USER.email||CURRENT_USER.id):'Admin';
+  var sessionNote=ACTIVE_SESSION?'SESSION:'+ACTIVE_SESSION.id:'QR Scan';
+  var safeIncidents=INCIDENTS.length?INCIDENTS.map(function(i){return{type:i.type,qty:i.qty,imageUrl:i.imageUrl||null};}):null;
+  // Find first incident with an image for column storage
+  var firstImgInc=INCIDENTS.find(function(i){return i.imageUrl;});
+  var rcPayload={
+    equipment_id:eq.id,
+    asset_id:eq.asset_id||null,
+    equipment_name:eq.name,
+    checked_by:checkedBy,
+    checked_at:new Date().toISOString(),
+    status:INCIDENTS.length?'incident':'good',
+    incidents:safeIncidents?JSON.stringify(safeIncidents):null,
+    notes:sessionNote,
+    quantity: eq.total_qty || 1,
+    good_qty: newGood,
+    incident_image_url: firstImgInc?firstImgInc.imageUrl:null,
+    incident_image_public_id: firstImgInc?firstImgInc.imagePublicId:null
+  };
+  var savedRowId=SESSION_ROW_ID;
+  if(savedRowId){await sb.from('routine_check').update(rcPayload).eq('id',savedRowId);}
+  else{var ins=(await sb.from('routine_check').insert(rcPayload).select('id').maybeSingle()).data;if(ins)savedRowId=ins.id;SESSION_ROW_ID=savedRowId;}
+  var assetKey=(eq.asset_id||'').toUpperCase();
+  if(assetKey){var chkItems=getRcCheckedItems();chkItems[assetKey]={status:rcPayload.status,incidents:INCIDENTS.slice(),routineCheckRowId:savedRowId||null};saveRcCheckedItems(chkItems);}
+  eq.good_qty=newGood;eq.maintenance_qty=newMaint;eq.missing_qty=newMiss;eq.retired_qty=newRet;
+  renderEquipmentInfo(eq);
+  toast('Check saved!','success');
+  saveBtn.disabled=false;saveBtn.innerHTML=' Save';
+}
+
+function escHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function allocDisplayName(resv, row){
+  resv = resv || {};
+  var pkg = resv.package_name || resv.packageName || '';
+  var client = resv.client_name || resv.client || '';
+  if(client && pkg) return client + ' — ' + pkg;
+  if(pkg) return pkg;
+  if(row && row.reservation_name) return row.reservation_name;
+  return client || '—';
+}
+
+function allocDateKey(d){
+  if(!d) return '';
+  var s = String(d);
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  var dt = new Date(s);
+  if(!isNaN(dt.getTime())){
+    var y=dt.getFullYear(), m=String(dt.getMonth()+1).padStart(2,'0'), day=String(dt.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  }
+  return s;
+}
+
+function historyOrFilter(eq){
+  var orParts=[];
+  if(eq.asset_id) orParts.push('asset_id.eq.'+eq.asset_id);
+  if(eq.id) orParts.push('equipment_id.eq.'+eq.id);
+  if(eq.name) orParts.push('equipment_name.eq."'+String(eq.name).replace(/"/g,'')+'"');
+  return orParts;
+}
+
+// One current batch per reservation: keep the newest history rows and drop leftovers from older saves.
+function latestAllocPerReservation(rows){
+  var map = {};
+  (rows || []).forEach(function(r){
+    var key = r.reservation_id || r.allocation_batch || r.id;
+    if(!key) return;
+    var t = r.recorded_at ? new Date(r.recorded_at).getTime() : 0;
+    var prev = map[key];
+    var pt = prev && prev.recorded_at ? new Date(prev.recorded_at).getTime() : -1;
+    if(!prev || t > pt) map[key] = r;
+  });
+  return Object.keys(map).map(function(k){ return map[k]; });
+}
+
+async function loadCurrentAllocations(eq){
+  var headEl=document.getElementById('cur-alloc-head');
+  var listEl=document.getElementById('current-alloc-list');
+  if(!listEl)return;
+  window._allocCoordData={};
+  try{
+    var orParts=historyOrFilter(eq);
+    if(!orParts.length){listEl.innerHTML='';if(headEl)headEl.style.display='none';return;}
+    var res=await sb.from('allocation_history')
+      .select('id,asset_id,equipment_id,equipment_name,allocation_batch,reservation_id,reservation_name,allocation_date,allocated_qty,recorded_at,is_rental')
+      .or(orParts.join(','))
+      .order('recorded_at',{ascending:false});
+    if(res.error||!res.data||!res.data.length){listEl.innerHTML='';if(headEl)headEl.style.display='none';return;}
+    var histRows=res.data.filter(function(r){return r.is_rental !== true && !(r.allocation_batch && r.allocation_batch.startsWith('VENUE-'));});
+    var resIds=[...new Set(histRows.map(function(r){return r.reservation_id;}).filter(Boolean))];
+    var reservationMap={};
+    if(resIds.length){
+      var rr=await sb.from('reservations').select('id,status,client_name,package_name,venue,timeframe,date').in('id',resIds);
+      if(!rr.error && rr.data) rr.data.forEach(function(r){reservationMap[r.id]=r;});
+    }
+    var excluded=['completed','cancelled'];
+    var activeAllocs=latestAllocPerReservation(histRows).filter(function(row){
+      if(!row.reservation_id)return true;
+      var resv=reservationMap[row.reservation_id];
+      if(!resv)return true;
+      return !excluded.includes((resv.status||'').toLowerCase());
+    });
+    if(!activeAllocs.length){listEl.innerHTML='';if(headEl)headEl.style.display='none';return;}
+    if(headEl)headEl.style.display='flex';
+    activeAllocs.forEach(function(row,idx){
+      var resv=reservationMap[row.reservation_id];
+      if(resv){
+        var c = resv.venue_coords || resv.coords;
+        window._allocCoordData['ca-'+idx]={coords:c,venue:resv.venue||''};
+      }
+    });
+    listEl.innerHTML=activeAllocs.map(function(row,idx){
+      var resv=reservationMap[row.reservation_id];
+      var venue=resv?(resv.venue||''):'';
+      var timeRaw=resv?(resv.time||resv.timeframe||''):'';
+      var time=formatTime12Hour(timeRaw);
+      var coords=resv?(resv.venue_coords||resv.coords):null;
+      var accId='ca-'+idx;
+      return '<div class="alloc-row alloc-accordion" onclick="toggleAllocAccordion(\'' + accId + '\')">'
+        +'<div class="alloc-acc-header">'
+        +'<div style="flex:1;min-width:0;">'
+        +'<div class="alloc-batch">'+(row.allocation_batch||'--')+'</div>'
+        +'<div class="alloc-res">'+escHtml(allocDisplayName(resv,row))+'</div>'
+        +'<div class="alloc-meta">'
+        +(row.allocation_date?'<span> '+fmtDate(row.allocation_date)+'</span>':'')
+        +(row.allocated_qty!=null?'<span> Qty: '+row.allocated_qty+'</span>':'')
+        +'</div></div>'
+        +'<span class="alloc-acc-chev" id="'+accId+'-chev">&#9660;</span>'
+        +'</div>'
+        +'<div class="alloc-acc-body" id="'+accId+'">'
+        +'<div class="alloc-detail-line"><span class="adl-lbl">Quantity Allocated</span><span class="adl-val">'+(row.allocated_qty!=null?row.allocated_qty:'--')+'</span></div>'
+        +(time?'<div class="alloc-detail-line"><span class="adl-lbl">Time Range</span><span class="adl-val" style="text-align:right;max-width:60%;">'+time+'</span></div>':'')
+        +(venue?'<div class="alloc-detail-line"><span class="adl-lbl">Venue Address</span><span class="adl-val" style="text-align:right;max-width:60%;">'+venue+'</span></div>':'')
+        +((coords||venue)?'<div id="'+accId+'-map" class="alloc-mini-map" style="display:none;"></div>':'')
+        +'</div>'
+        +'</div>';
+    }).join('');
+  }catch(e){
+    console.error('[scan] loadCurrentAllocations error:',e);
+    listEl.innerHTML='';
+    if(headEl)headEl.style.display='none';
+  }
+}
+
+function toggleAllocAccordion(id){
+  var body=document.getElementById(id);
+  var chev=document.getElementById(id+'-chev');
+  if(!body)return;
+  var isOpen=body.classList.contains('open');
+  body.classList.toggle('open');
+  if(chev)chev.classList.toggle('open');
+  if(!isOpen&&window._allocCoordData&&window._allocCoordData[id]){
+    setTimeout(async function(){
+      var mapEl=document.getElementById(id+'-map');
+      if(!mapEl||mapEl._leafletMap||!window.L)return;
+      var d=window._allocCoordData[id];
+      var lat=null,lng=null;
+      var c=d.coords;
+      if(typeof c==='string'){try{c=JSON.parse(c);}catch(e){}}
+      if(c&&typeof c==='object'){
+        lat=c.lat||c.latitude||(Array.isArray(c)?c[0]:null);
+        lng=c.lng||c.longitude||(Array.isArray(c)?c[1]:null);
+      }
+      if(!lat && !lng && d.venue){
+         try {
+            var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(d.venue) + '&limit=1&countrycodes=ph';
+            var r = await fetch(url);
+            var data = await r.json();
+            if(data && data.length){ lat=parseFloat(data[0].lat); lng=parseFloat(data[0].lon); d.coords=[lat,lng]; }
+         }catch(e){}
+      }
+      if(!lat||!lng)return;
+      mapEl.style.display='block';
+      var map=L.map(mapEl,{zoomControl:false,attributionControl:false}).setView([lat,lng],15);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}').addTo(map);
+      L.marker([lat,lng]).addTo(map).bindPopup(d.venue||'Venue').openPopup();
+      mapEl._leafletMap=map;
+    },60);
+  }
+}
+
+async function loadNextAllocations(eq){
+  var panel = document.getElementById('next-alloc-panel');
+  var resList = document.getElementById('next-alloc-res-list');
+  var dateBadge = document.getElementById('next-alloc-date-badge');
+  if(!panel || !resList) return;
+
+  try {
+    var orParts = historyOrFilter(eq);
+    if(!orParts.length){ panel.style.display='none'; return; }
+
+    var allocRes = await sb.from('allocation_history')
+      .select('reservation_id,reservation_name,allocated_qty,allocation_date,asset_id,equipment_id,equipment_name,allocation_batch,recorded_at,is_rental')
+      .or(orParts.join(','))
+      .order('allocation_date', {ascending: true});
+
+    if(allocRes.error || !allocRes.data || !allocRes.data.length){ panel.style.display='none'; return; }
+
+    var histRows = allocRes.data.filter(function(r){ return r.is_rental !== true && !(r.allocation_batch && r.allocation_batch.startsWith('VENUE-')); });
+
+    // Find the soonest upcoming date (today or future)
+    var todayStr = new Date().toISOString().slice(0,10);
+    var futureDates = histRows
+      .map(function(r){ return allocDateKey(r.allocation_date); })
+      .filter(function(d){ return d && d >= todayStr; })
+      .sort();
+
+    if(!futureDates.length){ panel.style.display='none'; return; }
+    var nextDate = futureDates[0];
+
+    // Only allocations on that single date, then collapse leftover old saves to one card per reservation
+    var nextAllocs = latestAllocPerReservation(histRows.filter(function(r){ return allocDateKey(r.allocation_date) === nextDate; }));
+    if(!nextAllocs.length){ panel.style.display='none'; return; }
+
+    // Fetch full reservation details (including address fields)
+    var resIds = [...new Set(nextAllocs.map(function(r){ return r.reservation_id; }).filter(Boolean))];
+    var reservationMap = {};
+    if(resIds.length){
+      var rr = await sb.from('reservations')
+        .select('id,status,client_name,package_name,venue,timeframe,date')
+        .in('id', resIds);
+      if(!rr.error && rr.data) rr.data.forEach(function(r){ reservationMap[r.id] = r; });
+    }
+
+    var excluded = ['completed','cancelled'];
+    nextAllocs = nextAllocs.filter(function(row){
+      if(!row.reservation_id) return true;
+      var resv = reservationMap[row.reservation_id];
+      if(!resv) return true;
+      return !excluded.includes((resv.status||'').toLowerCase());
+    });
+    if(!nextAllocs.length){ panel.style.display='none'; return; }
+
+    // Format date — bigger centered, no pill
+    var badgeDate = new Date(nextDate + 'T00:00:00');
+    dateBadge.textContent = badgeDate.toLocaleDateString('en-US', {weekday:'short', month:'long', day:'numeric', year:'numeric'});
+
+    var totalQty = parseInt(eq.total_qty || eq.good_qty || eq.available_qty || 99);
+
+    // Render each reservation as its own card — goes straight to pending state
+    resList.innerHTML = nextAllocs.map(function(row, idx){
+      var resv = reservationMap[row.reservation_id] || {};
+      var name = allocDisplayName(resv, row);
+
+      // Time: try multiple fields
+      var rawTime = resv.timeframe || resv.time || resv.time_range || '';
+      if(!rawTime && resv.time_from && resv.time_to) rawTime = resv.time_from + ' - ' + resv.time_to;
+      var timeStr = rawTime ? formatTime12Hour(rawTime) : '';
+
+      // Address: try multiple fields
+      var addr = resv.venue || resv.venue_address || resv.full_address || resv.address || '';
+
+      var qty = row.allocated_qty != null ? row.allocated_qty : 1;
+      var rowKey = 'next_alloc_pending_' + (eq.asset_id || eq.id) + '_' + (row.reservation_id || idx);
+      // Auto-set the pending state immediately — skip the "units leaving" save step
+      sessionStorage.setItem(rowKey, JSON.stringify({ qty: qty, savedAt: new Date().toISOString() }));
+      var pendId = 'na-pend-' + idx;
+
+      return '<div class="next-alloc-row">'
+        // Info block
+        + '<div class="next-alloc-row-info">'
+        + '<div class="next-alloc-res-name">' + escHtml(name) + '</div>'
+        + '<div class="next-alloc-detail-line">Qty needed: <b>' + qty + '</b></div>'
+        + (timeStr ? '<div class="next-alloc-detail-line">Time: <b>' + escHtml(timeStr) + '</b></div>' : '')
+        + (addr ? '<div class="next-alloc-detail-line" style="align-items:flex-start;">Venue: <b style="flex:1;">' + escHtml(addr) + '</b></div>' : '')
+        + '</div>'
+        // Pending zone only — dispatch input zone is gone
+        + '<div class="next-alloc-pending-zone" id="' + pendId + '" style="display:flex;">'
+        + '<div class="next-alloc-pending-text">Waiting for staff to signal arrival.</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    panel.style.display = 'block';
+  } catch(e) {
+    console.error('[scan] loadNextAllocations error:', e);
+    if(panel) panel.style.display = 'none';
+  }
+}
+
+function saveAllocDispatch(idx, resId, eqKey){
+  // No longer used — cards go straight to pending. Kept as stub.
+}
+
+function cancelAllocDispatch(idx, eqKey, resId){
+  if(eqKey && resId !== undefined){
+    var pendingKey = 'next_alloc_pending_' + eqKey + '_' + (resId || idx);
+    sessionStorage.removeItem(pendingKey);
+  }
+  // Hide the pending zone (dispatch input zone no longer exists)
+  var pendEl = document.getElementById('na-pend-' + idx);
+  if(pendEl) pendEl.style.display = 'none';
+}
+
+// Legacy stubs (kept for safety if any old onclick remains)
+function saveNextAllocDispatch(){}
+function cancelNextAllocDispatch(){}
+
+function escHtml(str){
+  if(!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatTime12Hour(str) {
+  if(!str) return '';
+  if(str.includes('-')){
+    return str.split('-').map(function(p){return _formatSingleTime(p.trim());}).join(' - ');
+  }
+  if(str.includes('to')){
+    return str.split('to').map(function(p){return _formatSingleTime(p.trim());}).join(' - ');
+  }
+  return _formatSingleTime(str.trim());
+}
+function _formatSingleTime(t) {
+  var lower = t.toLowerCase();
+  var isPm = lower.indexOf('pm') !== -1;
+  var isAm = lower.indexOf('am') !== -1;
+  var m = t.match(/^(\d{1,2}):(\d{2})/);
+  if(!m) return t;
+  var h = parseInt(m[1], 10);
+  var suffix = isPm ? 'PM' : (isAm ? 'AM' : (h >= 12 ? 'PM' : 'AM'));
+  var h12 = h % 12;
+  if(h12 === 0) h12 = 12;
+  return h12 + ':' + m[2] + ' ' + suffix;
+}
+
+function openAnalyticsPanel(){
+  var panel=document.getElementById('panel-analytics');
+  if(!panel)return;
+  var isOpen=panel.classList.contains('open');
+  closeSubPanel('panel-details');closeSubPanel('panel-incident');closeSubPanel('panel-standalone-incident');closeSubPanel('panel-location');
+  if(!isOpen){panel.classList.add('open');if(CURRENT_EQ)renderAnalyticsCharts(CURRENT_EQ);}
+  else{panel.classList.remove('open');}
+}
+
+// ===== SCAN ANALYTICS LOGIC & DATE FILTERING =====
+var SCAN_MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+var SCAN_SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+var SCAN_CHART_KEYS = ['alloc-freq', 'return-rate', 'maint', 'miss', 'ret'];
+
+// Chart filter state tracking anchor date and range in memory (resets to current month/year on refresh)
+var _scanChartFilters = {};
+function resetScanChartFilters() {
+  var d = new Date();
+  var curY = d.getFullYear();
+  var curM = d.getMonth();
+  SCAN_CHART_KEYS.forEach(function(k) {
+    _scanChartFilters[k] = {
+      anchorYear: curY,
+      anchorMonth: curM,
+      // Allocation Frequency defaults to 7 months as required; other charts default to 6 months
+      rangeMonths: (k === 'alloc-freq' ? 7 : 6)
+    };
+  });
+}
+resetScanChartFilters();
+
+function updateScanDateLabel(key) {
+  var f = _scanChartFilters[key];
+  if (!f) return;
+  var el = document.getElementById('scan-date-label-' + key);
+  if (el) {
+    el.textContent = SCAN_MONTH_NAMES[f.anchorMonth] + ' ' + f.anchorYear;
+  }
+}
+
+function updateScanFilterButtonStates(key) {
+  var f = _scanChartFilters[key];
+  if (!f) return;
+  var r = f.rangeMonths;
+  var isPredefined = [1, 3, 6, 12].indexOf(r) !== -1;
+  ['1', '3', '6', '12', 'custom'].forEach(function(btnKey) {
+    var b = document.getElementById('btn-range-' + key + '-' + btnKey);
+    if (!b) return;
+    if (btnKey === 'custom') {
+      if (!isPredefined) {
+        b.classList.add('active');
+        b.textContent = 'Last ' + r + ' Mos';
+      } else {
+        b.classList.remove('active');
+        b.textContent = 'Custom Range';
+      }
+    } else {
+      if (isPredefined && String(r) === btnKey) {
+        b.classList.add('active');
+      } else {
+        b.classList.remove('active');
+      }
+    }
+  });
+}
+
+function updateAllScanFilterUI() {
+  SCAN_CHART_KEYS.forEach(function(k) {
+    updateScanDateLabel(k);
+    updateScanFilterButtonStates(k);
+  });
+}
+
+function navScanFilterMonth(key, delta) {
+  var f = _scanChartFilters[key];
+  if (!f) return;
+  f.anchorMonth += delta;
+  if (f.anchorMonth < 0) {
+    f.anchorMonth = 11;
+    f.anchorYear--;
+  } else if (f.anchorMonth > 11) {
+    f.anchorMonth = 0;
+    f.anchorYear++;
+  }
+  updateScanDateLabel(key);
+  if (CURRENT_EQ) renderAnalyticsCharts(CURRENT_EQ);
+}
+
+function setScanRange(key, rangeVal, isCustom) {
+  var f = _scanChartFilters[key];
+  if (!f) return;
+  f.rangeMonths = parseInt(rangeVal, 10) || 1;
+  updateScanFilterButtonStates(key);
+  if (CURRENT_EQ) renderAnalyticsCharts(CURRENT_EQ);
+}
+
+function promptScanCustomRange(key) {
+  var cur = (_scanChartFilters[key] && _scanChartFilters[key].rangeMonths) || 3;
+  var val = prompt('Enter number of months (max 3 digits, e.g. 1 to 999):', cur);
+  if (val === null) return;
+  val = val.trim();
+  if (!/^\d{1,3}$/.test(val) || parseInt(val, 10) <= 0) {
+    alert('Please enter a valid positive number up to 3 digits (1 - 999).');
+    return;
+  }
+  setScanRange(key, parseInt(val, 10), true);
+}
+
+var _activePickerChartKey = null;
+
+function openScanDatePickerModal(key) {
+  _activePickerChartKey = key;
+  var f = _scanChartFilters[key];
+  if (!f) return;
+  var mEl = document.getElementById('scan-picker-month');
+  var yEl = document.getElementById('scan-picker-year');
+  if (mEl) mEl.value = String(f.anchorMonth);
+  if (yEl) yEl.value = String(f.anchorYear);
+  var modal = document.getElementById('scan-date-picker-modal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeScanDatePickerModal() {
+  var modal = document.getElementById('scan-date-picker-modal');
+  if (modal) modal.style.display = 'none';
+  _activePickerChartKey = null;
+}
+
+function saveScanDatePickerModal() {
+  if (!_activePickerChartKey) return;
+  var mEl = document.getElementById('scan-picker-month');
+  var yEl = document.getElementById('scan-picker-year');
+  var m = mEl ? parseInt(mEl.value, 10) : 0;
+  var y = yEl ? parseInt(yEl.value, 10) : new Date().getFullYear();
+  if (isNaN(y) || y < 2000 || y > 2100) {
+    alert('Please enter a valid year.');
+    return;
+  }
+  var f = _scanChartFilters[_activePickerChartKey];
+  if (f) {
+    f.anchorMonth = m;
+    f.anchorYear = y;
+    updateScanDateLabel(_activePickerChartKey);
+  }
+  closeScanDatePickerModal();
+  if (CURRENT_EQ) renderAnalyticsCharts(CURRENT_EQ);
+}
+
+function getScanMonthRangeKeys(filter) {
+  // If rangeMonths = 1, show only anchor month
+  // If rangeMonths = 3, show anchor month + 3 months prior (4 months total: e.g. July, Aug, Sep, Oct)
+  // If rangeMonths = 7, show anchor month + 7 months prior (8 months total)
+  var nBack = Math.max(0, filter.rangeMonths === 1 ? 0 : filter.rangeMonths);
+  var list = [];
+  for (var i = nBack; i >= 0; i--) {
+    var d = new Date(filter.anchorYear, filter.anchorMonth - i, 1);
+    var y = d.getFullYear();
+    var m = d.getMonth();
+    var key = y + '-' + String(m + 1).padStart(2, '0');
+    var shortLabel = SCAN_SHORT_MONTHS[m] + (y !== filter.anchorYear ? (" '" + String(y).slice(-2)) : '');
+    var fullLabel = SCAN_MONTH_NAMES[m] + ' ' + y;
+    list.push({ key: key, year: y, month: m, shortLabel: shortLabel, fullLabel: fullLabel });
+  }
+  return list;
+}
+
+var scanIncidentFilter = 'all';
+
+function setScanIncidentFilter(flt) {
+  scanIncidentFilter = flt;
+  document.querySelectorAll('.inc-flt-btn').forEach(function(b) {
+    b.classList.remove('active');
+    b.style.background = 'transparent';
+    b.style.color = 'var(--text-dim)';
+  });
+  var activeBtn = document.getElementById('btn-flt-' + flt);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    activeBtn.style.background = 'var(--gold)';
+    activeBtn.style.color = '#0e0b07';
+  }
+  if (CURRENT_EQ) renderAnalyticsCharts(CURRENT_EQ);
+}
+
+async function renderAnalyticsCharts(eq) {
+  if (typeof Chart === 'undefined') return;
+  try {
+    updateAllScanFilterUI();
+
+    var orParts = [];
+    if (eq.id) orParts.push('equipment_id.eq.' + eq.id);
+    if (eq.asset_id) orParts.push('asset_id.eq.' + eq.asset_id);
+    if (!orParts.length) return;
+
+    var totalCap = Math.max(1, eq.total_qty || eq.good_qty || 1);
+
+    // Fetch batch allocations from allocation_history
+    var allocRows = [];
+    try {
+      var allocRes = await sb.from('allocation_history')
+        .select('*')
+        .or(orParts.join(','))
+        .eq('is_rental', false)
+        .order('allocation_date', { ascending: true });
+      allocRows = (allocRes.data || []).filter(function(r) {
+        return !r.is_rental && !(r.allocation_batch && r.allocation_batch.startsWith('VENUE-'));
+      });
+    } catch (eAlloc) {
+      console.warn('[scan] Failed to fetch allocation_history:', eAlloc);
+    }
+
+    // Fetch execution day incidents for this equipment
+    var execIncRows = [];
+    try {
+      var execRes = await sb.from('exec_batch_incidents')
+        .select('*')
+        .or(orParts.join(','))
+        .order('logged_at', { ascending: true });
+      execIncRows = execRes.data || [];
+    } catch (eExec) {
+      console.warn('[scan] Failed to fetch exec_batch_incidents:', eExec);
+    }
+
+    // -------------------------------------------------------------
+    // 1. ALLOCATION FREQUENCY LINE CHART (Jan -> Feb -> Mar -> ...)
+    // -------------------------------------------------------------
+    try {
+      var allocFilter = _scanChartFilters['alloc-freq'];
+      var allocMonths = getScanMonthRangeKeys(allocFilter);
+
+      var allocCountMap = {};
+      var allocQtyMap = {};
+      allocRows.forEach(function(r) {
+        var dStr = (r.allocation_date || r.recorded_at || '').slice(0, 7);
+        if (dStr) {
+          allocCountMap[dStr] = (allocCountMap[dStr] || 0) + 1;
+          var q = parseInt(r.allocated_qty, 10) || 1;
+          allocQtyMap[dStr] = (allocQtyMap[dStr] || 0) + q;
+        }
+      });
+
+      var allocLabels = allocMonths.map(function(m) { return m.shortLabel; });
+      var allocData = allocMonths.map(function(m) { return allocCountMap[m.key] || 0; });
+
+      var allocCanvas = document.getElementById('chart-alloc-freq');
+      if (allocCanvas) {
+        if (allocCanvas._chartInst) allocCanvas._chartInst.destroy();
+        allocCanvas._chartInst = new Chart(allocCanvas, {
+          type: 'line',
+          data: {
+            labels: allocLabels,
+            datasets: [{
+              label: 'Allocations',
+              data: allocData,
+              borderColor: '#c49a3c',
+              backgroundColor: 'rgba(196,154,60,0.15)',
+              borderWidth: 2,
+              pointRadius: 4,
+              pointBackgroundColor: '#c49a3c',
+              tension: 0.35,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: function(items) {
+                    if (!items || !items.length) return '';
+                    var m = allocMonths[items[0].dataIndex];
+                    return m ? m.fullLabel : '';
+                  },
+                  label: function(item) {
+                    var m = allocMonths[item.dataIndex];
+                    var cnt = item.raw || 0;
+                    var qty = (m && allocQtyMap[m.key]) || 0;
+                    return ['Frequency: ' + cnt + ' allocation' + (cnt === 1 ? '' : 's'), 'Total Units: ' + qty];
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { color: '#7a6e5e', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+              y: { ticks: { color: '#7a6e5e', font: { size: 9 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true, suggestedMax: 2 }
+            }
+          }
+        });
+      }
+    } catch (errAlloc) {
+      console.warn('[scan] Allocation Frequency chart error:', errAlloc);
+    }
+
+    // -------------------------------------------------------------
+    // 2. RETURN RATE LINE CHART & METRICS
+    // -------------------------------------------------------------
+    try {
+      var retFilter = _scanChartFilters['return-rate'];
+      var retMonths = getScanMonthRangeKeys(retFilter);
+      var retMonthKeySet = {};
+      retMonths.forEach(function(m) { retMonthKeySet[m.key] = true; });
+
+      var curAnchorKey = retFilter.anchorYear + '-' + String(retFilter.anchorMonth + 1).padStart(2, '0');
+      var lastDate = new Date(retFilter.anchorYear, retFilter.anchorMonth - 1, 1);
+      var lastAnchorKey = lastDate.getFullYear() + '-' + String(lastDate.getMonth() + 1).padStart(2, '0');
+
+      var allReturnPoints = [];
+      var totalAllocatedAll = 0;
+      var totalReturnedAll = 0;
+      var thisMonthAllocated = 0;
+      var thisMonthReturned = 0;
+      var lastMonthAllocated = 0;
+      var lastMonthReturned = 0;
+
+      // Group exec incidents by reservation / batch to subtract broken/missing/trash
+      var incByBatch = {};
+      execIncRows.forEach(function(inc) {
+        var k = inc.reservation_id || inc.batch_id || inc.allocation_batch;
+        if (k) {
+          incByBatch[k] = (incByBatch[k] || 0) + (parseInt(inc.quantity, 10) || 1);
+        }
+      });
+
+      allocRows.forEach(function(r) {
+        var origQty = parseInt(r.allocated_qty, 10) || 0;
+        var rKey = r.reservation_id || r.allocation_batch;
+        var damagedOrLost = (rKey && incByBatch[rKey]) || 0;
+        var retQty = Math.max(0, origQty - damagedOrLost);
+        var ratePct = origQty > 0 ? Math.round((retQty / origQty) * 100) : 100;
+
+        var dRaw = r.allocation_date || r.recorded_at || '';
+        var dStr = dRaw.slice(0, 10) || 'Unknown Date';
+        var mKey = dStr.slice(0, 7);
+
+        // Sum for stats
+        totalAllocatedAll += origQty;
+        totalReturnedAll += retQty;
+        if (mKey === curAnchorKey) {
+          thisMonthAllocated += origQty;
+          thisMonthReturned += retQty;
+        }
+        if (mKey === lastAnchorKey) {
+          lastMonthAllocated += origQty;
+          lastMonthReturned += retQty;
+        }
+
+        // Check if inside filtered range
+        if (retMonthKeySet[mKey]) {
+          allReturnPoints.push({
+            dateStr: dStr,
+            origQty: origQty,
+            retQty: retQty,
+            rate: ratePct,
+            resName: r.reservation_name || r.reservation_id || ''
+          });
+        }
+      });
+
+      // Sort points chronologically
+      allReturnPoints.sort(function(a, b) {
+        return (a.dateStr > b.dateStr) ? 1 : -1;
+      });
+
+      // Compute bottom percentage stats
+      var totalRetRate = totalAllocatedAll > 0 ? Math.round((totalReturnedAll / totalAllocatedAll) * 100) : 100;
+      var lastRetRate = lastMonthAllocated > 0 ? Math.round((lastMonthReturned / lastMonthAllocated) * 100) : 100;
+      var thisRetRate = thisMonthAllocated > 0 ? Math.round((thisMonthReturned / thisMonthAllocated) * 100) : 100;
+      var retDiff = thisRetRate - lastRetRate;
+
+      var elRetTot = document.getElementById('stat-ret-rate-total');
+      if (elRetTot) elRetTot.textContent = totalRetRate + '%';
+      var elRetLast = document.getElementById('stat-ret-rate-last-month');
+      if (elRetLast) elRetLast.textContent = lastRetRate + '%';
+      var elRetThis = document.getElementById('stat-ret-rate-this-month');
+      if (elRetThis) elRetThis.textContent = thisRetRate + '%';
+      var elRetChg = document.getElementById('stat-ret-rate-change');
+      if (elRetChg) elRetChg.textContent = (retDiff >= 0 ? '+' : '') + retDiff + '% change';
+
+      // Render chart
+      var retLabels = [];
+      var retData = [];
+      if (allReturnPoints.length) {
+        retLabels = allReturnPoints.map(function(p) {
+          return p.dateStr.slice(5) + (p.resName ? (' ' + p.resName.slice(0, 10)) : '');
+        });
+        retData = allReturnPoints.map(function(p) { return p.rate; });
+      } else {
+        retLabels = ['No Allocations'];
+        retData = [100];
+      }
+
+      var retCanvas = document.getElementById('chart-return-rate');
+      if (retCanvas) {
+        if (retCanvas._chartInst) retCanvas._chartInst.destroy();
+        retCanvas._chartInst = new Chart(retCanvas, {
+          type: 'line',
+          data: {
+            labels: retLabels,
+            datasets: [{
+              label: 'Return Rate %',
+              data: retData,
+              borderColor: '#2ea043',
+              backgroundColor: 'rgba(46,160,67,0.15)',
+              borderWidth: 2,
+              pointRadius: allReturnPoints.length ? 5 : 2,
+              pointBackgroundColor: '#2ea043',
+              tension: 0.25,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: function(items) {
+                    if (!items || !items.length) return '';
+                    var idx = items[0].dataIndex;
+                    var pt = allReturnPoints[idx];
+                    if (!pt) return 'Return Rate';
+                    return 'Date Allocated: ' + pt.dateStr + (pt.resName ? ' (' + pt.resName + ')' : '');
+                  },
+                  label: function(item) {
+                    var idx = item.dataIndex;
+                    var pt = allReturnPoints[idx];
+                    if (!pt) return 'Return Rate: 100% (No allocations)';
+                    return [
+                      'Original Qty: ' + pt.origQty,
+                      'Returning Qty: ' + pt.retQty,
+                      'Return Rate: ' + pt.rate + '%'
+                    ];
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { color: '#7a6e5e', font: { size: 9 }, maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+              y: {
+                ticks: {
+                  color: '#7a6e5e',
+                  font: { size: 9 },
+                  callback: function(v) { return v + '%'; }
+                },
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                beginAtZero: true,
+                suggestedMax: 100
+              }
+            }
+          }
+        });
+      }
+    } catch (errRet) {
+      console.warn('[scan] Return Rate chart error:', errRet);
+    }
+
+    // -------------------------------------------------------------
+    // 3. INCIDENT DATA POOL (Routine, Standalone, Execution)
+    // -------------------------------------------------------------
+    var incidentsPool = [];
+
+    // Routine Checks
+    if (scanIncidentFilter === 'all' || scanIncidentFilter === 'inventory') {
+      try {
+        var rcRes = await sb.from('routine_check')
+          .select('checked_at,incidents,status')
+          .or(orParts.join(','))
+          .not('checked_at', 'is', null)
+          .order('checked_at', { ascending: true });
+
+        (rcRes.data || []).forEach(function(row) {
+          var d = new Date(row.checked_at);
+          var mKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+          var incs = [];
+          if (Array.isArray(row.incidents)) incs = row.incidents;
+          else if (typeof row.incidents === 'string') { try { incs = JSON.parse(row.incidents); } catch(e) {} }
+
+          incs.forEach(function(i) {
+            incidentsPool.push({
+              month: mKey,
+              type: i.type === 'trash' ? 'retired' : (i.type || 'broken'),
+              qty: parseInt(i.qty, 10) || 1,
+              source: 'routine'
+            });
+          });
+        });
+      } catch(e) {}
+
+      // Standalone Incident Reports
+      try {
+        var saRes = await sb.from('standalone_incident_reports')
+          .select('*')
+          .or(orParts.join(','))
+          .eq('is_reverted', false)
+          .order('created_at', { ascending: true });
+
+        (saRes.data || []).forEach(function(row) {
+          var d = new Date(row.created_at || row.reported_at || Date.now());
+          var mKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+          incidentsPool.push({
+            month: mKey,
+            type: row.incident_type === 'trash' ? 'retired' : (row.incident_type || 'broken'),
+            qty: parseInt(row.quantity, 10) || 1,
+            source: 'standalone'
+          });
+        });
+      } catch(e) {}
+    }
+
+    // Execution Batch Incidents
+    if (scanIncidentFilter === 'all' || scanIncidentFilter === 'execution') {
+      execIncRows.forEach(function(row) {
+        var d = new Date(row.logged_at || Date.now());
+        var mKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        var it = (row.incident_type || '').toLowerCase();
+        if (it === 'trash') it = 'retired';
+        incidentsPool.push({
+          month: mKey,
+          type: it || 'broken',
+          qty: parseInt(row.quantity, 10) || 1,
+          source: 'execution'
+        });
+      });
+    }
+
+    // Function to render each incident chart according to its date/range filter
+    function renderIncidentChart(key, canvasId, color, matchTypes, statPrefix) {
+      var flt = _scanChartFilters[key];
+      var months = getScanMonthRangeKeys(flt);
+      var curAnchorKey = flt.anchorYear + '-' + String(flt.anchorMonth + 1).padStart(2, '0');
+      var lastDate = new Date(flt.anchorYear, flt.anchorMonth - 1, 1);
+      var lastAnchorKey = lastDate.getFullYear() + '-' + String(lastDate.getMonth() + 1).padStart(2, '0');
+
+      var monthQtyMap = {};
+      var totalQty = 0;
+      var lastMonthQty = 0;
+      var thisMonthQty = 0;
+
+      incidentsPool.forEach(function(inc) {
+        var t = inc.type.toLowerCase();
+        if (matchTypes.indexOf(t) !== -1) {
+          monthQtyMap[inc.month] = (monthQtyMap[inc.month] || 0) + inc.qty;
+          totalQty += inc.qty;
+          if (inc.month === curAnchorKey) thisMonthQty += inc.qty;
+          if (inc.month === lastAnchorKey) lastMonthQty += inc.qty;
+        }
+      });
+
+      var totPct = Math.round((totalQty / totalCap) * 100);
+      var lastPct = Math.min(100, Math.round((lastMonthQty / totalCap) * 100));
+      var thisPct = Math.min(100, Math.round((thisMonthQty / totalCap) * 100));
+      var diff = thisPct - lastPct;
+
+      var elTot = document.getElementById('stat-' + statPrefix + '-total');
+      if (elTot) elTot.textContent = totPct + '%';
+      var elLast = document.getElementById('stat-' + statPrefix + '-last-month');
+      if (elLast) elLast.textContent = lastPct + '%';
+      var elThis = document.getElementById('stat-' + statPrefix + '-this-month');
+      if (elThis) elThis.textContent = thisPct + '%';
+      var elChg = document.getElementById('stat-' + statPrefix + '-change');
+      if (elChg) elChg.textContent = (diff >= 0 ? '+' : '') + diff + '% this month';
+
+      var labels = months.map(function(m) { return m.shortLabel; });
+      var data = months.map(function(m) { return monthQtyMap[m.key] || 0; });
+
+      var canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      if (canvas._chartInst) canvas._chartInst.destroy();
+      canvas._chartInst = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            borderColor: color,
+            backgroundColor: color.replace(',1)', ',0.15)'),
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: color,
+            tension: 0.35,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: function(items) {
+                  if (!items || !items.length) return '';
+                  var m = months[items[0].dataIndex];
+                  return m ? m.fullLabel : '';
+                },
+                label: function(item) {
+                  return 'Incidents: ' + item.raw;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#7a6e5e', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#7a6e5e', font: { size: 9 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true, suggestedMax: 2 }
+          }
+        }
+      });
+    }
+
+    renderIncidentChart('maint', 'chart-maint', 'rgba(212,117,10,1)', ['broken', 'damage', 'maintenance'], 'maint');
+    renderIncidentChart('miss', 'chart-miss', 'rgba(192,57,43,1)', ['missing'], 'miss');
+    renderIncidentChart('ret', 'chart-ret', 'rgba(122,110,94,1)', ['retired', 'trash'], 'ret');
+
+  } catch(e) {
+    console.error('[scan] renderAnalyticsCharts error:', e);
+  }
+}
+
+// ===== STANDALONE INCIDENT REPORTING FUNCTIONS =====
+var STANDALONE_INCIDENTS = [];
+var _standaloneIncIdx = 0;
+
+function openStandaloneIncidentPanel() {
+  closeSubPanel('panel-details');
+  closeSubPanel('panel-incident');
+  closeSubPanel('panel-analytics');
+  closeSubPanel('panel-location');
+  document.getElementById('panel-standalone-incident').classList.add('open');
+  if (!STANDALONE_INCIDENTS.length) {
+    addStandaloneIncidentRow();
+  }
+}
+
+function cancelStandaloneIncidents() {
+  STANDALONE_INCIDENTS.forEach(function(inc) {
+    if (inc.imageDeleteToken) deleteCloudinaryImage(inc.imageDeleteToken);
+  });
+  STANDALONE_INCIDENTS = [];
+  _standaloneIncIdx = 0;
+  var list = document.getElementById('standalone-incident-list');
+  if (list) list.innerHTML = '';
+  closeSubPanel('panel-standalone-incident');
+  toast('Incident reporting cancelled');
+}
+
+function promptSaveStandaloneIncidents() {
+  if (!STANDALONE_INCIDENTS.length) {
+    toast('Please add at least one incident first.', 'error');
+    return;
+  }
+  var invalid = STANDALONE_INCIDENTS.some(function(i) { return !i.qty || i.qty < 1; });
+  if (invalid) {
+    toast('Please specify a valid quantity for all incidents.', 'error');
+    return;
+  }
+  var modal = document.getElementById('standalone-confirm-modal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeStandaloneConfirmModal() {
+  var modal = document.getElementById('standalone-confirm-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function confirmSaveStandaloneIncidents() {
+  closeStandaloneConfirmModal();
+  if (!CURRENT_EQ) return;
+  var saveBtn = document.getElementById('btn-save-standalone');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving...'; }
+
+  try {
+    var eq = CURRENT_EQ;
+    var newGood = eq.good_qty != null ? eq.good_qty : (eq.available_qty != null ? eq.available_qty : (eq.total_qty || 0));
+    var newMaint = eq.maintenance_qty || 0, newMiss = eq.missing_qty || 0, newRet = eq.retired_qty || 0;
+
+    STANDALONE_INCIDENTS.forEach(function(inc) {
+      var a = Math.min(inc.qty, newGood);
+      newGood -= a;
+      if (inc.type === 'broken') newMaint += a;
+      else if (inc.type === 'missing') newMiss += a;
+      else if (inc.type === 'trash' || inc.type === 'retired') newRet += a;
+    });
+
+    var reportedBy = CURRENT_USER ? (CURRENT_USER.email || CURRENT_USER.id) : 'Staff';
+
+    // Insert records into standalone_incident_reports table
+    for (var i = 0; i < STANDALONE_INCIDENTS.length; i++) {
+      var inc = STANDALONE_INCIDENTS[i];
+      var incType = inc.type === 'trash' ? 'retired' : inc.type;
+      var payload = {
+        equipment_id: eq.id || null,
+        asset_id: eq.asset_id || null,
+        equipment_name: eq.name || 'Equipment',
+        incident_type: incType,
+        quantity: inc.qty || 1,
+        photo_url: inc.imageUrl || null,
+        photo_public_id: inc.imagePublicId || null,
+        notes: 'Reported outside routine checks',
+        reported_by: reportedBy,
+        source: 'standalone',
+        phase: 'Inspection',
+        is_reverted: false
+      };
+      await sb.from('standalone_incident_reports').insert(payload);
+    }
+
+    // Save and update equipment_inventory quantities
+    await sb.from('equipment_inventory').update({
+      good_qty: Math.max(0, newGood),
+      maintenance_qty: newMaint,
+      missing_qty: newMiss,
+      retired_qty: newRet,
+      last_incident_type: STANDALONE_INCIDENTS[0].type,
+      last_incident_date: new Date().toISOString(),
+      last_incident_source: 'standalone',
+      last_incident_quantity: STANDALONE_INCIDENTS[0].qty
+    }).eq('id', eq.id);
+
+    eq.good_qty = newGood;
+    eq.maintenance_qty = newMaint;
+    eq.missing_qty = newMiss;
+    eq.retired_qty = newRet;
+    renderEquipmentInfo(eq);
+
+    STANDALONE_INCIDENTS = [];
+    _standaloneIncIdx = 0;
+    var list = document.getElementById('standalone-incident-list');
+    if (list) list.innerHTML = '';
+    closeSubPanel('panel-standalone-incident');
+
+    toast('Incident reports submitted successfully!', 'success');
+
+    // Redirect them back to the start of the scan area
+    setTimeout(function() {
+      closeSubPanel('panel-standalone-incident');
+      closeSubPanel('panel-details');
+      closeSubPanel('panel-incident');
+      closeSubPanel('panel-analytics');
+      closeSubPanel('panel-location');
+      document.getElementById('default-view').style.display = 'block';
+    }, 500);
+  } catch(e) {
+    console.error('[scan] Standalone incident submit error:', e);
+    toast('Error submitting report: ' + (e.message || e), 'error');
+  } finally {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
+  }
+}
+
+function _usedStandaloneIncidentTypes() {
+  return STANDALONE_INCIDENTS.map(function(i) { return i.type === 'retired' ? 'trash' : i.type; });
+}
+function _unusedStandaloneType() {
+  var allTypes = ['broken', 'missing', 'trash'];
+  var used = _usedStandaloneIncidentTypes();
+  return allTypes.find(function(t) { return !used.includes(t); }) || null;
+}
+
+function addStandaloneIncidentRow() {
+  var next = _unusedStandaloneType();
+  if (!next) return;
+  var idx = _standaloneIncIdx++;
+  STANDALONE_INCIDENTS.push({ type: next, qty: 1, domIdx: idx });
+  _appendStandaloneIncidentDOM({ type: next, qty: 1, domIdx: idx });
+  _refreshStandaloneIncidentSelectOptions();
+}
+
+function _appendStandaloneIncidentDOM(inc) {
+  var maxQ = CURRENT_EQ ? (CURRENT_EQ.good_qty || CURRENT_EQ.available_qty || 99) : 99;
+  var list = document.getElementById('standalone-incident-list');
+  if (!list) return;
+  var div = document.createElement('div');
+  div.className = 'incident-item';
+  div.id = 'standalone-inc-row-' + inc.domIdx;
+  var myType = inc.type === 'retired' ? 'trash' : inc.type;
+  var used = _usedStandaloneIncidentTypes().filter(function(t) { return t !== myType; });
+  var thumbHtml = inc.imageUrl ? '<img src="' + inc.imageUrl + '" style="width:28px;height:28px;object-fit:cover;border-radius:4px;border:1px solid rgba(196,154,60,0.4);flex-shrink:0;" />' : '';
+
+  div.innerHTML = '<div class="incident-row-cols">'
+    + '<div><label>Incident Type</label><select id="standalone-inc-type-' + inc.domIdx + '" onchange="updateStandaloneIncident(' + inc.domIdx + ')">'
+    + '<option value="broken"' + (myType === 'broken' ? ' selected' : '') + (used.includes('broken') ? ' disabled' : '') + '>Broken / Damaged</option>'
+    + '<option value="missing"' + (myType === 'missing' ? ' selected' : '') + (used.includes('missing') ? ' disabled' : '') + '>Missing</option>'
+    + '<option value="trash"' + (myType === 'trash' ? ' selected' : '') + (used.includes('trash') ? ' disabled' : '') + '>Retired / Disposed</option>'
+    + '</select></div>'
+    + '<div>'
+    + '<label>Quantity Affected</label>'
+    + '<div style="display:flex;align-items:center;gap:6px;">'
+    + '<input type="number" id="standalone-inc-qty-' + inc.domIdx + '" value="' + (inc.qty || 1) + '" min="1" max="' + maxQ + '" onchange="updateStandaloneIncident(' + inc.domIdx + ')" style="flex:1;" />'
+    + '<input type="file" id="standalone-inc-file-' + inc.domIdx + '" accept="image/*" capture="environment" style="display:none;" onchange="handleStandaloneIncidentFileChange(' + inc.domIdx + ',this)" />'
+    + '<button onclick="document.getElementById(\'standalone-inc-file-' + inc.domIdx + '\').click()" style="background:rgba(196,154,60,0.12);border:1px solid rgba(196,154,60,0.3);color:var(--gold);border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;" id="standalone-inc-upload-btn-' + inc.domIdx + '">'
+    + (inc.imageUrl ? 'Replace' : 'Upload')
+    + '</button>'
+    + '<span id="standalone-inc-thumb-' + inc.domIdx + '">' + thumbHtml + '</span>'
+    + '<button onclick="removeStandaloneIncident(' + inc.domIdx + ')" title="Remove this incident" style="background:rgba(224,92,78,0.15);border:1px solid rgba(224,92,78,0.35);color:#e05c4e;border-radius:6px;padding:5px 9px;font-size:14px;font-weight:900;cursor:pointer;line-height:1;flex-shrink:0;">&#xd7;</button>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+  list.appendChild(div);
+}
+
+function _refreshStandaloneIncidentSelectOptions() {
+  var used = _usedStandaloneIncidentTypes();
+  STANDALONE_INCIDENTS.forEach(function(inc) {
+    var sel = document.getElementById('standalone-inc-type-' + inc.domIdx);
+    if (!sel) return;
+    var myType = inc.type === 'retired' ? 'trash' : inc.type;
+    Array.from(sel.options).forEach(function(o) {
+      o.disabled = o.value !== myType && used.includes(o.value);
+    });
+  });
+  var addBtn = document.getElementById('btn-add-standalone-inc');
+  if (addBtn) addBtn.style.display = used.length >= 3 ? 'none' : '';
+}
+
+function updateStandaloneIncident(idx) {
+  var t = document.getElementById('standalone-inc-type-' + idx);
+  var q = document.getElementById('standalone-inc-qty-' + idx);
+  if (!t || !q) return;
+  var inc = STANDALONE_INCIDENTS.find(function(i) { return i.domIdx === idx; });
+  if (inc) {
+    inc.type = t.value;
+    inc.qty = parseInt(q.value, 10) || 1;
+  }
+  _refreshStandaloneIncidentSelectOptions();
+}
+
+function removeStandaloneIncident(idx) {
+  var row = document.getElementById('standalone-inc-row-' + idx);
+  if (row) row.remove();
+  var removing = STANDALONE_INCIDENTS.find(function(i) { return i.domIdx === idx; });
+  if (removing && removing.imageDeleteToken) deleteCloudinaryImage(removing.imageDeleteToken);
+  STANDALONE_INCIDENTS = STANDALONE_INCIDENTS.filter(function(i) { return i.domIdx !== idx; });
+  _refreshStandaloneIncidentSelectOptions();
+}
+
+async function handleStandaloneIncidentFileChange(domIdx, input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var btn = document.getElementById('standalone-inc-upload-btn-' + domIdx);
+  var thumbEl = document.getElementById('standalone-inc-thumb-' + domIdx);
+  if (btn) { btn.textContent = 'Uploading...'; btn.disabled = true; }
+  try {
+    var result = await uploadIncidentImageToCloudinary(file);
+    var inc = STANDALONE_INCIDENTS.find(function(i) { return i.domIdx === domIdx; });
+    if (inc) {
+      inc.imageUrl = result.secure_url;
+      inc.imagePublicId = result.public_id;
+      inc.imageDeleteToken = result.delete_token || null;
+    }
+    if (thumbEl) thumbEl.innerHTML = '<img src="' + result.secure_url + '" style="width:28px;height:28px;object-fit:cover;border-radius:4px;border:1px solid rgba(196,154,60,0.4);flex-shrink:0;" />';
+    if (btn) { btn.textContent = 'Replace'; btn.disabled = false; }
+    toast('Photo uploaded', 'success');
+  } catch(e) {
+    if (btn) { btn.textContent = 'Upload'; btn.disabled = false; }
+    toast('Upload failed: ' + e.message, 'error');
+  }
+}
+
+// ===== EQUIPMENT HISTORY SUB-PANEL =====
+var currentEqHistoryFilter = 'all';
+
+function openEquipmentHistoryPanel(){
+  var panel = document.getElementById('panel-history');
+  if (!panel) return;
+  var isOpen = panel.classList.contains('open');
+  closeSubPanel('panel-details');
+  closeSubPanel('panel-incident');
+  closeSubPanel('panel-standalone-incident');
+  closeSubPanel('panel-analytics');
+  if (!isOpen) {
+    panel.classList.add('open');
+    if (CURRENT_EQ) renderEquipmentHistory();
+  } else {
+    panel.classList.remove('open');
+  }
+}
+
+function filterEquipmentHistory(flt) {
+  currentEqHistoryFilter = flt;
+  document.querySelectorAll('.eq-hist-flt-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  var activeBtn = document.getElementById('btn-hist-flt-' + flt);
+  if (activeBtn) activeBtn.classList.add('active');
+  renderEquipmentHistory();
+}
+
+async function renderEquipmentHistory() {
+  var listEl = document.getElementById('eq-history-list');
+  if (!listEl || !CURRENT_EQ) return;
+
+  listEl.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-dim); font-size:12px;">Loading history records...</div>';
+
+  var orParts = [];
+  if (CURRENT_EQ.id) orParts.push('equipment_id.eq.' + CURRENT_EQ.id);
+  if (CURRENT_EQ.asset_id) orParts.push('asset_id.eq.' + CURRENT_EQ.asset_id);
+  if (!orParts.length) {
+    listEl.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-dim); font-size:12px;">No equipment identified.</div>';
+    return;
+  }
+
+  var historyItems = [];
+
+  try {
+    // 1. Allocations
+    var allocRes = await sb.from('allocation_history')
+      .select('*')
+      .or(orParts.join(','))
+      .order('recorded_at', { ascending: false });
+
+    (allocRes.data || []).forEach(function(r) {
+      if (r.is_rental || (r.allocation_batch && r.allocation_batch.startsWith('VENUE-'))) return;
+      var dStr = (r.allocation_date || r.recorded_at || '').slice(0, 10) || 'Unknown Date';
+      var q = parseInt(r.allocated_qty, 10) || 1;
+      historyItems.push({
+        category: 'allocation',
+        date: dStr,
+        timestamp: new Date(r.recorded_at || r.allocation_date || Date.now()).getTime(),
+        title: r.reservation_name || ('Reservation ' + (r.reservation_id || '')),
+        details: 'Allocated ' + q + ' unit' + (q === 1 ? '' : 's') + (r.allocation_batch ? ' (' + r.allocation_batch + ')' : ''),
+        badge: 'Allocation',
+        badgeColor: 'var(--gold)'
+      });
+    });
+
+    // 2. Routine checks
+    var rcRes = await sb.from('routine_check')
+      .select('*')
+      .or(orParts.join(','))
+      .not('checked_at', 'is', null)
+      .order('checked_at', { ascending: false });
+
+    (rcRes.data || []).forEach(function(row) {
+      var d = new Date(row.checked_at);
+      var dStr = row.checked_at ? row.checked_at.slice(0, 10) : 'Unknown Date';
+      var incs = [];
+      if (Array.isArray(row.incidents)) incs = row.incidents;
+      else if (typeof row.incidents === 'string') { try { incs = JSON.parse(row.incidents); } catch(e) {} }
+
+      incs.forEach(function(i) {
+        var t = (i.type || 'broken').toLowerCase();
+        var cat = 'broken';
+        var bText = 'Broken';
+        var bCol = 'var(--orange)';
+        if (t === 'missing') { cat = 'missing'; bText = 'Missing'; bCol = 'var(--red)'; }
+        else if (t === 'trash' || t === 'retired') { cat = 'retired'; bText = 'Retired'; bCol = 'var(--text-dim)'; }
+
+        historyItems.push({
+          category: cat,
+          date: dStr,
+          timestamp: d.getTime(),
+          title: 'Routine Check Incident',
+          details: 'Quantity: ' + (i.qty || 1) + (i.notes ? ' · ' + i.notes : ''),
+          badge: bText,
+          badgeColor: bCol
+        });
+      });
+    });
+
+    // 3. Standalone reports
+    var saRes = await sb.from('standalone_incident_reports')
+      .select('*')
+      .or(orParts.join(','))
+      .eq('is_reverted', false)
+      .order('created_at', { ascending: false });
+
+    (saRes.data || []).forEach(function(row) {
+      var d = new Date(row.created_at || row.reported_at || Date.now());
+      var dStr = (row.created_at || '').slice(0, 10) || 'Unknown Date';
+      var t = (row.incident_type || 'broken').toLowerCase();
+      var cat = 'broken';
+      var bText = 'Broken';
+      var bCol = 'var(--orange)';
+      if (t === 'missing') { cat = 'missing'; bText = 'Missing'; bCol = 'var(--red)'; }
+      else if (t === 'trash' || t === 'retired') { cat = 'retired'; bText = 'Retired'; bCol = 'var(--text-dim)'; }
+
+      historyItems.push({
+        category: cat,
+        date: dStr,
+        timestamp: d.getTime(),
+        title: 'Incident Report' + (row.report_id ? ' #' + row.report_id : ''),
+        details: 'Quantity: ' + (row.quantity || 1) + (row.description ? ' · ' + row.description : ''),
+        badge: bText,
+        badgeColor: bCol
+      });
+    });
+
+    // 4. Execution batch incidents
+    var execRes = await sb.from('exec_batch_incidents')
+      .select('*')
+      .or(orParts.join(','))
+      .order('logged_at', { ascending: false });
+
+    (execRes.data || []).forEach(function(row) {
+      var d = new Date(row.logged_at || Date.now());
+      var dStr = (row.logged_at || '').slice(0, 10) || 'Unknown Date';
+      var t = (row.incident_type || 'broken').toLowerCase();
+      var cat = 'broken';
+      var bText = 'Broken';
+      var bCol = 'var(--orange)';
+      if (t === 'missing') { cat = 'missing'; bText = 'Missing'; bCol = 'var(--red)'; }
+      else if (t === 'trash' || t === 'retired') { cat = 'retired'; bText = 'Retired'; bCol = 'var(--text-dim)'; }
+
+      historyItems.push({
+        category: cat,
+        date: dStr,
+        timestamp: d.getTime(),
+        title: 'Execution Event Incident',
+        details: 'Quantity: ' + (row.quantity || 1) + (row.notes ? ' · ' + row.notes : ''),
+        badge: bText,
+        badgeColor: bCol
+      });
+    });
+  } catch(e) {
+    console.warn('[scan] Error fetching history:', e);
+  }
+
+  // Sort newest first
+  historyItems.sort(function(a, b) {
+    return b.timestamp - a.timestamp;
+  });
+
+  // Filter by category
+  var filtered = historyItems;
+  if (currentEqHistoryFilter !== 'all') {
+    filtered = historyItems.filter(function(it) {
+      return it.category === currentEqHistoryFilter;
+    });
+  }
+
+  if (!filtered.length) {
+    listEl.innerHTML = '<div style="text-align:center; padding:30px 10px; color:var(--text-dim); font-size:12px;">No ' + (currentEqHistoryFilter === 'all' ? '' : currentEqHistoryFilter + ' ') + 'records found for this equipment.</div>';
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(function(item) {
+    return '<div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">' +
+      '<div style="flex:1;">' +
+        '<div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">' +
+          '<span style="font-size:10px; font-weight:800; color:' + item.badgeColor + '; text-transform:uppercase; letter-spacing:0.5px;">' + item.badge + '</span>' +
+          '<span style="font-size:11px; color:var(--text-dim);">' + item.date + '</span>' +
+        '</div>' +
+        '<div style="font-size:12px; font-weight:700; color:var(--cream);">' + item.title + '</div>' +
+        '<div style="font-size:11px; color:var(--text-dim); margin-top:2px;">' + item.details + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+init();
+</script>
+</body>
+</html>
+
+
+
+
