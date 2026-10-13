@@ -1,0 +1,168 @@
+# SMARTSERVE — Full Security Audit Report
+**Date:** August 20, 2026  
+**Source:** Live Supabase backup (`2026-08-20_15-10`)  
+**Assessed By:** Antigravity (AI Pair Programmer)
+
+---
+
+## CRITICAL ISSUES (Fix Immediately)
+
+---
+
+### 🔴 CRITICAL #1 — Plain-Text Passwords in `users` Table
+
+**This is the most severe vulnerability in the entire system.**
+
+From `users.json` in the backup:
+
+| User | Email | Password (VISIBLE IN PLAIN TEXT) |
+|---|---|---|
+| administrator | admin@gmail.com | `Yotsuba07` |
+| lili Diddy | rizalandrew93@gmail.com | `Yotsuba07` |
+| Rin Rin | cicibestexp@gmail.com | `Yotsuba07` |
+
+**What this means:**
+- Any person who accesses the `users` table (via the anon key + REST API) can read **everyone's password in plain text**
+- Since the Supabase anon key is publicly embedded in your JS files (`admin.html`), **anyone can do this right now from a browser console**
+- The admin password is `Yotsuba07` — fully exposed
+- If any of these users reuse this password elsewhere (email, social media, other accounts), those are also at risk
+
+**Fix Required:**
+1. Hash all passwords using `bcrypt` before storing (never store plain text)
+2. Add RLS to block anon reads from the `users` table entirely
+3. Change all passwords immediately
+
+---
+
+### 🔴 CRITICAL #2 — `users` Table Has No RLS (Fully Public Read)
+
+The `users` table has **Row Level Security disabled**. Combined with the public anon key in `admin.html`, anyone on the internet can run:
+
+```
+GET https://nukbdmyqizrnkmbusdtm.supabase.co/rest/v1/users?select=*
+Headers: apikey: <anon key from your JS>
+```
+
+And receive **every user's name, email, phone, role, and password.**
+
+**Fix:**
+```sql
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Block anon reads on users" ON public.users;
+-- No SELECT policy = no one can read it anonymously
+```
+
+---
+
+### 🟠 HIGH #3 — 11 Tables Fully Exposed (No RLS)
+
+The following tables currently have **RLS disabled** (UNRESTRICTED in Supabase dashboard). Anyone can read, write, update, or delete data in them using the public anon key:
+
+| Table | Sensitive Data |
+|---|---|
+| `meetings` | Customer names, emails, meeting notes, uploaded contract documents |
+| `guests` | Personal guest PII |
+| `purchaseorders` | Financial purchase records |
+| `issueresolutions` | Internal issue logs |
+| `maintenancetasks` | Task assignments |
+| `execution_activities` | Event execution data |
+| `equipment_flags` | Operational flags |
+| `equipment_inventory` | Inventory values |
+| `equipment_maintenance` | Maintenance logs |
+| `equipment_resupply` | Supply chain data |
+| `foodtaste` | Food tasting session records |
+| `allocation_history` | Equipment allocation history |
+| `reservation_decorations` | Decoration records |
+| `routine_check` | Routine check logs |
+| `rental_orders` | Rental order data |
+
+**Fix:** Enable RLS + add read-only policy for anon on tables that the app needs to read publicly.
+
+---
+
+### 🟠 HIGH #4 — `reservations` Table Contains Full Customer PII (Unprotected Write)
+
+From `reservations.json`, each reservation contains:
+- `client_name`, `client_email`, `client_phone` — customer PII
+- `contract_url` — link to signed contract documents on Cloudinary
+- Full package details, payment amounts, venue addresses
+
+The `reservations` table has RLS enabled for reads, but **anyone with the anon key can write/update/delete any reservation**.
+
+---
+
+### 🟡 MEDIUM #5 — Anon Key Hardcoded in Frontend HTML
+
+The Supabase anon key is embedded directly in `admin.html` (line 4339):
+```
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+```
+
+This is **visible to any user** who views page source or opens DevTools. This is by design in Supabase's architecture, but it means **RLS is your only protection layer** — and right now, most tables have no RLS.
+
+---
+
+## REMEDIATION PLAN
+
+### Step 1 — Do RIGHT NOW (5 minutes in Supabase SQL Editor)
+
+```sql
+-- 1. Lock the users table completely from anon access
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+-- 2. Lock personnel table writes (reads already fixed)
+ALTER TABLE public.personnel ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read on personnel" ON public.personnel;
+CREATE POLICY "Allow public read on personnel"
+  ON public.personnel FOR SELECT USING (true);
+
+-- 3. Lock meetings from anon writes
+ALTER TABLE public.meetings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read on meetings"
+  ON public.meetings FOR SELECT USING (true);
+
+-- 4. Lock reservation writes from anon
+ALTER TABLE public.reservations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read on reservations"
+  ON public.reservations FOR SELECT USING (true);
+CREATE POLICY "Allow insert on reservations"
+  ON public.reservations FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow update on reservations"
+  ON public.reservations FOR UPDATE USING (true);
+```
+
+### Step 2 — Change the Admin Password (Today)
+
+1. Go to Supabase → Table Editor → `users`
+2. Update the `password` field for `admin@gmail.com` to a new, strong password
+3. Also update the login check in `app.js` to compare a hashed password (bcrypt)
+
+### Step 3 — Hash Passwords (This Week)
+
+The login function in `app.js` currently does a plain-text comparison:
+```js
+// CURRENT (insecure):
+if (user.password === enteredPassword) { ... }
+```
+
+Replace with bcrypt hashing. This requires:
+1. Run a one-time migration to hash existing passwords in the DB
+2. Update the login check to use `bcrypt.compare()`
+
+### Step 4 — Enable RLS on Remaining Tables (This Week)
+
+Run `fix_all_rls.sql` (to be created) to enable RLS across all 15 exposed tables.
+
+---
+
+## RISK SUMMARY
+
+| Issue | Severity | Effort to Fix |
+|---|---|---|
+| Plain-text passwords in `users` | CRITICAL | Medium (hashing + migration) |
+| `users` table fully public | CRITICAL | Low (2 SQL lines) |
+| 11+ tables with no RLS | HIGH | Low (SQL policies) |
+| Anon key in frontend | MEDIUM | High (requires backend proxy) |
+| No write protection on reservations | HIGH | Low (SQL policy) |
+
+> **Bottom line:** The plain-text password issue is the most dangerous thing in this database. It must be fixed today.
